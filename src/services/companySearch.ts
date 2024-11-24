@@ -34,7 +34,7 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
 
   try {
     const response = await fetch(
-      `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${encodeURIComponent(query + ' company information')}`
+      `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${encodeURIComponent(query + ' company information')}&siteSearch=teatmik.ee&siteSearchFilter=i`
     );
     
     if (!response.ok) {
