@@ -2,31 +2,59 @@ import { Company, Offer, CompanyInvitation } from './types';
 export * from './types';
 export * from './companySearch';
 
+// Store to simulate database
+let mockCompanies: Company[] = [
+  {
+    id: 1,
+    name: "Acme Corp",
+    industry: "Technology",
+    salesVolume: "$1.2M",
+    growth: "+15%",
+    createdBy: "user1",
+    sharedWith: [],
+    reviews: [
+      {
+        id: 1,
+        rating: 4,
+        comment: "Great company to work with!",
+        date: "2024-02-20",
+      }
+    ]
+  },
+];
+
+let userRepositories: Record<string, number[]> = {};
+
 export const fetchCompanies = async (): Promise<Company[]> => {
-  // For demonstration, returning mock data
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        {
-          id: 1,
-          name: "Acme Corp",
-          industry: "Technology",
-          salesVolume: "$1.2M",
-          growth: "+15%",
-          createdBy: "user1",
-          sharedWith: [],
-          reviews: [
-            {
-              id: 1,
-              rating: 4,
-              comment: "Great company to work with!",
-              date: "2024-02-20",
-            }
-          ]
-        },
-      ]);
-    }, 1000);
-  });
+  return Promise.resolve([...mockCompanies]);
+};
+
+export const fetchUserCompanyRepository = async (userId: string): Promise<Company[]> => {
+  const userCompanyIds = userRepositories[userId] || [];
+  const userCompanies = mockCompanies.filter(company => userCompanyIds.includes(company.id));
+  return Promise.resolve(userCompanies);
+};
+
+export const addToUserRepository = async (companyId: number, userId: string): Promise<Company> => {
+  if (!userRepositories[userId]) {
+    userRepositories[userId] = [];
+  }
+  
+  // Check if company exists
+  const company = mockCompanies.find(c => c.id === companyId);
+  if (!company) {
+    throw new Error("Company not found");
+  }
+  
+  // Check if already in repository
+  if (userRepositories[userId].includes(companyId)) {
+    throw new Error("Company already in repository");
+  }
+  
+  // Add to user's repository
+  userRepositories[userId].push(companyId);
+  
+  return Promise.resolve(company);
 };
 
 export const fetchUserCompanies = async (userId: string): Promise<Company[]> => {
@@ -141,43 +169,6 @@ export const addReview = async (companyId: number, review: { rating: number; com
           date: new Date().toISOString().split("T")[0],
         }],
       });
-    }, 500);
-  });
-};
-
-// Add the missing functions
-export const addToUserRepository = async (companyId: number, userId: string): Promise<Company> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        id: companyId,
-        name: "Added Company",
-        industry: "Technology",
-        salesVolume: "$1.2M",
-        growth: "+15%",
-        createdBy: userId,
-        sharedWith: [],
-        reviews: [],
-      });
-    }, 500);
-  });
-};
-
-export const fetchUserCompanyRepository = async (userId: string): Promise<Company[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        {
-          id: 1,
-          name: "User's Company",
-          industry: "Technology",
-          salesVolume: "$1.2M",
-          growth: "+15%",
-          createdBy: userId,
-          sharedWith: [],
-          reviews: [],
-        },
-      ]);
     }, 500);
   });
 };
