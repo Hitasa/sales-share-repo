@@ -12,6 +12,14 @@ interface CompanyListProps {
 export const CompanyList = ({ companies, isPrivate = false }: CompanyListProps) => {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
+  const handleCompanyClick = (company: Company) => {
+    if (company.link) {
+      window.open(company.link, '_blank');
+    } else {
+      setSelectedCompany(company);
+    }
+  };
+
   return (
     <>
       <div className="rounded-lg border">
@@ -27,7 +35,7 @@ export const CompanyList = ({ companies, isPrivate = false }: CompanyListProps) 
               <TableRow key={company.id}>
                 <TableCell 
                   className="font-medium cursor-pointer hover:text-blue-600"
-                  onClick={() => setSelectedCompany(company)}
+                  onClick={() => handleCompanyClick(company)}
                 >
                   {company.name}
                 </TableCell>
