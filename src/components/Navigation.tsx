@@ -1,9 +1,29 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const Navigation = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Success",
+        description: "You have been logged out successfully",
+      });
+      navigate("/auth/login");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+      });
+    }
+  };
 
   return (
     <nav className="bg-background border-b">
@@ -48,7 +68,7 @@ const Navigation = () => {
                 <Link to="/profile">
                   <Button variant="ghost">Profile</Button>
                 </Link>
-                <Button variant="ghost" onClick={() => logout()}>
+                <Button variant="ghost" onClick={handleLogout}>
                   Logout
                 </Button>
               </div>
