@@ -26,9 +26,13 @@ export interface Review {
 export interface Company {
   id: number;
   name: string;
-  industry: string;
-  salesVolume: string;
-  growth: string;
+  industry?: string;
+  salesVolume?: string;
+  growth?: string;
+  website?: string;
+  phoneNumber?: string;
+  review?: string;
+  notes?: string;
   createdBy: string;
   sharedWith: string[];
   link?: string;
