@@ -34,6 +34,7 @@ export const fetchUserCompanyRepository = async (userId: string): Promise<Compan
   if (!userId) return [];
   const userCompanyIds = userRepositories[userId] || [];
   const userCompanies = mockCompanies.filter(company => userCompanyIds.includes(company.id));
+  console.log('Fetching user companies:', { userCompanyIds, userCompanies }); // Debug log
   return Promise.resolve(userCompanies);
 };
 
@@ -60,9 +61,7 @@ export const addToUserRepository = async (companyId: number, userId: string): Pr
   
   // Add to user's repository and ensure it exists in mockCompanies
   userRepositories[userId].push(companyId);
-  if (!mockCompanies.find(c => c.id === companyId)) {
-    mockCompanies.push(company);
-  }
+  console.log('Updated repositories:', { userRepositories, mockCompanies }); // Debug log
   
   return Promise.resolve(company);
 };

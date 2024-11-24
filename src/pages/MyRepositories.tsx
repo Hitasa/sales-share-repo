@@ -1,14 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { CompanyList } from "@/components/company/CompanyList";
 import { fetchUserCompanyRepository } from "@/services/api";
 
 const MyRepositories = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ["userCompanyRepository", user?.id],
