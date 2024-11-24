@@ -41,7 +41,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    if (error) {
+      console.error("Logout error:", error);
+      throw new Error("Failed to logout");
+    }
+    setUser(null);
   };
 
   const register = async (email: string, password: string) => {
