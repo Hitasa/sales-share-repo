@@ -32,11 +32,17 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
     queryFn: async () => {
       const { data, error } = await supabase
         .from('companies')
-        .select('reviews')
+        .select('reviews, team_id')
         .eq('id', company.id)
         .single();
       
       if (error) throw error;
+
+      // If the company belongs to a team (private), don't show its reviews in public view
+      if (data.team_id) {
+        return { ...data, reviews: [] };
+      }
+      
       return data;
     },
     initialData: company
