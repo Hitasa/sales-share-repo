@@ -38,6 +38,13 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
         description: "Company profile updated successfully",
       });
     },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update company",
+      });
+    },
   });
 
   const handleSave = () => {
@@ -111,7 +118,9 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
             <Button variant="outline" onClick={() => setIsEditing(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>Save Changes</Button>
+            <Button onClick={() => updateCompanyMutation.mutate(editedCompany)}>
+              Save Changes
+            </Button>
           </CardContent>
         )}
 
