@@ -2,7 +2,6 @@ import { Company, Offer, CompanyInvitation } from './types';
 export * from './types';
 export * from './companySearch';
 
-// Store to simulate database
 let mockCompanies: Company[] = [
   {
     id: 1,
@@ -49,7 +48,6 @@ export const fetchUserCompanyRepository = async (userId: string): Promise<Compan
   if (!userId) return [];
   const userCompanyIds = userRepositories[userId] || [];
   const userCompanies = mockCompanies.filter(company => userCompanyIds.includes(company.id));
-  console.log('Fetching user companies:', { userCompanyIds, userCompanies }); // Debug log
   return Promise.resolve(userCompanies);
 };
 
@@ -71,12 +69,11 @@ export const addToUserRepository = async (companyId: number, userId: string): Pr
   
   // Check if already in repository
   if (userRepositories[userId].includes(companyId)) {
-    throw new Error("Company already in repository");
+    throw new Error(`${company.name} is already in your repository`);
   }
   
   // Add to user's repository
   userRepositories[userId].push(companyId);
-  console.log('Updated repositories:', { userRepositories, mockCompanies }); // Debug log
   
   return Promise.resolve(company);
 };
