@@ -15,20 +15,17 @@ interface CompanyListProps {
 export const CompanyList = ({ companies, isPrivate = false, onCompanySelect }: CompanyListProps) => {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
-  const handleCompanyClick = (company: Company, event: React.MouseEvent) => {
-    // If the company has a website URL, open it in a new tab
-    if (company.website) {
-      window.open(company.website, '_blank');
-      event.stopPropagation(); // Prevent dialog from opening
-      return;
-    }
-
-    // Otherwise, handle the default click behavior
+  const handleCompanyClick = (company: Company) => {
     if (isPrivate && onCompanySelect) {
       onCompanySelect(company);
     } else {
       setSelectedCompany(company);
     }
+  };
+
+  const handleWebsiteClick = (website: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    window.open(website, '_blank');
   };
 
   if (selectedCompany && isPrivate) {
@@ -54,14 +51,15 @@ export const CompanyList = ({ companies, isPrivate = false, onCompanySelect }: C
             {companies.map((company) => (
               <TableRow key={company.id}>
                 <TableCell 
-                  className={`font-medium cursor-pointer hover:text-blue-600 ${
-                    company.website ? 'flex items-center gap-2' : ''
-                  }`}
-                  onClick={(e) => handleCompanyClick(company, e)}
+                  className="font-medium cursor-pointer hover:text-blue-600 flex items-center gap-2"
+                  onClick={() => handleCompanyClick(company)}
                 >
                   {company.name}
                   {company.website && (
-                    <ExternalLink className="h-4 w-4 text-gray-400" />
+                    <ExternalLink 
+                      className="h-4 w-4 text-gray-400 hover:text-gray-600"
+                      onClick={(e) => handleWebsiteClick(company.website!, e)}
+                    />
                   )}
                 </TableCell>
                 <TableCell>
