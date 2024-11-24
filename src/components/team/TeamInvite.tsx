@@ -23,11 +23,40 @@ export const TeamInvite = ({ teamId, onInviteSuccess }: TeamInviteProps) => {
     try {
       setIsLoading(true);
 
-      // First check if the user exists in profiles
-      const { data: profiles, error: profileError } = await supabase
-        .from("profiles")
+      // Check if user is already a member
+      const { data: existingMember } = await supabase
+        .from("team_members")
         .select("id")
-        .eq("email", email);
+        .eq("team_id", teamId)
+        .eq("user_id", (await supabase.from("profiles").select("id").eq("email", email).single()).data?.id)
+        .single();
+
+      if (existingMember) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "This user is already a member of the team",
+        });
+        return;
+      }
+
+      // Check if there's already a pending invitation
+      const { data: existingInvitation } = await supabase
+        .from("team_invitations")
+        .select("id")
+        .eq("team_id", teamId)
+        .eq("email", email)
+        .eq("status", "pending")
+        .single();
+
+      if (existingInvitation) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "An invitation has already been sent to this email",
+        });
+        return;
+      }
 
       // Generate a unique token for the invitation
       const token = crypto.randomUUID();
@@ -48,9 +77,7 @@ export const TeamInvite = ({ teamId, onInviteSuccess }: TeamInviteProps) => {
 
       toast({
         title: "Success",
-        description: profiles && profiles.length > 0 
-          ? `Invitation sent to existing user ${email}`
-          : `Invitation sent to new user ${email}`,
+        description: `Invitation sent to ${email}`,
       });
       
       setEmail("");

@@ -60,6 +60,31 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
     }
 
     try {
+      // First check if user is already a member of a team with this name
+      const { data: existingTeam } = await supabase
+        .from("teams")
+        .select("id")
+        .eq("name", newTeamName)
+        .single();
+
+      if (existingTeam) {
+        const { data: existingMembership } = await supabase
+          .from("team_members")
+          .select("id")
+          .eq("team_id", existingTeam.id)
+          .eq("user_id", user.id)
+          .single();
+
+        if (existingMembership) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "You are already a member of a team with this name",
+          });
+          return;
+        }
+      }
+
       const { data: team, error: teamError } = await supabase
         .from("teams")
         .insert([{ name: newTeamName }])
