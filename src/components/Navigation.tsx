@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -6,14 +6,11 @@ import { TeamInvitationNotifications } from "./notifications/TeamInvitationNotif
 
 const Navigation = () => {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleLogout = async () => {
     try {
       await logout();
-      // Force navigation to login page after logout
-      window.location.href = "/auth/login";
       toast({
         title: "Success",
         description: "You have been logged out successfully",
@@ -28,6 +25,11 @@ const Navigation = () => {
     }
   };
 
+  // Don't render navigation if user is not authenticated
+  if (!user) {
+    return null;
+  }
+
   return (
     <nav className="bg-background border-b">
       <div className="container mx-auto px-4">
@@ -36,56 +38,41 @@ const Navigation = () => {
             <Link to="/" className="flex items-center px-2 py-2 text-sm font-medium">
               Home
             </Link>
-            {user && (
-              <>
-                <Link
-                  to="/repositories"
-                  className="flex items-center px-2 py-2 text-sm font-medium"
-                >
-                  Repositories
-                </Link>
-                <Link
-                  to="/my-repositories"
-                  className="flex items-center px-2 py-2 text-sm font-medium"
-                >
-                  My Repositories
-                </Link>
-                <Link
-                  to="/team-repositories"
-                  className="flex items-center px-2 py-2 text-sm font-medium"
-                >
-                  Team Repositories
-                </Link>
-                <Link
-                  to="/projects"
-                  className="flex items-center px-2 py-2 text-sm font-medium"
-                >
-                  Projects
-                </Link>
-              </>
-            )}
+            <Link
+              to="/repositories"
+              className="flex items-center px-2 py-2 text-sm font-medium"
+            >
+              Repositories
+            </Link>
+            <Link
+              to="/my-repositories"
+              className="flex items-center px-2 py-2 text-sm font-medium"
+            >
+              My Repositories
+            </Link>
+            <Link
+              to="/team-repositories"
+              className="flex items-center px-2 py-2 text-sm font-medium"
+            >
+              Team Repositories
+            </Link>
+            <Link
+              to="/projects"
+              className="flex items-center px-2 py-2 text-sm font-medium"
+            >
+              Projects
+            </Link>
           </div>
           <div className="flex items-center">
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <TeamInvitationNotifications />
-                <Link to="/profile">
-                  <Button variant="ghost">Profile</Button>
-                </Link>
-                <Button variant="ghost" onClick={handleLogout}>
-                  Logout
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-4">
-                <Link to="/auth/login">
-                  <Button variant="ghost">Login</Button>
-                </Link>
-                <Link to="/auth/register">
-                  <Button>Sign Up</Button>
-                </Link>
-              </div>
-            )}
+            <div className="flex items-center space-x-4">
+              <TeamInvitationNotifications />
+              <Link to="/profile">
+                <Button variant="ghost">Profile</Button>
+              </Link>
+              <Button variant="ghost" onClick={handleLogout}>
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
