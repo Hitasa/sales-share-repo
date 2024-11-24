@@ -65,7 +65,7 @@ export const CreateProjectDialog = ({ onSubmit, teams }: CreateProjectDialogProp
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Personal Project</SelectItem>
+                        <SelectItem value="personal">Personal Project</SelectItem>
                         {teams.map((team) => (
                           <SelectItem key={team.id} value={team.id}>
                             {team.name}
