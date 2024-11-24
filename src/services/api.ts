@@ -1,5 +1,14 @@
-// Mock API endpoint - replace with your actual API endpoint
 const API_URL = 'https://api.example.com';
+
+export interface Offer {
+  id: number;
+  companyId: number;
+  userId: string;
+  type: 'sent' | 'received';
+  amount: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  date: string;
+}
 
 export interface Company {
   id: number;
@@ -7,17 +16,20 @@ export interface Company {
   industry: string;
   salesVolume: string;
   growth: string;
+  createdBy: string;
+  sharedWith: string[];
   reviews?: Array<{
     id: number;
     rating: number;
     comment: string;
     date: string;
   }>;
+  offers?: Offer[];
 }
 
-export const fetchCompanies = async (): Promise<Company[]> => {
+// Fetch companies for the current user (including shared ones)
+export const fetchUserCompanies = async (userId: string): Promise<Company[]> => {
   // For demonstration, we'll return mock data
-  // Replace this with actual API call: return fetch(`${API_URL}/companies`).then(res => res.json())
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve([
@@ -27,6 +39,19 @@ export const fetchCompanies = async (): Promise<Company[]> => {
           industry: "Technology",
           salesVolume: "$1.2M",
           growth: "+15%",
+          createdBy: userId,
+          sharedWith: ["user2", "user3"],
+          offers: [
+            {
+              id: 1,
+              companyId: 1,
+              userId: userId,
+              type: "sent",
+              amount: "$500K",
+              status: "pending",
+              date: "2024-02-20",
+            }
+          ],
           reviews: [
             {
               id: 1,
@@ -36,24 +61,38 @@ export const fetchCompanies = async (): Promise<Company[]> => {
             },
           ],
         },
-        {
-          id: 2,
-          name: "Beta Industries",
-          industry: "Manufacturing",
-          salesVolume: "$850K",
-          growth: "+8%",
-          reviews: [],
-        },
-        {
-          id: 3,
-          name: "Gamma Solutions",
-          industry: "Services",
-          salesVolume: "$2.1M",
-          growth: "+22%",
-          reviews: [],
-        },
       ]);
-    }, 1000); // Simulate network delay
+    }, 1000);
+  });
+};
+
+export const shareCompany = async (companyId: number, userId: string): Promise<Company> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        id: companyId,
+        name: "Shared Company",
+        industry: "Technology",
+        salesVolume: "$1.2M",
+        growth: "+15%",
+        createdBy: "user1",
+        sharedWith: [userId],
+        offers: [],
+        reviews: [],
+      });
+    }, 500);
+  });
+};
+
+export const createOffer = async (companyId: number, offer: Omit<Offer, "id">): Promise<Offer> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        ...offer,
+        id: Date.now(),
+        companyId,
+      });
+    }, 500);
   });
 };
 
