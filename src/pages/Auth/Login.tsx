@@ -33,10 +33,11 @@ const Login = () => {
       });
       navigate("/profile");
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Invalid credentials. Please try again.",
+        title: "Login Failed",
+        description: "Invalid email or password. If you don't have an account, please sign up first.",
       });
     } finally {
       setIsLoading(false);
