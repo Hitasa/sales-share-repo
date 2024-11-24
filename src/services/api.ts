@@ -26,6 +26,20 @@ let mockCompanies: Company[] = [
 // Store user repositories in memory
 let userRepositories: Record<string, number[]> = {};
 
+export const updateCompany = async (companyId: number, updates: Partial<Company>): Promise<Company> => {
+  const companyIndex = mockCompanies.findIndex(c => c.id === companyId);
+  if (companyIndex === -1) {
+    throw new Error("Company not found");
+  }
+  
+  mockCompanies[companyIndex] = {
+    ...mockCompanies[companyIndex],
+    ...updates,
+  };
+  
+  return mockCompanies[companyIndex];
+};
+
 export const fetchCompanies = async (): Promise<Company[]> => {
   return Promise.resolve([...mockCompanies]);
 };

@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Company } from "@/services/types";
 import { useToast } from "@/hooks/use-toast";
+import { updateCompany } from "@/services/api";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CompanyDetailsDialogProps {
   company: Company;
@@ -20,14 +22,25 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editedCompany, setEditedCompany] = useState(company);
+  const queryClient = useQueryClient();
 
-  const handleSave = () => {
-    // Here you would typically make an API call to update the company
-    setIsEditing(false);
-    toast({
-      title: "Success",
-      description: "Company information updated successfully",
-    });
+  const handleSave = async () => {
+    try {
+      await updateCompany(company.id, editedCompany);
+      setIsEditing(false);
+      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      toast({
+        title: "Success",
+        description: "Company information updated successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update company information",
+      });
+    }
   };
 
   return (
