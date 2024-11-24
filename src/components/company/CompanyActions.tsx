@@ -126,7 +126,7 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
             {user && (
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold mb-4">Write a Review</h3>
-                <ReviewForm companyId={company.id} />
+                <ReviewForm companyId={company.id} onSubmit={() => {}} />
               </div>
             )}
           </div>
