@@ -58,18 +58,30 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
 
     if (localError) throw localError;
 
-    // Then try Google search via Edge Function
-    const { data: googleResults, error: functionError } = await supabase.functions.invoke('search-companies', {
-      body: JSON.stringify({ query })
-    });
+    // Then try Google search
+    const GOOGLE_API_KEY = 'YOUR_GOOGLE_API_KEY';
+    const SEARCH_ENGINE_ID = 'YOUR_SEARCH_ENGINE_ID';
+    const googleSearchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}`;
 
-    if (functionError) {
-      console.error('Google search error:', functionError);
-      return localResults || [];
-    }
+    const response = await fetch(googleSearchUrl);
+    const data = await response.json();
+
+    // Transform Google search results into Company format
+    const googleResults = data.items?.map((item: any) => ({
+      id: item.cacheId || crypto.randomUUID(),
+      name: item.title,
+      industry: '',
+      salesVolume: '',
+      growth: '',
+      website: item.link,
+      createdBy: '',
+      sharedWith: [],
+      reviews: [],
+      comments: [],
+    })) || [];
 
     // Combine and deduplicate results
-    const allResults = [...(localResults || []), ...(googleResults || [])];
+    const allResults = [...(localResults || []), ...googleResults];
     const uniqueResults = Array.from(new Map(allResults.map(item => [item.id, item])).values());
     
     return uniqueResults;
