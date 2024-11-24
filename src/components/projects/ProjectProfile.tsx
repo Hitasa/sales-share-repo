@@ -103,30 +103,35 @@ export const ProjectProfile = ({
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Description</label>
-              <Input
-                value={editedProject.description || ""}
-                onChange={(e) =>
-                  setEditedProject({ ...editedProject, description: e.target.value })
-                }
-                placeholder="Add a description..."
-                disabled={!isEditing}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Notes</label>
-              <Input
-                value={editedProject.notes || ""}
-                onChange={(e) =>
-                  setEditedProject({ ...editedProject, notes: e.target.value })
-                }
-                placeholder="Add notes..."
-                disabled={!isEditing}
-              />
-            </div>
+            {(editedProject.description || isEditing) && (
+              <Card className="p-4">
+                <h4 className="text-sm font-medium mb-2">Description</h4>
+                <Input
+                  value={editedProject.description || ""}
+                  onChange={(e) =>
+                    setEditedProject({ ...editedProject, description: e.target.value })
+                  }
+                  placeholder="Add a description..."
+                  disabled={!isEditing}
+                />
+              </Card>
+            )}
+            
+            {(editedProject.notes || isEditing) && (
+              <Card className="p-4">
+                <h4 className="text-sm font-medium mb-2">Notes</h4>
+                <Input
+                  value={editedProject.notes || ""}
+                  onChange={(e) =>
+                    setEditedProject({ ...editedProject, notes: e.target.value })
+                  }
+                  placeholder="Add notes..."
+                  disabled={!isEditing}
+                />
+              </Card>
+            )}
 
             {isEditing && (
               <div className="flex justify-end">
