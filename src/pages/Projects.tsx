@@ -49,15 +49,20 @@ const Projects = () => {
     queryKey: ["project-companies", selectedProject],
     queryFn: async () => {
       if (!selectedProject) return [];
+      
+      // First get the company IDs in the project
+      const { data: projectCompanyIds } = await supabase
+        .from("project_companies")
+        .select("company_id")
+        .eq("project_id", selectedProject);
+
+      if (!projectCompanyIds || projectCompanyIds.length === 0) return [];
+
+      // Then get the actual companies
       const { data, error } = await supabase
         .from("companies")
         .select("*")
-        .in("id", (
-          await supabase
-            .from("project_companies")
-            .select("company_id")
-            .eq("project_id", selectedProject)
-        ).data?.map(pc => pc.company_id) || []);
+        .in("id", projectCompanyIds.map(pc => pc.company_id));
 
       if (error) throw error;
       return data;
@@ -68,15 +73,31 @@ const Projects = () => {
   const { data: availableCompanies } = useQuery({
     queryKey: ["available-companies", selectedProject],
     queryFn: async () => {
+      if (!selectedProject) return [];
+
+      // First get the company IDs in the project
+      const { data: projectCompanyIds } = await supabase
+        .from("project_companies")
+        .select("company_id")
+        .eq("project_id", selectedProject);
+
+      const excludedIds = projectCompanyIds?.map(pc => pc.company_id) || [];
+
+      // If there are no companies in the project, just get all companies
+      if (excludedIds.length === 0) {
+        const { data, error } = await supabase
+          .from("companies")
+          .select("*");
+        
+        if (error) throw error;
+        return data;
+      }
+
+      // Otherwise, get companies not in the project
       const { data, error } = await supabase
         .from("companies")
         .select("*")
-        .not("id", "in", (
-          await supabase
-            .from("project_companies")
-            .select("company_id")
-            .eq("project_id", selectedProject)
-        ).data?.map(pc => pc.company_id) || []);
+        .not("id", "in", `(${excludedIds.join(",")})`);
 
       if (error) throw error;
       return data;
