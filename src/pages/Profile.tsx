@@ -9,6 +9,10 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserCompanies } from "@/components/UserCompanies";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const Profile = () => {
   const userProfile = {
@@ -18,6 +22,13 @@ const Profile = () => {
     email: "john.doe@salesexcellence.com",
     phone: "+1 (555) 123-4567",
     bio: "Experienced sales professional with over 10 years in B2B software sales. Specialized in building and maintaining long-term client relationships.",
+  };
+
+  const [userComments, setUserComments] = useState("");
+
+  const handleSaveComments = () => {
+    // In a real application, this would save to a backend
+    toast.success("Comments saved successfully");
   };
 
   return (
@@ -65,68 +76,49 @@ const Profile = () => {
 
                   <div className="pt-4 border-t">
                     <h3 className="text-lg font-semibold mb-2">About</h3>
-                    <p className="text-gray-600">{userProfile.bio}</p>
+                    <p className="text-gray-600 mb-4">{userProfile.bio}</p>
+                    
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-medium">Additional Comments</h4>
+                      <Textarea
+                        placeholder="Add your comments here..."
+                        value={userComments}
+                        onChange={(e) => setUserComments(e.target.value)}
+                        className="min-h-[100px]"
+                      />
+                      <Button onClick={handleSaveComments}>Save Comments</Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <Card className="glass-card">
-                    <CardHeader>
-                      <CardTitle>Statistics</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex justify-between">
-                          <span>Total Repositories</span>
-                          <span className="font-semibold">24</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Shared Repositories</span>
-                          <span className="font-semibold">12</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Success Rate</span>
-                          <span className="font-semibold">87%</span>
-                        </div>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Card className="glass-card mt-6">
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="text-sm">
+                        <p className="font-medium">Created new repository</p>
+                        <p className="text-gray-500">2 hours ago</p>
                       </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <Card className="glass-card">
-                    <CardHeader>
-                      <CardTitle>Recent Activity</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="text-sm">
-                          <p className="font-medium">Created new repository</p>
-                          <p className="text-gray-500">2 hours ago</p>
-                        </div>
-                        <div className="text-sm">
-                          <p className="font-medium">Shared repository with team</p>
-                          <p className="text-gray-500">1 day ago</p>
-                        </div>
-                        <div className="text-sm">
-                          <p className="font-medium">Updated sales strategy</p>
-                          <p className="text-gray-500">3 days ago</p>
-                        </div>
+                      <div className="text-sm">
+                        <p className="font-medium">Shared repository with team</p>
+                        <p className="text-gray-500">1 day ago</p>
                       </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </div>
+                      <div className="text-sm">
+                        <p className="font-medium">Updated sales strategy</p>
+                        <p className="text-gray-500">3 days ago</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </motion.div>
           </TabsContent>
 
