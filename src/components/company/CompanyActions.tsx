@@ -2,12 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MessageSquare, Star, PlusSquare, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addToUserRepository, removeFromUserRepository, addReview, addCompany } from "@/services/api";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { addToUserRepository, removeFromUserRepository, addReview } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import ReviewList from "@/components/ReviewList";
 import ReviewForm from "@/components/ReviewForm";
 import { Company } from "@/services/types";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CompanyActionsProps {
   company: Company;
@@ -19,28 +20,26 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
+  const { data: projects } = useQuery({
+    queryKey: ["user-projects"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("created_by", user?.id);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
   const addToRepositoryMutation = useMutation({
     mutationFn: async () => {
       if (!user?.id || !company) {
         throw new Error("Missing required information");
       }
-
-      // First create the company with only valid fields
-      const createdCompany = await addCompany({
-        name: company.name,
-        industry: company.industry || "",
-        sales_volume: company.salesVolume || "",
-        growth: company.growth || "",
-        website: company.website || "",
-        phone_number: company.phoneNumber || "",
-        email: company.email || "",
-        review: company.review || "",
-        notes: company.notes || "",
-        created_by: user.id,
-      });
-
-      // Then add it to repository
-      await addToUserRepository(createdCompany.id, user.id);
+      await addToUserRepository(company.id, user.id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
@@ -57,6 +56,34 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
         variant: "destructive",
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to add company to repository",
+      });
+    },
+  });
+
+  const addToProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!user?.id || !company.id) {
+        throw new Error("Missing required information");
+      }
+      const { error } = await supabase
+        .from("project_companies")
+        .insert([{ project_id: projectId, company_id: company.id }]);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["project-companies"] });
+      queryClient.invalidateQueries({ queryKey: ["available-companies"] });
+      toast({
+        title: "Success",
+        description: "Company added to project successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to add company to project",
       });
     },
   });
@@ -162,6 +189,36 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
           {removeFromRepositoryMutation.isPending ? "Removing..." : "Remove"}
         </Button>
       )}
+
+      {/* Add to Project Dialog */}
+      {projects && projects.length > 0 && (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              <PlusSquare className="h-4 w-4 mr-1" />
+              Add to Project
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add to Project</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              {projects.map((project) => (
+                <Button
+                  key={project.id}
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => addToProjectMutation.mutate(project.id)}
+                >
+                  {project.name}
+                </Button>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="outline" size="sm">
