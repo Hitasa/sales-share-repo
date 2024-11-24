@@ -307,15 +307,64 @@ export type Database = {
         }
         Relationships: []
       }
+      user_licenses: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          features: Json
+          id: string
+          is_active: boolean
+          license_type: Database["public"]["Enums"]["license_type"]
+          starts_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          license_type?: Database["public"]["Enums"]["license_type"]
+          starts_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          license_type?: Database["public"]["Enums"]["license_type"]
+          starts_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_licenses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_feature_access: {
+        Args: {
+          feature_name: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      license_type: "free" | "basic" | "professional" | "enterprise"
     }
     CompositeTypes: {
       [_ in never]: never

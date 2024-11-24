@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,6 +7,7 @@ import { CompanyList } from "@/components/company/CompanyList";
 import { CompanySearch } from "@/components/company/CompanySearch";
 import { AddCompanyDialog } from "@/components/company/AddCompanyDialog";
 import { fetchCompanies, searchCompanies, addCompany } from "@/services/api";
+import { useLicense } from "@/hooks/useLicense";
 
 const Repositories = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,29 +15,25 @@ const Repositories = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { checkFeatureAccess } = useLicense();
 
   const { data: companies = [], isLoading, error } = useQuery({
     queryKey: ["companies", debouncedSearch],
     queryFn: async () => {
-      console.log("Fetching companies with search query:", debouncedSearch);
-      try {
-        const result = debouncedSearch ? await searchCompanies(debouncedSearch) : await fetchCompanies();
-        console.log("Fetch result:", result);
-        return result;
-      } catch (error) {
-        console.error("Error fetching companies:", error);
-        throw error;
+      if (!checkFeatureAccess('VIEW_COMPANIES')) {
+        throw new Error('Feature not available');
       }
+      return debouncedSearch ? await searchCompanies(debouncedSearch) : await fetchCompanies();
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    meta: {
-      errorMessage: "Failed to fetch companies. Please try again."
-    },
-    retry: 1
   });
 
   const addCompanyMutation = useMutation({
-    mutationFn: (newCompany: any) => addCompany(newCompany),
+    mutationFn: async (newCompany: any) => {
+      if (!checkFeatureAccess('CREATE_COMPANY')) {
+        throw new Error('Feature not available');
+      }
+      return addCompany(newCompany);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
@@ -65,20 +62,21 @@ const Repositories = () => {
   };
 
   const handleSearch = (value: string) => {
-    console.log("Search value changed to:", value);
     setSearchQuery(value);
   };
 
-  useEffect(() => {
-    if (error) {
-      console.error("Error in useEffect:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch companies. Please try again.",
-      });
-    }
-  }, [error, toast]);
+  if (error) {
+    return (
+      <div className="container mx-auto py-20 px-4">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900">Access Restricted</h2>
+          <p className="mt-2 text-gray-600">
+            Please upgrade your license to access this feature.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-20 px-4 animate-fadeIn">
