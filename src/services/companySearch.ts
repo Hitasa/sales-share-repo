@@ -1,11 +1,11 @@
 import { Company } from './types';
 
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
+const GOOGLE_API_KEY = 'AIzaSyBgCiYKdPkflAb-bh5seRBs64us61C-Qkk';
 const GOOGLE_CSE_ID = import.meta.env.VITE_GOOGLE_CSE_ID;
 
 export const searchCompanies = async (query: string): Promise<Company[]> => {
-  if (!GOOGLE_API_KEY || !GOOGLE_CSE_ID) {
-    throw new Error('Google API credentials not configured');
+  if (!GOOGLE_CSE_ID) {
+    throw new Error('Google CSE ID not configured');
   }
 
   try {
