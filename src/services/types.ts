@@ -30,7 +30,7 @@ export interface Comment {
 }
 
 export interface Company {
-  id: number;
+  id: string; // Changed from number to string to match Supabase UUID
   name: string;
   industry?: string;
   salesVolume?: string;
