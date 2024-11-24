@@ -43,6 +43,13 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
     }
   };
 
+  const formatWebsiteUrl = (url: string) => {
+    if (!url) return '';
+    // Remove any protocol prefix if it exists
+    const cleanUrl = url.replace(/^(https?:\/\/)?(www\.)?/, '');
+    return `https://${cleanUrl}`;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[80vh] overflow-y-auto">
@@ -88,7 +95,7 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
                       />
                     ) : (
                       <a 
-                        href={company.website} 
+                        href={formatWebsiteUrl(company.website)} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="hover:underline text-primary"
