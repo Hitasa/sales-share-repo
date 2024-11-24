@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { TeamPolicyTest } from "@/components/team/TeamPolicyTest";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -73,9 +72,8 @@ const Profile = () => {
             />
           )}
         </div>
-        <div className="space-y-8">
+        <div>
           <TeamList />
-          <TeamPolicyTest />
         </div>
       </div>
     </div>
