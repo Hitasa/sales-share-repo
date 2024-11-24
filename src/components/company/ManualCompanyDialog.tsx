@@ -1,133 +1,33 @@
 import { Button } from "@/components/ui/button";
-import { PlusSquare } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { addCompany } from "@/services/api";
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { AddCompanyForm } from "../AddCompanyForm";
+import { Plus } from "lucide-react";
 
-export const ManualCompanyDialog = () => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    website: "",
-    phoneNumber: "",
-    review: "",
-    notes: "",
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-
-    try {
-      await addCompany({
-        ...formData,
-        createdBy: user.id,
-        sharedWith: [],
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
-      toast.success("Company added successfully");
-      setOpen(false);
-      setFormData({
-        name: "",
-        website: "",
-        phoneNumber: "",
-        review: "",
-        notes: "",
-      });
-    } catch (error) {
-      toast.error("Failed to add company");
-    }
-  };
-
+export function ManualCompanyDialog() {
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog>
       <DialogTrigger asChild>
         <Button>
-          <PlusSquare className="h-4 w-4 mr-2" />
-          Add Company Manually
+          <Plus className="mr-2 h-4 w-4" />
+          Add to Shared Repository
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Company Manually</DialogTitle>
+          <DialogTitle>Add Company</DialogTitle>
+          <DialogDescription>
+            Add a new company to the shared repository.
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Company Name</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="website">Website</Label>
-            <Input
-              id="website"
-              type="url"
-              value={formData.website}
-              onChange={(e) =>
-                setFormData({ ...formData, website: e.target.value })
-              }
-              placeholder="https://example.com"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phoneNumber">Phone Number</Label>
-            <Input
-              id="phoneNumber"
-              type="tel"
-              value={formData.phoneNumber}
-              onChange={(e) =>
-                setFormData({ ...formData, phoneNumber: e.target.value })
-              }
-              placeholder="+1234567890"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="review">Review</Label>
-            <Input
-              id="review"
-              value={formData.review}
-              onChange={(e) =>
-                setFormData({ ...formData, review: e.target.value })
-              }
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="notes">Additional Notes</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) =>
-                setFormData({ ...formData, notes: e.target.value })
-              }
-              placeholder="Enter any additional information..."
-            />
-          </div>
-          <Button type="submit" className="w-full">
-            Add Company
-          </Button>
-        </form>
+        <AddCompanyForm />
       </DialogContent>
     </Dialog>
   );
-};
+}
