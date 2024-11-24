@@ -76,6 +76,8 @@ export const TeamInvitationNotifications = () => {
           ? "You have joined the team successfully"
           : "Invitation declined successfully",
       });
+      
+      setOpen(false);
     } catch (error: any) {
       toast({
         variant: "destructive",
