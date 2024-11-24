@@ -31,6 +31,7 @@ export const fetchCompanies = async (): Promise<Company[]> => {
 };
 
 export const fetchUserCompanyRepository = async (userId: string): Promise<Company[]> => {
+  if (!userId) return [];
   const userCompanyIds = userRepositories[userId] || [];
   return Promise.resolve(mockCompanies.filter(company => userCompanyIds.includes(company.id)));
 };
@@ -58,7 +59,6 @@ export const addToUserRepository = async (companyId: number, userId: string): Pr
   
   // Add to user's repository
   userRepositories[userId].push(companyId);
-  console.log(`Added company ${companyId} to user ${userId}'s repository:`, userRepositories[userId]);
   
   return Promise.resolve(company);
 };

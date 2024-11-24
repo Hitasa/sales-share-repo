@@ -38,13 +38,25 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
     },
   });
 
+  const handleAddToRepository = () => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please login to add companies to your repository",
+      });
+      return;
+    }
+    addToRepositoryMutation.mutate();
+  };
+
   return (
     <div className="flex space-x-2">
       {!isPrivate && (
         <Button
           variant="outline"
           size="sm"
-          onClick={() => addToRepositoryMutation.mutate()}
+          onClick={handleAddToRepository}
           disabled={addToRepositoryMutation.isPending}
         >
           <PlusSquare className="h-4 w-4 mr-1" />
