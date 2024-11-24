@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { TeamList } from "@/components/team/TeamList";
 import { ProfileData } from "@/components/profile/types";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,7 @@ const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [editedProfile, setEditedProfile] = useState<ProfileData | null>(null);
 
   const { data: profile, refetch } = useQuery({
     queryKey: ["profile", user?.id],
@@ -28,30 +29,37 @@ const Profile = () => {
     enabled: !!user?.id,
   });
 
-  const handleSave = async () => {
-    if (!user?.id || !profile) return;
-
-    try {
+  const updateProfileMutation = useMutation({
+    mutationFn: async (updatedProfile: ProfileData) => {
+      if (!user?.id) throw new Error("No user ID");
       const { error } = await supabase
         .from("profiles")
-        .update(profile)
+        .update(updatedProfile)
         .eq("id", user.id);
 
       if (error) throw error;
-
+      return updatedProfile;
+    },
+    onSuccess: () => {
       toast({
         title: "Success",
         description: "Profile updated successfully",
       });
-      
       setIsEditing(false);
       refetch();
-    } catch (error: any) {
+    },
+    onError: (error) => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to update profile",
+        description: error instanceof Error ? error.message : "Failed to update profile",
       });
+    },
+  });
+
+  const handleSave = () => {
+    if (editedProfile) {
+      updateProfileMutation.mutate(editedProfile);
     }
   };
 
@@ -62,11 +70,9 @@ const Profile = () => {
         <div>
           {profile && (
             <ProfileForm
-              profile={profile}
+              profile={editedProfile || profile}
               isEditing={isEditing}
-              setProfile={(newProfile) => {
-                refetch();
-              }}
+              setProfile={setEditedProfile}
               onSave={handleSave}
               setIsEditing={setIsEditing}
             />

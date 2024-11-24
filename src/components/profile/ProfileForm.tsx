@@ -65,7 +65,7 @@ export const ProfileForm = ({
         </Button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 mt-6">
         <div className="flex items-center space-x-3">
           <Building2 className="h-5 w-5 text-primary" />
           {isEditing ? (
@@ -78,7 +78,7 @@ export const ProfileForm = ({
               className="flex-1"
             />
           ) : (
-            <span>{profile.company}</span>
+            <span>{profile.company || "Not specified"}</span>
           )}
         </div>
         <div className="flex items-center space-x-3">
@@ -93,7 +93,7 @@ export const ProfileForm = ({
               className="flex-1"
             />
           ) : (
-            <span>{profile.email}</span>
+            <span>{profile.email || "Not specified"}</span>
           )}
         </div>
         <div className="flex items-center space-x-3">
@@ -108,12 +108,12 @@ export const ProfileForm = ({
               className="flex-1"
             />
           ) : (
-            <span>{profile.phone}</span>
+            <span>{profile.phone || "Not specified"}</span>
           )}
         </div>
       </div>
 
-      <div className="pt-4 border-t">
+      <div className="pt-4 border-t mt-6">
         <h3 className="text-lg font-semibold mb-2">About</h3>
         {isEditing ? (
           <Textarea
@@ -123,7 +123,7 @@ export const ProfileForm = ({
             className="min-h-[100px]"
           />
         ) : (
-          <p className="text-gray-600 mb-4">{profile.bio}</p>
+          <p className="text-gray-600 mb-4">{profile.bio || "No bio provided"}</p>
         )}
       </div>
     </>
