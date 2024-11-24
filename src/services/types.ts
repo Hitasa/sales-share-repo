@@ -24,6 +24,7 @@ export interface Company {
   growth: string;
   createdBy: string;
   sharedWith: string[];
+  link?: string;
   reviews?: Array<{
     id: number;
     rating: number;

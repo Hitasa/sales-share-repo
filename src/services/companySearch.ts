@@ -23,7 +23,7 @@ const getFallbackCompanies = (query: string): Company[] => {
       growth: 'N/A',
       createdBy: 'system',
       sharedWith: [],
-      link: ''
+      link: 'https://console.developers.google.com/apis/api/customsearch.googleapis.com/overview'
     },
     {
       id: 3,
@@ -33,7 +33,7 @@ const getFallbackCompanies = (query: string): Company[] => {
       growth: 'N/A',
       createdBy: 'system',
       sharedWith: [],
-      link: ''
+      link: 'https://console.developers.google.com'
     }
   ];
 };
