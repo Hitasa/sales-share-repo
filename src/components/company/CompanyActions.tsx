@@ -20,7 +20,12 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
   const { user } = useAuth();
 
   const addToRepositoryMutation = useMutation({
-    mutationFn: () => addToUserRepository(company.id, user?.id || ""),
+    mutationFn: async () => {
+      if (!user?.id || !company.id) {
+        throw new Error("Missing required information");
+      }
+      await addToUserRepository(company.id, user.id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository", user?.id] });
@@ -31,6 +36,7 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
       });
     },
     onError: (error) => {
+      console.error("Error adding to repository:", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -40,7 +46,12 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
   });
 
   const removeFromRepositoryMutation = useMutation({
-    mutationFn: () => removeFromUserRepository(company.id, user?.id || ""),
+    mutationFn: async () => {
+      if (!user?.id || !company.id) {
+        throw new Error("Missing required information");
+      }
+      await removeFromUserRepository(company.id, user.id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository", user?.id] });
@@ -51,6 +62,7 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
       });
     },
     onError: (error) => {
+      console.error("Error removing from repository:", error);
       toast({
         variant: "destructive",
         title: "Error",
