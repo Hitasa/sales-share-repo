@@ -56,12 +56,10 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
       },
     ];
 
-    const updatedCompany = {
+    updateCompanyMutation.mutate({
       ...editedCompany,
       comments: updatedComments,
-    };
-
-    updateCompanyMutation.mutate(updatedCompany);
+    });
     setNewComment("");
   };
 
@@ -73,13 +71,12 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
     };
 
     const updatedReviews = [...(editedCompany.reviews || []), newReview];
-    const updatedCompany = {
+    
+    updateCompanyMutation.mutate({
       ...editedCompany,
       reviews: updatedReviews,
       averageRating: calculateAverageRating(updatedReviews),
-    };
-
-    updateCompanyMutation.mutate(updatedCompany);
+    });
   };
 
   const averageRating = calculateAverageRating(editedCompany.reviews);
