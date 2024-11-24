@@ -27,6 +27,7 @@ export interface Company {
   reviews: Review[];
   comments?: Comment[];
   averageRating?: number;
+  team_id?: string | null;
 }
 
 export interface Team {
