@@ -8,6 +8,7 @@ import { TeamInvite } from "./TeamInvite";
 import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Separator } from "@/components/ui/separator";
 
 interface TeamSectionProps {
   selectedTeam: Team | null;
@@ -59,7 +60,6 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
     }
 
     try {
-      // First create the team
       const { data: team, error: teamError } = await supabase
         .from("teams")
         .insert([{ name: newTeamName }])
@@ -67,9 +67,6 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
         .single();
 
       if (teamError) throw teamError;
-
-      // The trigger handle_new_team will automatically create a team_member entry
-      // with the current user as admin
 
       toast({
         title: "Success",
@@ -118,17 +115,29 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">{selectedTeam.name}</h2>
+        <div className="text-sm text-muted-foreground">
+          Your role: {userRole || "member"}
+        </div>
       </div>
 
       <Card className="p-6">
         <div className="space-y-6">
           {isAdmin && (
-            <TeamInvite
-              teamId={selectedTeam.id}
-              onInviteSuccess={() => {
-                // Refetch team members
-              }}
-            />
+            <>
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Team Management</h3>
+                <TeamInvite
+                  teamId={selectedTeam.id}
+                  onInviteSuccess={() => {
+                    toast({
+                      title: "Success",
+                      description: "Invitation sent successfully",
+                    });
+                  }}
+                />
+              </div>
+              <Separator className="my-6" />
+            </>
           )}
 
           <TeamMembersList teamId={selectedTeam.id} isAdmin={isAdmin} />

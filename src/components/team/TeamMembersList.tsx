@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2 } from "lucide-react";
+import { Trash2, UserCircle } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface TeamMember {
   id: string;
@@ -52,7 +53,6 @@ export const TeamMembersList = ({ teamId, isAdmin }: TeamMembersListProps) => {
 
       if (error) throw error;
 
-      // Transform the data to match our TeamMember type
       return (data || []).map((member: any) => ({
         id: member.id,
         role: member.role,
@@ -87,12 +87,19 @@ export const TeamMembersList = ({ teamId, isAdmin }: TeamMembersListProps) => {
     }
   };
 
+  const getInitials = (firstName: string | null, lastName: string | null) => {
+    const first = firstName?.charAt(0) || '';
+    const last = lastName?.charAt(0) || '';
+    return (first + last).toUpperCase() || '?';
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Team Members</h3>
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-[50px]"></TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Role</TableHead>
@@ -102,6 +109,13 @@ export const TeamMembersList = ({ teamId, isAdmin }: TeamMembersListProps) => {
         <TableBody>
           {members.map((member) => (
             <TableRow key={member.id}>
+              <TableCell>
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback>
+                    {getInitials(member.user.first_name, member.user.last_name)}
+                  </AvatarFallback>
+                </Avatar>
+              </TableCell>
               <TableCell>
                 {member.user.first_name || member.user.last_name
                   ? `${member.user.first_name || ""} ${member.user.last_name || ""}`
