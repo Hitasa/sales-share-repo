@@ -40,9 +40,7 @@ export const UserCompanies = () => {
     return <div>Loading...</div>;
   }
 
-  const company = companies?.[0];
-
-  if (!company) {
+  if (!companies || companies.length === 0) {
     return (
       <div className="container mx-auto py-8">
         <Card className="p-6">
@@ -52,5 +50,5 @@ export const UserCompanies = () => {
     );
   }
 
-  return <CompanyProfile company={company} />;
+  return <CompanyProfile company={companies[0]} />;
 };

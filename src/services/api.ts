@@ -23,7 +23,9 @@ export const fetchCompanies = async (): Promise<Company[]> => {
 };
 
 export const fetchUserCompanies = async (userId: string): Promise<Company[]> => {
-  return Promise.resolve([]);
+  // For demonstration, we'll return the company that was added to the repository
+  const company = mockCompanies.find(c => c.createdBy === userId);
+  return Promise.resolve(company ? [company] : []);
 };
 
 export const inviteUserToCompany = async (companyId: number, email: string, role: 'admin' | 'member'): Promise<CompanyInvitation> => {
