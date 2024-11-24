@@ -103,6 +103,14 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
     removeFromRepositoryMutation.mutate();
   };
 
+  const calculateAverageRating = () => {
+    if (!company.reviews || company.reviews.length === 0) return 0;
+    const sum = company.reviews.reduce((acc, review) => acc + review.rating, 0);
+    return sum / company.reviews.length;
+  };
+
+  const averageRating = calculateAverageRating();
+
   return (
     <div className="flex space-x-2">
       {!isPrivate ? (
@@ -155,22 +163,21 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
           </div>
         </DialogContent>
       </Dialog>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => {
-          const avgRating = company.reviews?.reduce((acc, review) => acc + review.rating, 0) || 0;
-          const total = company.reviews?.length || 0;
-          toast({
-            description: total > 0 
-              ? `Average rating: ${(avgRating / total).toFixed(1)} / 5.0 (${total} reviews)`
-              : "No ratings yet",
-          });
-        }}
-      >
-        <Star className="h-4 w-4 mr-1" />
-        Ratings
-      </Button>
+      <div className="flex items-center space-x-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`h-4 w-4 ${
+              star <= averageRating
+                ? "fill-yellow-400 text-yellow-400"
+                : "text-gray-300"
+            }`}
+          />
+        ))}
+        <span className="text-sm text-gray-600 ml-1">
+          ({company.reviews?.length || 0})
+        </span>
+      </div>
     </div>
   );
 };
