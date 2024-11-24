@@ -24,6 +24,12 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
   const [newComment, setNewComment] = useState("");
   const queryClient = useQueryClient();
 
+  const calculateAverageRating = (reviews: { rating: number }[] = []) => {
+    if (!reviews.length) return 0;
+    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+    return Number((sum / reviews.length).toFixed(1));
+  };
+
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
@@ -63,6 +69,8 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
     }
   };
 
+  const averageRating = calculateAverageRating(editedCompany.reviews);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[80vh] overflow-y-auto">
@@ -83,6 +91,7 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
                 isEditing={isEditing}
                 setEditedCompany={setEditedCompany}
                 setIsEditing={setIsEditing}
+                averageRating={averageRating}
               />
               <CardContent>
                 <CompanyCommentsSection
