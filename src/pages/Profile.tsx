@@ -21,9 +21,22 @@ const Profile = () => {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle(); // Changed from .single() to .maybeSingle()
 
       if (error) throw error;
+      
+      // If no profile exists, create a default one
+      if (!data) {
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert([{ id: user.id }])
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        return newProfile as ProfileData;
+      }
+
       return data as ProfileData;
     },
     enabled: !!user?.id,
