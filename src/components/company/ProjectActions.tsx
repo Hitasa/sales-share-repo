@@ -18,13 +18,24 @@ export const ProjectActions = ({ company, projectId }: ProjectActionsProps) => {
   const { user } = useAuth();
 
   const { data: projects } = useQuery({
-    queryKey: ["user-projects"],
+    queryKey: ["user-projects", user?.id],
     queryFn: async () => {
+      if (!user?.id) return [];
+
+      // First get team IDs where the user is a member
+      const { data: teamMembers } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", user.id);
+
+      const teamIds = teamMembers?.map(tm => tm.team_id) || [];
+
+      // Then fetch projects where user is creator OR projects belonging to teams where user is a member
       const { data, error } = await supabase
         .from("projects")
         .select("*")
-        .eq("created_by", user?.id);
-      
+        .or(`created_by.eq.${user.id}${teamIds.length > 0 ? `,team_id.in.(${teamIds.join(',')})` : ''}`);
+
       if (error) throw error;
       return data;
     },
