@@ -67,8 +67,6 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
 
       if (teamError) throw teamError;
 
-      // The team member entry will be created automatically by the database trigger
-      
       toast({
         title: "Success",
         description: "Team created successfully",
