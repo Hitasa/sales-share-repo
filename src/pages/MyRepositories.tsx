@@ -8,9 +8,11 @@ import { Company } from "@/services/types";
 import { CompanyProfile } from "@/components/company/CompanyProfile";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { PlusSquare, Share2 } from "lucide-react";
+import { PlusSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Team } from "@/types/team";
+import { TeamShareDialog } from "@/components/team/TeamShareDialog";
 
 const MyRepositories = () => {
   const { user } = useAuth();
@@ -26,7 +28,7 @@ const MyRepositories = () => {
     enabled: !!user,
   });
 
-  const { data: userTeams = [] } = useQuery({
+  const { data: userTeams = [] } = useQuery<Team[]>({
     queryKey: ["userTeams", user?.id],
     queryFn: async () => {
       const { data: teamMembers, error } = await supabase
@@ -35,7 +37,7 @@ const MyRepositories = () => {
         .eq("user_id", user?.id);
 
       if (error) throw error;
-      return teamMembers.map(tm => tm.team);
+      return teamMembers.map(tm => tm.team as Team);
     },
     enabled: !!user,
   });
@@ -129,38 +131,12 @@ const MyRepositories = () => {
     );
   }
 
-  const renderTeamDialog = (company: Company) => (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="ml-2">
-          <Share2 className="h-4 w-4 mr-1" />
-          Share with Team
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Share with Team</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 mt-4">
-          {userTeams.map((team) => (
-            <Button
-              key={team.id}
-              variant="outline"
-              className="w-full justify-start"
-              onClick={() => {
-                linkToTeamMutation.mutate({
-                  companyId: company.id,
-                  teamId: team.id,
-                });
-              }}
-            >
-              {team.name}
-            </Button>
-          ))}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+  const handleTeamSelect = (company: Company) => (teamId: string) => {
+    linkToTeamMutation.mutate({
+      companyId: company.id,
+      teamId,
+    });
+  };
 
   const renderProjectDialog = (company: Company) => (
     <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
@@ -196,7 +172,10 @@ const MyRepositories = () => {
   const renderActions = (company: Company) => (
     <div className="flex space-x-2">
       {renderProjectDialog(company)}
-      {renderTeamDialog(company)}
+      <TeamShareDialog 
+        teams={userTeams} 
+        onTeamSelect={handleTeamSelect(company)} 
+      />
     </div>
   );
 
