@@ -1,4 +1,8 @@
+import { customsearch } from '@googleapis/customsearch';
+
 const API_URL = 'https://api.example.com';
+const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
+const GOOGLE_CSE_ID = import.meta.env.VITE_GOOGLE_CSE_ID;
 
 export interface Offer {
   id: number;
@@ -35,6 +39,37 @@ export interface Company {
   offers?: Offer[];
   invitations?: CompanyInvitation[];
 }
+
+export const searchCompanies = async (query: string): Promise<Company[]> => {
+  if (!GOOGLE_API_KEY || !GOOGLE_CSE_ID) {
+    throw new Error('Google API credentials not configured');
+  }
+
+  const customSearch = new customsearch.v1.Customsearch({});
+  
+  try {
+    const response = await customSearch.cse.list({
+      auth: GOOGLE_API_KEY,
+      cx: GOOGLE_CSE_ID,
+      q: `${query} company information`,
+    });
+
+    const searchResults = response.data.items || [];
+    
+    return searchResults.map((item, index) => ({
+      id: index + 1,
+      name: item.title || 'Unknown',
+      industry: item.pagemap?.metatags?.[0]?.['og:type'] || 'Various',
+      salesVolume: 'N/A',
+      growth: 'N/A',
+      createdBy: 'system',
+      sharedWith: [],
+    }));
+  } catch (error) {
+    console.error('Google search error:', error);
+    return [];
+  }
+};
 
 export const fetchCompanies = async (): Promise<Company[]> => {
   // For demonstration, returning mock data

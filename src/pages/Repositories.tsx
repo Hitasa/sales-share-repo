@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AddCompanyForm } from "@/components/AddCompanyForm";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchCompanies, addCompany, Company } from "@/services/api";
+import { fetchCompanies, addCompany, searchCompanies, Company } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Repositories = () => {
@@ -30,8 +30,9 @@ const Repositories = () => {
   const { user } = useAuth();
 
   const { data: companies = [], isLoading } = useQuery({
-    queryKey: ['companies'],
-    queryFn: fetchCompanies,
+    queryKey: ['companies', searchQuery],
+    queryFn: () => searchQuery ? searchCompanies(searchQuery) : fetchCompanies(),
+    debounceTime: 1000,
   });
 
   const addCompanyMutation = useMutation({
@@ -44,10 +45,6 @@ const Repositories = () => {
       });
     },
   });
-
-  const filteredCompanies = companies.filter((company) =>
-    company.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const handleAddCompany = (formData: {
     name: string;
@@ -64,6 +61,10 @@ const Repositories = () => {
     };
     
     addCompanyMutation.mutate(newCompany);
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
   };
 
   if (isLoading) {
@@ -95,7 +96,7 @@ const Repositories = () => {
         <Input
           placeholder="Search companies..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
           className="pl-10"
         />
       </div>
@@ -111,7 +112,7 @@ const Repositories = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredCompanies.map((company) => (
+            {companies.map((company) => (
               <TableRow key={company.id}>
                 <TableCell className="font-medium">{company.name}</TableCell>
                 <TableCell>{company.industry}</TableCell>
