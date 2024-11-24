@@ -11,7 +11,7 @@ export const TeamList = () => {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const { toast } = useToast();
 
-  const { data: teams = [], refetch } = useQuery({
+  const { data: teams = [] } = useQuery({
     queryKey: ["teams"],
     queryFn: async () => {
       const { data: userTeams, error } = await supabase
@@ -26,7 +26,11 @@ export const TeamList = () => {
         .order("created_at", { foreignTable: "teams", ascending: false });
 
       if (error) throw error;
-      return userTeams.map(({ team }) => team) as Team[];
+      
+      // Transform the data to match the Team type
+      return userTeams
+        .map(({ team }) => team)
+        .filter((team): team is Team => team !== null) as Team[];
     },
   });
 
