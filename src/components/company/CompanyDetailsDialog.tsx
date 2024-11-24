@@ -4,7 +4,11 @@ import { Building2, Mail, Phone, Globe } from "lucide-react";
 import { motion } from "framer-motion";
 import ReviewList from "@/components/ReviewList";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { Company } from "@/services/types";
+import { useToast } from "@/hooks/use-toast";
 
 interface CompanyDetailsDialogProps {
   company: Company;
@@ -13,6 +17,19 @@ interface CompanyDetailsDialogProps {
 }
 
 export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDetailsDialogProps) => {
+  const { toast } = useToast();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedCompany, setEditedCompany] = useState(company);
+
+  const handleSave = () => {
+    // Here you would typically make an API call to update the company
+    setIsEditing(false);
+    toast({
+      title: "Success",
+      description: "Company information updated successfully",
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[80vh] overflow-y-auto">
@@ -28,46 +45,78 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
           >
             <Card className="glass-card">
               <CardHeader>
-                <div className="flex items-center space-x-4">
-                  <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Building2 className="h-10 w-10 text-primary" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Building2 className="h-10 w-10 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-2xl">{company.name}</CardTitle>
+                      <CardDescription>{company.industry}</CardDescription>
+                    </div>
                   </div>
-                  <div>
-                    <CardTitle className="text-2xl">{company.name}</CardTitle>
-                    <CardDescription>{company.industry}</CardDescription>
-                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    {isEditing ? "Cancel" : "Edit"}
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
-                  {company.website && (
-                    <div className="flex items-center space-x-3">
-                      <Globe className="h-5 w-5 text-primary" />
+                  <div className="flex items-center space-x-3">
+                    <Globe className="h-5 w-5 text-primary" />
+                    {isEditing ? (
+                      <Input
+                        value={editedCompany.website || ''}
+                        onChange={(e) => setEditedCompany({ ...editedCompany, website: e.target.value })}
+                        placeholder="Website URL"
+                      />
+                    ) : (
                       <a 
                         href={company.website} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="hover:underline"
                       >
-                        {company.website}
+                        {company.website || 'No website provided'}
                       </a>
-                    </div>
-                  )}
+                    )}
+                  </div>
                   
-                  {company.phoneNumber && (
-                    <div className="flex items-center space-x-3">
-                      <Phone className="h-5 w-5 text-primary" />
-                      <span>{company.phoneNumber}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center space-x-3">
+                    <Phone className="h-5 w-5 text-primary" />
+                    {isEditing ? (
+                      <Input
+                        value={editedCompany.phoneNumber || ''}
+                        onChange={(e) => setEditedCompany({ ...editedCompany, phoneNumber: e.target.value })}
+                        placeholder="Phone number"
+                      />
+                    ) : (
+                      <span>{company.phoneNumber || 'No phone number provided'}</span>
+                    )}
+                  </div>
 
-                  {company.email && (
-                    <div className="flex items-center space-x-3">
-                      <Mail className="h-5 w-5 text-primary" />
-                      <span>{company.email}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center space-x-3">
+                    <Mail className="h-5 w-5 text-primary" />
+                    {isEditing ? (
+                      <Input
+                        value={editedCompany.email || ''}
+                        onChange={(e) => setEditedCompany({ ...editedCompany, email: e.target.value })}
+                        placeholder="Email address"
+                      />
+                    ) : (
+                      <span>{company.email || 'No email provided'}</span>
+                    )}
+                  </div>
                 </div>
+
+                {isEditing && (
+                  <div className="flex justify-end">
+                    <Button onClick={handleSave}>Save Changes</Button>
+                  </div>
+                )}
 
                 <div className="pt-4 border-t">
                   <h3 className="text-lg font-semibold mb-2">About</h3>
