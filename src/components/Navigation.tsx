@@ -11,16 +11,16 @@ const Navigation = () => {
   const handleLogout = async () => {
     try {
       await logout();
+      navigate("/auth/login");
       toast({
         title: "Success",
         description: "You have been logged out successfully",
       });
-      navigate("/auth/login");
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to log out. Please try again.",
+        description: error.message || "Failed to log out. Please try again.",
       });
     }
   };
