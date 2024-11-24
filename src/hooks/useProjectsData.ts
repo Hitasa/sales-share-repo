@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
+import { Company } from "@/services/types";
 
 const projectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
@@ -63,13 +64,38 @@ export const useProjectsData = (projectId?: string) => {
             name,
             industry,
             website,
-            created_at
+            created_at,
+            created_by,
+            reviews,
+            sales_volume,
+            growth,
+            phone_number,
+            email,
+            review,
+            notes,
+            team_id
           )
         `)
         .eq("project_id", projectId);
 
       if (error) throw error;
-      return data?.map(item => item.companies) || [];
+
+      return data?.map(item => ({
+        id: item.companies.id,
+        name: item.companies.name,
+        industry: item.companies.industry || undefined,
+        salesVolume: item.companies.sales_volume || undefined,
+        growth: item.companies.growth || undefined,
+        website: item.companies.website || undefined,
+        phoneNumber: item.companies.phone_number || undefined,
+        email: item.companies.email || undefined,
+        review: item.companies.review || undefined,
+        notes: item.companies.notes || undefined,
+        createdBy: item.companies.created_by || "",
+        team_id: item.companies.team_id,
+        sharedWith: [],
+        reviews: item.companies.reviews || [],
+      })) as Company[] || [];
     },
     enabled: !!projectId,
   });
@@ -79,7 +105,6 @@ export const useProjectsData = (projectId?: string) => {
     queryFn: async () => {
       if (!projectId) return [];
       
-      // First get the IDs of companies already in the project
       const { data: existingCompanies } = await supabase
         .from("project_companies")
         .select("company_id")
@@ -87,14 +112,34 @@ export const useProjectsData = (projectId?: string) => {
       
       const existingIds = existingCompanies?.map(c => c.company_id) || [];
       
-      // Then fetch companies not in the project
-      const { data, error } = await supabase
+      const query = supabase
         .from("companies")
-        .select("*")
-        .not('id', 'in', `(${existingIds.join(',')})`);
+        .select("*");
+
+      if (existingIds.length > 0) {
+        query.not('id', 'in', `(${existingIds.join(',')})`);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
-      return data || [];
+      
+      return (data || []).map(company => ({
+        id: company.id,
+        name: company.name,
+        industry: company.industry || undefined,
+        salesVolume: company.sales_volume || undefined,
+        growth: company.growth || undefined,
+        website: company.website || undefined,
+        phoneNumber: company.phone_number || undefined,
+        email: company.email || undefined,
+        review: company.review || undefined,
+        notes: company.notes || undefined,
+        createdBy: company.created_by || "",
+        team_id: company.team_id,
+        sharedWith: [],
+        reviews: company.reviews || [],
+      })) as Company[];
     },
     enabled: !!projectId,
   });
