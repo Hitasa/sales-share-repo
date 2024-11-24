@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { CompanyList } from "@/components/company/CompanyList";
 import { supabase } from "@/integrations/supabase/client";
+import { Company } from "@/services/types";
 
 const TeamRepositories = () => {
   const { user } = useAuth();
@@ -22,10 +23,39 @@ const TeamRepositories = () => {
       // Then get the companies shared with these teams
       const { data: companies } = await supabase
         .from('companies')
-        .select('*')
+        .select(`
+          id,
+          name,
+          industry,
+          sales_volume,
+          growth,
+          website,
+          phone_number,
+          email,
+          review,
+          notes,
+          created_by,
+          team_id,
+          created_at
+        `)
         .in('team_id', teamIds);
 
-      return companies || [];
+      // Transform the data to match the Company type
+      return (companies || []).map(company => ({
+        id: company.id,
+        name: company.name,
+        industry: company.industry || undefined,
+        salesVolume: company.sales_volume || undefined,
+        growth: company.growth || undefined,
+        website: company.website || undefined,
+        phoneNumber: company.phone_number || undefined,
+        email: company.email || undefined,
+        review: company.review || undefined,
+        notes: company.notes || undefined,
+        createdBy: company.created_by || "",
+        sharedWith: [], // This field isn't stored in the database
+        reviews: [], // This field isn't stored in the database yet
+      })) as Company[];
     },
     enabled: !!user,
   });

@@ -9,6 +9,69 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      companies: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string | null
+          growth: string | null
+          id: string
+          industry: string | null
+          name: string
+          notes: string | null
+          phone_number: string | null
+          review: string | null
+          sales_volume: string | null
+          team_id: string | null
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          growth?: string | null
+          id?: string
+          industry?: string | null
+          name: string
+          notes?: string | null
+          phone_number?: string | null
+          review?: string | null
+          sales_volume?: string | null
+          team_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          growth?: string | null
+          id?: string
+          industry?: string | null
+          name?: string
+          notes?: string | null
+          phone_number?: string | null
+          review?: string | null
+          sales_volume?: string | null
+          team_id?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companies_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companies_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           bio: string | null
