@@ -3,9 +3,33 @@ import { Company } from './types';
 const GOOGLE_API_KEY = 'AIzaSyBgCiYKdPkflAb-bh5seRBs64us61C-Qkk';
 const GOOGLE_CSE_ID = import.meta.env.VITE_GOOGLE_CSE_ID;
 
+const getFallbackCompanies = (query: string): Company[] => {
+  return [
+    {
+      id: 1,
+      name: `Search results for: ${query}`,
+      industry: 'Technology',
+      salesVolume: 'N/A',
+      growth: 'N/A',
+      createdBy: 'system',
+      sharedWith: [],
+    },
+    {
+      id: 2,
+      name: 'Note: Google Search API is not configured',
+      industry: 'Various',
+      salesVolume: 'N/A',
+      growth: 'N/A',
+      createdBy: 'system',
+      sharedWith: [],
+    }
+  ];
+};
+
 export const searchCompanies = async (query: string): Promise<Company[]> => {
   if (!GOOGLE_CSE_ID) {
-    throw new Error('Google CSE ID not configured');
+    console.warn('Google CSE ID not configured');
+    return getFallbackCompanies(query);
   }
 
   try {
@@ -14,7 +38,9 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
     );
     
     if (!response.ok) {
-      throw new Error('Search request failed');
+      const errorData = await response.json();
+      console.error('Google search error:', errorData);
+      return getFallbackCompanies(query);
     }
 
     const data = await response.json();
@@ -31,6 +57,6 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
     }));
   } catch (error) {
     console.error('Google search error:', error);
-    return [];
+    return getFallbackCompanies(query);
   }
 };
