@@ -49,21 +49,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = async () => {
     try {
-      // First clear the session and user state
+      // Clear local state first
       setSession(null);
       setUser(null);
-      
-      // Then sign out from Supabase
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      // Clear any local storage items
       localStorage.clear();
+      
+      // Check if we have a session before trying to sign out
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (currentSession) {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+      }
     } catch (error) {
-      // Restore session and user if logout fails
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
+      // If there's an error, check if we still have a valid session
+      const { data: { session: newSession } } = await supabase.auth.getSession();
+      if (newSession) {
+        setSession(newSession);
+        setUser(newSession.user);
+      }
       throw error;
     }
   };
