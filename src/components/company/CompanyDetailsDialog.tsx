@@ -6,6 +6,7 @@ import ReviewList from "@/components/ReviewList";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { Company } from "@/services/types";
 import { useToast } from "@/hooks/use-toast";
@@ -22,11 +23,12 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editedCompany, setEditedCompany] = useState(company);
+  const [comments, setComments] = useState(company.notes || "");
   const queryClient = useQueryClient();
 
   const handleSave = async () => {
     try {
-      await updateCompany(company.id, editedCompany);
+      await updateCompany(company.id, { ...editedCompany, notes: comments });
       setIsEditing(false);
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
       queryClient.invalidateQueries({ queryKey: ["companies"] });
@@ -45,7 +47,6 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
 
   const formatWebsiteUrl = (url: string) => {
     if (!url) return '';
-    // Remove any protocol prefix if it exists
     const cleanUrl = url.replace(/^(https?:\/\/)?(www\.)?/, '');
     return `https://${cleanUrl}`;
   };
@@ -140,20 +141,22 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
 
                 <div className="pt-4 border-t">
                   <h3 className="text-lg font-semibold mb-2">About</h3>
-                  <p className="text-gray-600">{company.review}</p>
-                </div>
-
-                <div className="pt-4 border-t">
-                  <h3 className="text-lg font-semibold mb-2">Sales Information</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium">Sales Volume</p>
-                      <p className="text-2xl font-bold">{company.salesVolume}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Growth</p>
-                      <p className="text-2xl font-bold">{company.growth}</p>
-                    </div>
+                  <p className="text-gray-600 mb-4">{company.review}</p>
+                  
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium">Comments</h4>
+                    <Textarea
+                      placeholder="Add your comments here..."
+                      value={comments}
+                      onChange={(e) => setComments(e.target.value)}
+                      className="min-h-[100px]"
+                    />
+                    <Button 
+                      onClick={handleSave}
+                      className="w-full"
+                    >
+                      Save Comments
+                    </Button>
                   </div>
                 </div>
               </CardContent>
