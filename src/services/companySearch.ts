@@ -16,7 +16,16 @@ const getFallbackCompanies = (query: string): Company[] => {
     },
     {
       id: 2,
-      name: 'Note: Google Search API is not configured',
+      name: 'Google Search API is not enabled',
+      industry: 'Various',
+      salesVolume: 'N/A',
+      growth: 'N/A',
+      createdBy: 'system',
+      sharedWith: [],
+    },
+    {
+      id: 3,
+      name: 'Please enable the Custom Search API in Google Cloud Console',
       industry: 'Various',
       salesVolume: 'N/A',
       growth: 'N/A',
@@ -27,8 +36,8 @@ const getFallbackCompanies = (query: string): Company[] => {
 };
 
 export const searchCompanies = async (query: string): Promise<Company[]> => {
-  if (!GOOGLE_CSE_ID) {
-    console.warn('Google CSE ID not configured');
+  if (!GOOGLE_CSE_ID || !GOOGLE_API_KEY) {
+    console.warn('Google CSE ID or API Key not configured');
     return getFallbackCompanies(query);
   }
 
@@ -40,6 +49,11 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Google search error:', errorData);
+      
+      if (errorData.error?.code === 403) {
+        console.error('Google Custom Search API is not enabled. Please enable it in the Google Cloud Console.');
+      }
+      
       return getFallbackCompanies(query);
     }
 
