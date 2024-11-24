@@ -40,7 +40,11 @@ export const fetchCompanies = async (): Promise<Company[]> => {
     .from('companies')
     .select('*');
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error fetching companies:', error);
+    throw error;
+  }
+  
   return data || [];
 };
 
@@ -70,18 +74,13 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
       return localResults || [];
     }
 
-    console.log('Using Google API Key:', GOOGLE_API_KEY?.slice(0, 5) + '...');
-    console.log('Using Search Engine ID:', SEARCH_ENGINE_ID);
-
     const googleSearchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}`;
     
-    console.log('Making request to:', googleSearchUrl.replace(GOOGLE_API_KEY, 'REDACTED'));
-
     const googleResponse = await fetch(googleSearchUrl);
     
     if (!googleResponse.ok) {
-      const errorText = await googleResponse.text();
       console.error('Google Search API error status:', googleResponse.status);
+      const errorText = await googleResponse.text();
       console.error('Google Search API error details:', errorText);
       return localResults || [];
     }
@@ -92,8 +91,6 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
       console.log('No Google search results found');
       return localResults || [];
     }
-
-    console.log(`Found ${googleData.items.length} Google search results`);
 
     // Transform Google search results into Company format
     const googleResults = googleData.items.map((item: any) => ({
@@ -115,8 +112,6 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
     // Combine and deduplicate results
     const allResults = [...(localResults || []), ...googleResults];
     const uniqueResults = Array.from(new Map(allResults.map(item => [item.id, item])).values());
-    
-    console.log(`Returning ${uniqueResults.length} total results (${localResults?.length || 0} local + ${googleResults.length} from Google)`);
     
     return uniqueResults;
   } catch (error) {
