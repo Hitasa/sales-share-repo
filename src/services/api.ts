@@ -61,7 +61,7 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
       return [];
     }
 
-    // Then try Google search regardless of local results
+    // Then try Google search
     const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
     const SEARCH_ENGINE_ID = import.meta.env.VITE_GOOGLE_CSE_ID;
     
@@ -72,28 +72,30 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
 
     const googleSearchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}`;
 
-    const response = await fetch(googleSearchUrl);
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Google Search API error:', errorText);
+    const googleResponse = await fetch(googleSearchUrl);
+    if (!googleResponse.ok) {
+      console.error('Google Search API error:', await googleResponse.text());
       return localResults || [];
     }
 
-    const data = await response.json();
-    console.log('Google Search API response:', data); // Debug log
+    const googleData = await googleResponse.json();
+    console.log('Google Search API response:', googleData);
 
     // Transform Google search results into Company format
-    const googleResults = data.items?.map((item: any) => ({
+    const googleResults = googleData.items?.map((item: any) => ({
       id: item.cacheId || crypto.randomUUID(),
       name: item.title,
-      industry: '',
-      salesVolume: '',
-      growth: '',
+      industry: item.snippet?.split(' - ')[0] || '',
       website: item.link,
-      createdBy: '',
-      sharedWith: [],
-      reviews: [],
-      comments: [],
+      created_by: null,
+      team_id: null,
+      created_at: new Date().toISOString(),
+      email: null,
+      growth: null,
+      notes: item.snippet || null,
+      phone_number: null,
+      review: null,
+      sales_volume: null
     })) || [];
 
     // Combine and deduplicate results
