@@ -10,18 +10,21 @@ const TeamRepositories = () => {
   const { data: teamCompanies = [], isLoading } = useQuery({
     queryKey: ["teamCompanies", user?.id],
     queryFn: async () => {
+      if (!user) return [];
+
       // First get the teams the user is a member of
-      const { data: teamMembers } = await supabase
+      const { data: teamMembers, error: teamError } = await supabase
         .from('team_members')
         .select('team_id')
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
 
+      if (teamError) throw teamError;
       if (!teamMembers?.length) return [];
 
       const teamIds = teamMembers.map(tm => tm.team_id);
 
-      // Then get the companies shared with these teams
-      const { data: companies } = await supabase
+      // Then get all companies shared with these teams
+      const { data: companies, error: companiesError } = await supabase
         .from('companies')
         .select(`
           id,
@@ -36,11 +39,13 @@ const TeamRepositories = () => {
           notes,
           created_by,
           team_id,
-          created_at
+          created_at,
+          reviews
         `)
         .in('team_id', teamIds);
 
-      // Transform the data to match the Company type
+      if (companiesError) throw companiesError;
+
       return (companies || []).map(company => ({
         id: company.id,
         name: company.name,
@@ -54,7 +59,7 @@ const TeamRepositories = () => {
         notes: company.notes || undefined,
         createdBy: company.created_by || "",
         sharedWith: [], // This field isn't stored in the database
-        reviews: [], // This field isn't stored in the database yet
+        reviews: company.reviews || [],
       })) as Company[];
     },
     enabled: !!user,

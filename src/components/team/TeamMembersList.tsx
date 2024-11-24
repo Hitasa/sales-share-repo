@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, UserCircle } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface TeamMember {
@@ -37,12 +37,12 @@ export const TeamMembersList = ({ teamId, isAdmin }: TeamMembersListProps) => {
   const { data: members = [], refetch } = useQuery({
     queryKey: ["team-members", teamId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: teamMembers, error } = await supabase
         .from("team_members")
         .select(`
           id,
           role,
-          user:profiles!team_members_user_id_fkey (
+          user:profiles (
             id,
             email,
             first_name,
@@ -53,12 +53,13 @@ export const TeamMembersList = ({ teamId, isAdmin }: TeamMembersListProps) => {
 
       if (error) throw error;
 
-      return (data || []).map((member: any) => ({
+      return (teamMembers || []).map((member: any) => ({
         id: member.id,
         role: member.role,
         user: member.user
       })) as TeamMember[];
     },
+    enabled: !!teamId,
   });
 
   const handleRemoveMember = async (memberId: string) => {
