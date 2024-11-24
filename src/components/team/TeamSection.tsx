@@ -6,9 +6,20 @@ import { Team } from "@/services/types";
 import { TeamMembersList } from "./TeamMembersList";
 import { TeamInvite } from "./TeamInvite";
 import { Card } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface TeamSectionProps {
   selectedTeam: Team | null;
@@ -17,6 +28,7 @@ interface TeamSectionProps {
 export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isCreatingTeam, setIsCreatingTeam] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
 
@@ -39,6 +51,37 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
   });
 
   const isAdmin = userRole === "admin";
+
+  const handleDeleteTeam = async () => {
+    if (!selectedTeam) return;
+
+    try {
+      const { error } = await supabase
+        .from("teams")
+        .delete()
+        .eq("id", selectedTeam.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Team deleted successfully",
+      });
+
+      // Invalidate teams query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+      
+      // Reset selected team
+      window.location.reload();
+    } catch (error: any) {
+      console.error("Error deleting team:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to delete team",
+      });
+    }
+  };
 
   const handleCreateTeam = async () => {
     if (!user) {
@@ -140,8 +183,32 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">{selectedTeam.name}</h2>
-        <div className="text-sm text-muted-foreground">
-          Your role: {userRole || "member"}
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-muted-foreground">
+            Your role: {userRole || "member"}
+          </div>
+          {isAdmin && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">Delete Team</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the
+                    team and remove all team members.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteTeam}>
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
       </div>
 
