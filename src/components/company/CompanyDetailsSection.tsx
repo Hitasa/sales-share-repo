@@ -61,30 +61,90 @@ export const CompanyDetailsSection = ({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-col">
-          <div className="flex justify-between">
+        <div className="flex flex-col space-y-4">
+          <div className="flex justify-between items-center">
             <span className="font-bold">Industry:</span>
-            <span>{editedCompany.industry}</span>
+            {isEditing ? (
+              <Input
+                value={editedCompany.industry || ""}
+                onChange={(e) =>
+                  setEditedCompany({ ...editedCompany, industry: e.target.value })
+                }
+                className="max-w-[250px]"
+              />
+            ) : (
+              <span>{editedCompany.industry}</span>
+            )}
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="font-bold">Sales Volume:</span>
-            <span>{editedCompany.salesVolume}</span>
+            {isEditing ? (
+              <Input
+                value={editedCompany.salesVolume || ""}
+                onChange={(e) =>
+                  setEditedCompany({ ...editedCompany, salesVolume: e.target.value })
+                }
+                className="max-w-[250px]"
+              />
+            ) : (
+              <span>{editedCompany.salesVolume}</span>
+            )}
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="font-bold">Growth:</span>
-            <span>{editedCompany.growth}</span>
+            {isEditing ? (
+              <Input
+                value={editedCompany.growth || ""}
+                onChange={(e) =>
+                  setEditedCompany({ ...editedCompany, growth: e.target.value })
+                }
+                className="max-w-[250px]"
+              />
+            ) : (
+              <span>{editedCompany.growth}</span>
+            )}
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="font-bold">Website:</span>
-            <span>{editedCompany.website}</span>
+            {isEditing ? (
+              <Input
+                value={editedCompany.website || ""}
+                onChange={(e) =>
+                  setEditedCompany({ ...editedCompany, website: e.target.value })
+                }
+                className="max-w-[250px]"
+              />
+            ) : (
+              <span>{editedCompany.website}</span>
+            )}
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="font-bold">Phone Number:</span>
-            <span>{editedCompany.phoneNumber}</span>
+            {isEditing ? (
+              <Input
+                value={editedCompany.phoneNumber || ""}
+                onChange={(e) =>
+                  setEditedCompany({ ...editedCompany, phoneNumber: e.target.value })
+                }
+                className="max-w-[250px]"
+              />
+            ) : (
+              <span>{editedCompany.phoneNumber}</span>
+            )}
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="font-bold">Email:</span>
-            <span>{editedCompany.email}</span>
+            {isEditing ? (
+              <Input
+                value={editedCompany.email || ""}
+                onChange={(e) =>
+                  setEditedCompany({ ...editedCompany, email: e.target.value })
+                }
+                className="max-w-[250px]"
+              />
+            ) : (
+              <span>{editedCompany.email}</span>
+            )}
           </div>
         </div>
       </CardContent>
