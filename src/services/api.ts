@@ -23,6 +23,7 @@ let mockCompanies: Company[] = [
   },
 ];
 
+// Store user repositories in memory
 let userRepositories: Record<string, number[]> = {};
 
 export const fetchCompanies = async (): Promise<Company[]> => {
@@ -31,11 +32,15 @@ export const fetchCompanies = async (): Promise<Company[]> => {
 
 export const fetchUserCompanyRepository = async (userId: string): Promise<Company[]> => {
   const userCompanyIds = userRepositories[userId] || [];
-  const userCompanies = mockCompanies.filter(company => userCompanyIds.includes(company.id));
-  return Promise.resolve(userCompanies);
+  return Promise.resolve(mockCompanies.filter(company => userCompanyIds.includes(company.id)));
 };
 
 export const addToUserRepository = async (companyId: number, userId: string): Promise<Company> => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  // Initialize user repository if it doesn't exist
   if (!userRepositories[userId]) {
     userRepositories[userId] = [];
   }
@@ -53,6 +58,7 @@ export const addToUserRepository = async (companyId: number, userId: string): Pr
   
   // Add to user's repository
   userRepositories[userId].push(companyId);
+  console.log(`Added company ${companyId} to user ${userId}'s repository:`, userRepositories[userId]);
   
   return Promise.resolve(company);
 };
