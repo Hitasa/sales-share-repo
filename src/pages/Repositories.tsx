@@ -17,7 +17,17 @@ const Repositories = () => {
 
   const { data: companies = [], isLoading, error } = useQuery({
     queryKey: ["companies", debouncedSearch],
-    queryFn: () => debouncedSearch ? searchCompanies(debouncedSearch) : fetchCompanies(),
+    queryFn: async () => {
+      console.log("Fetching companies with search query:", debouncedSearch);
+      try {
+        const result = debouncedSearch ? await searchCompanies(debouncedSearch) : await fetchCompanies();
+        console.log("Fetch result:", result);
+        return result;
+      } catch (error) {
+        console.error("Error fetching companies:", error);
+        throw error;
+      }
+    },
     staleTime: 1000 * 60 * 5, // 5 minutes
     meta: {
       errorMessage: "Failed to fetch companies. Please try again."
@@ -55,11 +65,13 @@ const Repositories = () => {
   };
 
   const handleSearch = (value: string) => {
+    console.log("Search value changed to:", value);
     setSearchQuery(value);
   };
 
   useEffect(() => {
     if (error) {
+      console.error("Error in useEffect:", error);
       toast({
         variant: "destructive",
         title: "Error",
