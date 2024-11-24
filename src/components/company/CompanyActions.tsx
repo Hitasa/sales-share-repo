@@ -73,28 +73,15 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
 
   return (
     <div className="flex space-x-2">
-      {!isPrivate ? (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => addToRepositoryMutation.mutate()}
-          disabled={addToRepositoryMutation.isPending}
-        >
-          <PlusSquare className="h-4 w-4 mr-1" />
-          {addToRepositoryMutation.isPending ? "Adding..." : "Add"}
-        </Button>
-      ) : (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => removeFromRepositoryMutation.mutate()}
-          disabled={removeFromRepositoryMutation.isPending}
-        >
-          <Trash2 className="h-4 w-4 mr-1" />
-          {removeFromRepositoryMutation.isPending ? "Removing..." : "Remove"}
-        </Button>
-      )}
-
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => removeFromRepositoryMutation.mutate()}
+        disabled={removeFromRepositoryMutation.isPending}
+      >
+        <Trash2 className="h-4 w-4 mr-1" />
+        {removeFromRepositoryMutation.isPending ? "Removing..." : "Remove"}
+      </Button>
       <ProjectActions company={company} projectId={projectId} />
       <ReviewActions company={company} />
     </div>
