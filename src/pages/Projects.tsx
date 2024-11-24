@@ -18,13 +18,19 @@ const Projects = () => {
     deleteProject,
     addCompanyToProject,
     removeCompanyFromProject,
-  } = useProjectsData();
+  } = useProjectsData(selectedProject || undefined);
 
   if (isLoadingProjects) {
     return <div>Loading...</div>;
   }
 
   const selectedProjectData = projects?.find(p => p.id === selectedProject);
+
+  const handleRemoveCompany = (companyId: string) => {
+    if (selectedProject) {
+      removeCompanyFromProject({ projectId: selectedProject, companyId });
+    }
+  };
 
   return (
     <div className="container mx-auto py-8 animate-fadeIn">
@@ -35,8 +41,8 @@ const Projects = () => {
           availableCompanies={availableCompanies}
           isLoadingCompanies={isLoadingCompanies}
           onBack={() => setSelectedProject(null)}
-          onAddCompany={addCompanyToProject}
-          onRemoveCompany={removeCompanyFromProject}
+          onAddCompany={(company) => addCompanyToProject({ ...company, projectId: selectedProject })}
+          onRemoveCompany={handleRemoveCompany}
         />
       ) : (
         <>
