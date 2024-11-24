@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -58,13 +58,15 @@ const Repositories = () => {
     setSearchQuery(value);
   };
 
-  if (error) {
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: "Failed to fetch companies. Please try again.",
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch companies. Please try again.",
+      });
+    }
+  }, [error, toast]);
 
   return (
     <div className="container mx-auto py-20 px-4 animate-fadeIn">
