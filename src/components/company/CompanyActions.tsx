@@ -133,15 +133,18 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
   return (
     <div className="flex space-x-2">
       {!isPrivate ? (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => addToRepositoryMutation.mutate()}
-          disabled={addToRepositoryMutation.isPending}
-        >
-          <PlusSquare className="h-4 w-4 mr-1" />
-          {addToRepositoryMutation.isPending ? "Adding..." : "Add"}
-        </Button>
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => addToRepositoryMutation.mutate()}
+            disabled={addToRepositoryMutation.isPending}
+          >
+            <PlusSquare className="h-4 w-4 mr-1" />
+            {addToRepositoryMutation.isPending ? "Adding..." : "Add"}
+          </Button>
+          <ReviewActions company={company} />
+        </>
       ) : (
         <>
           <Button
@@ -154,7 +157,6 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
             {removeFromRepositoryMutation.isPending ? "Removing..." : "Remove"}
           </Button>
           <ProjectActions company={company} projectId={projectId} />
-          <ReviewActions company={company} />
           <TeamShareDialog teams={userTeams} onTeamSelect={handleTeamSelect} />
         </>
       )}
