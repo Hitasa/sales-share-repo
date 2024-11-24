@@ -12,6 +12,7 @@ let mockCompanies: Company[] = [
     growth: "+15%",
     createdBy: "user1",
     sharedWith: [],
+    comments: [],
     reviews: [
       {
         id: 1,

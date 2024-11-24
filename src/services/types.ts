@@ -23,6 +23,12 @@ export interface Review {
   date: string;
 }
 
+export interface Comment {
+  id: number;
+  text: string;
+  createdAt: string;
+}
+
 export interface Company {
   id: number;
   name: string;
@@ -34,6 +40,7 @@ export interface Company {
   email?: string;
   review?: string;
   notes?: string;
+  comments?: Comment[];
   createdBy: string;
   sharedWith: string[];
   link?: string;

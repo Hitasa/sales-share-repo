@@ -8,10 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { Company } from "@/services/types";
+import { Company, Comment } from "@/services/types";
 import { useToast } from "@/hooks/use-toast";
 import { updateCompany } from "@/services/api";
 import { useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 
 interface CompanyDetailsDialogProps {
   company: Company;
@@ -23,22 +24,44 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editedCompany, setEditedCompany] = useState(company);
-  const [comments, setComments] = useState(company.notes || "");
+  const [newComment, setNewComment] = useState("");
   const queryClient = useQueryClient();
 
-  const handleSaveComments = async () => {
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+
+    const newCommentObj: Comment = {
+      id: Date.now(),
+      text: newComment.trim(),
+      createdAt: new Date().toISOString(),
+    };
+
+    const updatedComments = [...(editedCompany.comments || []), newCommentObj];
+
     try {
-      await updateCompany(company.id, { ...editedCompany, notes: comments });
+      await updateCompany(company.id, { 
+        ...editedCompany, 
+        comments: updatedComments 
+      });
+      
+      setEditedCompany(prev => ({
+        ...prev,
+        comments: updatedComments
+      }));
+      
+      setNewComment("");
+      
       toast({
         title: "Success",
-        description: "Comments saved successfully",
+        description: "Comment added successfully",
       });
+      
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to save comments",
+        description: error instanceof Error ? error.message : "Failed to add comment",
       });
     }
   };
@@ -144,18 +167,31 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium">Comments</h4>
                     <Textarea
-                      placeholder="Add your comments here..."
-                      value={comments}
-                      onChange={(e) => setComments(e.target.value)}
+                      placeholder="Add a new comment..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
                       className="min-h-[100px]"
                     />
                     <Button 
-                      onClick={handleSaveComments}
+                      onClick={handleAddComment}
                       className="w-full"
                     >
-                      Save Comments
+                      Add Comment
                     </Button>
                   </div>
+
+                  <ScrollArea className="h-[200px] w-full">
+                    <div className="space-y-4">
+                      {editedCompany.comments?.map((comment) => (
+                        <Card key={comment.id} className="p-4">
+                          <p className="text-sm text-gray-600 mb-2">
+                            {format(new Date(comment.createdAt), "PPp")}
+                          </p>
+                          <p className="text-gray-900">{comment.text}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </div>
               </CardContent>
             </Card>
