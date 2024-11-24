@@ -316,6 +316,7 @@ export type Database = {
           is_active: boolean
           license_type: Database["public"]["Enums"]["license_type"]
           starts_at: string
+          team_id: string | null
           updated_at: string
           user_id: string
         }
@@ -327,6 +328,7 @@ export type Database = {
           is_active?: boolean
           license_type?: Database["public"]["Enums"]["license_type"]
           starts_at?: string
+          team_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -338,10 +340,18 @@ export type Database = {
           is_active?: boolean
           license_type?: Database["public"]["Enums"]["license_type"]
           starts_at?: string
+          team_id?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_licenses_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_licenses_user_id_fkey"
             columns: ["user_id"]

@@ -11,16 +11,26 @@ export function useLicense() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("user_licenses")
-        .select("*")
-        .single();
+        .select("*");
 
       if (error) throw error;
 
+      // If no license exists, return a default free license
+      if (!data || data.length === 0) {
+        return {
+          licenseType: "free",
+          features: ["view_companies", "create_company", "basic_analytics"],
+          isActive: true,
+          startsAt: new Date(),
+        } as UserLicense;
+      }
+
+      const userLicense = data[0]; // Get the first license
       return {
-        ...data,
-        features: data.features as string[],
-        startsAt: new Date(data.starts_at),
-        expiresAt: data.expires_at ? new Date(data.expires_at) : undefined,
+        ...userLicense,
+        features: userLicense.features as string[],
+        startsAt: new Date(userLicense.starts_at),
+        expiresAt: userLicense.expires_at ? new Date(userLicense.expires_at) : undefined,
       } as UserLicense;
     },
   });
