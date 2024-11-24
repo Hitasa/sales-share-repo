@@ -13,10 +13,7 @@ async function searchGoogle(query: string) {
     throw new Error('Missing Google API configuration');
   }
 
-  // Add site restriction to the query
-  const siteRestrictedQuery = `${query} site:teatmik.ee`;
-  
-  const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&q=${encodeURIComponent(siteRestrictedQuery)}`;
+  const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&q=${encodeURIComponent(query)}`;
   
   const response = await fetch(url);
   if (!response.ok) {
@@ -45,7 +42,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('Searching for:', query, 'on teatmik.ee');
+    console.log('Searching for:', query);
     
     const searchResults = await searchGoogle(query);
     const items = searchResults.items || [];
