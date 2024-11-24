@@ -20,7 +20,7 @@ const MyRepositories = () => {
   return (
     <div className="container mx-auto py-20 px-4 animate-fadeIn">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">My Company Repository</h1>
+        <h1 className="text-3xl font-bold">Shared Company Repository</h1>
         <ManualCompanyDialog />
       </div>
       <CompanyList companies={companies} isPrivate={true} />
