@@ -1,10 +1,11 @@
-// Follow REST API best practices for CORS
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
-// Create a custom fetch function for Google API
 async function searchGoogle(query: string) {
   const apiKey = Deno.env.get('GOOGLE_API_KEY');
   const searchEngineId = Deno.env.get('GOOGLE_SEARCH_ENGINE_ID');
@@ -13,7 +14,10 @@ async function searchGoogle(query: string) {
     throw new Error('Missing Google API configuration');
   }
 
-  const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&q=${encodeURIComponent(query)}`;
+  // Add site restriction to the query
+  const siteRestrictedQuery = `${query} site:teatmik.ee`;
+  
+  const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&q=${encodeURIComponent(siteRestrictedQuery)}`;
   
   const response = await fetch(url);
   if (!response.ok) {
@@ -23,7 +27,7 @@ async function searchGoogle(query: string) {
   return await response.json();
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -42,7 +46,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('Searching for:', query);
+    console.log('Searching for:', query, 'on teatmik.ee');
     
     const searchResults = await searchGoogle(query);
     const items = searchResults.items || [];
@@ -78,4 +82,4 @@ Deno.serve(async (req) => {
       }
     );
   }
-})
+});
