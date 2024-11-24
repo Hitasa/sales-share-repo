@@ -70,6 +70,12 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
     const googleSearchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}`;
 
     const response = await fetch(googleSearchUrl);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Google Search API error:', errorText);
+      return localResults || [];
+    }
+
     const data = await response.json();
 
     // Transform Google search results into Company format
