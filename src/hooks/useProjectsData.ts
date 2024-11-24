@@ -21,7 +21,7 @@ export const useProjectsData = (projectId?: string) => {
         .from("teams")
         .select("*")
         .order("created_at", { ascending: false });
-      
+
       if (error) throw error;
       return data;
     },
@@ -83,15 +83,20 @@ export const useProjectsData = (projectId?: string) => {
     queryKey: ["available-companies", projectId],
     queryFn: async () => {
       if (!projectId) return [];
+      
+      // First get the IDs of companies already in the project
+      const { data: existingCompanies } = await supabase
+        .from("project_companies")
+        .select("company_id")
+        .eq("project_id", projectId);
+      
+      const existingIds = existingCompanies?.map(c => c.company_id) || [];
+      
+      // Then fetch companies not in the project
       const { data, error } = await supabase
         .from("companies")
         .select("*")
-        .not("id", "in", (
-          supabase
-            .from("project_companies")
-            .select("company_id")
-            .eq("project_id", projectId)
-        ));
+        .not('id', 'in', `(${existingIds.join(',')})`);
 
       if (error) throw error;
       return data || [];
