@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import ReviewList from "@/components/ReviewList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
-import { Company } from "@/services/types";
+import { Company, Comment } from "@/services/types";
 import { useToast } from "@/hooks/use-toast";
 import { updateCompany } from "@/services/api";
 import { useQueryClient } from "@tanstack/react-query";
@@ -33,8 +33,8 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
-    const newCommentObj = {
-      id: Date.now(),
+    const newCommentObj: Comment = {
+      id: crypto.randomUUID(),
       text: newComment.trim(),
       createdAt: new Date().toISOString(),
     };

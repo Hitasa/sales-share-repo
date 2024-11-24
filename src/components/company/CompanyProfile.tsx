@@ -3,7 +3,7 @@ import { CompanyDetailsSection } from "./CompanyDetailsSection";
 import { CompanyCommentsSection } from "./CompanyCommentsSection";
 import ReviewList from "../ReviewList";
 import ReviewForm from "../ReviewForm";
-import { Company } from "@/services/types";
+import { Company, Comment, Review } from "@/services/types";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -47,13 +47,15 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
   const handleAddComment = () => {
     if (!newComment.trim()) return;
 
+    const newCommentObj: Comment = {
+      id: crypto.randomUUID(),
+      text: newComment.trim(),
+      createdAt: new Date().toISOString(),
+    };
+
     const updatedComments = [
       ...(editedCompany.comments || []),
-      {
-        id: Date.now(),
-        text: newComment.trim(),
-        createdAt: new Date().toISOString(),
-      },
+      newCommentObj,
     ];
 
     updateCompanyMutation.mutate({
@@ -64,8 +66,8 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
   };
 
   const handleAddReview = (review: { rating: number; comment: string }) => {
-    const newReview = {
-      id: `${Date.now()}`, // Convert to string
+    const newReview: Review = {
+      id: crypto.randomUUID(),
       ...review,
       date: new Date().toISOString().split('T')[0],
     };
