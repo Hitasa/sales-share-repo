@@ -15,13 +15,30 @@ interface CompanyListProps {
 export const CompanyList = ({ companies, isPrivate = false, onCompanySelect }: CompanyListProps) => {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
-  const handleCompanyClick = (company: Company) => {
+  const handleCompanyClick = (company: Company, event: React.MouseEvent) => {
+    // If the company has a website URL, open it in a new tab
+    if (company.website) {
+      window.open(company.website, '_blank');
+      event.stopPropagation(); // Prevent dialog from opening
+      return;
+    }
+
+    // Otherwise, handle the default click behavior
     if (isPrivate && onCompanySelect) {
       onCompanySelect(company);
     } else {
       setSelectedCompany(company);
     }
   };
+
+  if (selectedCompany && isPrivate) {
+    return (
+      <CompanyProfile 
+        company={selectedCompany} 
+        onBack={() => setSelectedCompany(null)} 
+      />
+    );
+  }
 
   return (
     <>
@@ -37,20 +54,14 @@ export const CompanyList = ({ companies, isPrivate = false, onCompanySelect }: C
             {companies.map((company) => (
               <TableRow key={company.id}>
                 <TableCell 
-                  className="font-medium cursor-pointer hover:text-blue-600"
-                  onClick={() => handleCompanyClick(company)}
+                  className={`font-medium cursor-pointer hover:text-blue-600 ${
+                    company.website ? 'flex items-center gap-2' : ''
+                  }`}
+                  onClick={(e) => handleCompanyClick(company, e)}
                 >
                   {company.name}
                   {company.website && (
-                    <a 
-                      href={company.website} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center ml-2 text-gray-400 hover:text-gray-600"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
+                    <ExternalLink className="h-4 w-4 text-gray-400" />
                   )}
                 </TableCell>
                 <TableCell>
