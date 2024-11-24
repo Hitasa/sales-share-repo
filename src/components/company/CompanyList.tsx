@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CompanyActions } from "./CompanyActions";
 import { CompanyDetailsDialog } from "./CompanyDetailsDialog";
 import { Company } from "@/services/types";
+import { UserCompanies } from "../UserCompanies";
 
 interface CompanyListProps {
   companies: Company[];
@@ -11,14 +12,21 @@ interface CompanyListProps {
 
 export const CompanyList = ({ companies, isPrivate = false }: CompanyListProps) => {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [showProfile, setShowProfile] = useState(false);
 
   const handleCompanyClick = (company: Company) => {
     if (company.link) {
       window.open(company.link, '_blank');
+    } else if (isPrivate) {
+      setShowProfile(true);
     } else {
       setSelectedCompany(company);
     }
   };
+
+  if (showProfile) {
+    return <UserCompanies />;
+  }
 
   return (
     <>
@@ -48,7 +56,7 @@ export const CompanyList = ({ companies, isPrivate = false }: CompanyListProps) 
         </Table>
       </div>
 
-      {selectedCompany && (
+      {selectedCompany && !isPrivate && (
         <CompanyDetailsDialog
           company={selectedCompany}
           open={!!selectedCompany}
