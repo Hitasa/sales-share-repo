@@ -21,8 +21,15 @@ export const CompanyDetailsSection = ({
 }: CompanyDetailsSectionProps) => {
   const formatWebsiteUrl = (url: string) => {
     if (!url) return '';
-    const cleanUrl = url.replace(/^(https?:\/\/)?(www\.)?/, '');
-    return `https://${cleanUrl}`;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `https://${url}`;
+  };
+
+  const handleInputChange = (field: keyof Company, value: string) => {
+    setEditedCompany({
+      ...editedCompany,
+      [field]: value,
+    });
   };
 
   return (
@@ -53,12 +60,12 @@ export const CompanyDetailsSection = ({
             {isEditing ? (
               <Input
                 value={editedCompany.website || ''}
-                onChange={(e) => setEditedCompany({ ...editedCompany, website: e.target.value })}
+                onChange={(e) => handleInputChange('website', e.target.value)}
                 placeholder="Website URL"
               />
             ) : (
               <a 
-                href={formatWebsiteUrl(company.website)} 
+                href={formatWebsiteUrl(company.website || '')} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="hover:underline text-primary"
@@ -73,7 +80,7 @@ export const CompanyDetailsSection = ({
             {isEditing ? (
               <Input
                 value={editedCompany.phoneNumber || ''}
-                onChange={(e) => setEditedCompany({ ...editedCompany, phoneNumber: e.target.value })}
+                onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
                 placeholder="Phone number"
               />
             ) : (
@@ -86,7 +93,7 @@ export const CompanyDetailsSection = ({
             {isEditing ? (
               <Input
                 value={editedCompany.email || ''}
-                onChange={(e) => setEditedCompany({ ...editedCompany, email: e.target.value })}
+                onChange={(e) => handleInputChange('email', e.target.value)}
                 placeholder="Email address"
               />
             ) : (
