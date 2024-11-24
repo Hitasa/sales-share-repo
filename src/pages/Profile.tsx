@@ -37,15 +37,19 @@ const Profile = () => {
   const fetchProfile = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select()
+        .eq("id", user.id)
+        .maybeSingle();
 
-    if (error) {
-      if (error.code === "PGRST116") {
-        // Profile doesn't exist, create one
+      if (error) throw error;
+
+      if (data) {
+        setProfile(data);
+      } else {
+        // Create a new profile if one doesn't exist
         const { error: createError } = await supabase
           .from("profiles")
           .insert([{ id: user.id, email: user.email }]);
@@ -56,33 +60,30 @@ const Profile = () => {
         }
 
         setProfile({ ...defaultProfile, email: user.email || null });
-        return;
       }
-
+    } catch (error: any) {
       toast.error("Error fetching profile");
-      return;
-    }
-
-    if (data) {
-      setProfile(data);
+      console.error("Error:", error.message);
     }
   };
 
   const handleSave = async () => {
     if (!user) return;
 
-    const { error } = await supabase
-      .from("profiles")
-      .update(profile)
-      .eq("id", user.id);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update(profile)
+        .eq("id", user.id);
 
-    if (error) {
+      if (error) throw error;
+
+      toast.success("Profile updated successfully");
+      setIsEditing(false);
+    } catch (error: any) {
       toast.error("Error updating profile");
-      return;
+      console.error("Error:", error.message);
     }
-
-    toast.success("Profile updated successfully");
-    setIsEditing(false);
   };
 
   return (
