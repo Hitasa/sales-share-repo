@@ -75,6 +75,7 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
       setIsCreatingTeam(false);
       setNewTeamName("");
     } catch (error: any) {
+      console.error("Error creating team:", error);
       toast({
         variant: "destructive",
         title: "Error",
