@@ -3,11 +3,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { TeamInvitationNotifications } from "./notifications/TeamInvitationNotifications";
+import { useLicense } from "@/hooks/useLicense";
+import { Badge } from "@/components/ui/badge";
 
 const Navigation = () => {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { license } = useLicense();
 
   const handleLogout = async () => {
     try {
@@ -69,6 +72,16 @@ const Navigation = () => {
           <div className="flex items-center">
             <div className="flex items-center space-x-4">
               <TeamInvitationNotifications />
+              <Link to="/license">
+                <Button variant="ghost" className="flex items-center gap-2">
+                  License
+                  {license && (
+                    <Badge variant="secondary" className="capitalize">
+                      {license.licenseType}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
               <Link to="/profile">
                 <Button variant="ghost">Profile</Button>
               </Link>

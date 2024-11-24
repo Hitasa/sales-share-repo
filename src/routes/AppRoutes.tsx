@@ -10,6 +10,7 @@ import Projects from "@/pages/Projects";
 import Login from "@/pages/Auth/Login";
 import Register from "@/pages/Auth/Register";
 import ForgotPassword from "@/pages/Auth/ForgotPassword";
+import { LicenseManager } from "@/components/license/LicenseManager";
 
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -124,6 +125,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <Projects />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/license"
+          element={
+            <ProtectedRoute>
+              <LicenseManager />
             </ProtectedRoute>
           }
         />
