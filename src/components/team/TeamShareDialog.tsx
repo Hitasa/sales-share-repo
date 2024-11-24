@@ -2,15 +2,18 @@ import { Team } from "@/types/team";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Share2 } from "lucide-react";
+import { useState } from "react";
 
 interface TeamShareDialogProps {
   teams: Team[];
-  onTeamSelect: (teamId: string) => void;
+  onTeamSelect: (teamId: string, teamName: string, onSuccess: () => void) => void;
 }
 
 export const TeamShareDialog = ({ teams, onTeamSelect }: TeamShareDialogProps) => {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="ml-2">
           <Share2 className="h-4 w-4 mr-1" />
@@ -27,7 +30,7 @@ export const TeamShareDialog = ({ teams, onTeamSelect }: TeamShareDialogProps) =
               key={team.id}
               variant="outline"
               className="w-full justify-start"
-              onClick={() => onTeamSelect(team.id)}
+              onClick={() => onTeamSelect(team.id, team.name, () => setOpen(false))}
             >
               {team.name}
             </Button>

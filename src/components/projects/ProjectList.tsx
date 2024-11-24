@@ -4,6 +4,7 @@ import { Trash2, Share2 } from "lucide-react";
 import { TeamShareDialog } from "@/components/team/TeamShareDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Project {
   id: string;
@@ -23,6 +24,7 @@ export const ProjectList = ({
   onProjectSelect, 
   onProjectDelete 
 }: ProjectListProps) => {
+  const { toast } = useToast();
   const { data: teams } = useQuery({
     queryKey: ["user-teams"],
     queryFn: async () => {
@@ -36,7 +38,7 @@ export const ProjectList = ({
     },
   });
 
-  const handleTeamShare = async (projectId: string, teamId: string) => {
+  const handleTeamShare = async (projectId: string, teamId: string, teamName: string, onSuccess: () => void) => {
     try {
       const { error } = await supabase
         .from("projects")
@@ -44,8 +46,20 @@ export const ProjectList = ({
         .eq("id", projectId);
 
       if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: `Project shared with team ${teamName}`,
+      });
+      
+      onSuccess();
     } catch (error) {
       console.error("Error sharing project:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to share project with team",
+      });
     }
   };
 
@@ -66,7 +80,9 @@ export const ProjectList = ({
               {teams && teams.length > 0 && (
                 <TeamShareDialog
                   teams={teams}
-                  onTeamSelect={(teamId) => handleTeamShare(project.id, teamId)}
+                  onTeamSelect={(teamId, teamName, onSuccess) => 
+                    handleTeamShare(project.id, teamId, teamName, onSuccess)
+                  }
                 />
               )}
               <Button
