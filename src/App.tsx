@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Metrics from "./pages/Metrics";
 import Repositories from "./pages/Repositories";
+import MyRepositories from "./pages/MyRepositories";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/metrics" element={<Metrics />} />
             <Route path="/repositories" element={<Repositories />} />
+            <Route path="/my-repositories" element={<MyRepositories />} />
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/register" element={<Register />} />
             <Route path="/auth/forgot-password" element={<ForgotPassword />} />

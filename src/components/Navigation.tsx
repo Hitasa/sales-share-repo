@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Book, ChartLine, Share, User } from "lucide-react";
+import { Book, ChartLine, Share, User, BookMarked } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -31,6 +31,13 @@ const Navigation = () => {
                 >
                   <Book className="h-4 w-4 mr-2" />
                   Repositories
+                </Link>
+                <Link
+                  to="/my-repositories"
+                  className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary transition-colors"
+                >
+                  <BookMarked className="h-4 w-4 mr-2" />
+                  My Repository
                 </Link>
                 <Link
                   to="/metrics"
