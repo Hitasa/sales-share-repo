@@ -15,9 +15,7 @@ export const CompanyList = ({ companies, isPrivate = false }: CompanyListProps) 
   const [showProfile, setShowProfile] = useState(false);
 
   const handleCompanyClick = (company: Company) => {
-    if (company.link) {
-      window.open(company.link, '_blank');
-    } else if (isPrivate) {
+    if (isPrivate) {
       setShowProfile(true);
     } else {
       setSelectedCompany(company);
