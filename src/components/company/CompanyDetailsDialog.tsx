@@ -10,6 +10,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CompanyDetailsSection } from "./CompanyDetailsSection";
 import { CompanyCommentsSection } from "./CompanyCommentsSection";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CompanyDetailsDialogProps {
   company: Company;
@@ -23,6 +25,22 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
   const [editedCompany, setEditedCompany] = useState(company);
   const [newComment, setNewComment] = useState("");
   const queryClient = useQueryClient();
+
+  // Fetch company reviews
+  const { data: companyWithReviews } = useQuery({
+    queryKey: ["companyReviews", company.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('reviews')
+        .eq('id', company.id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    initialData: company
+  });
 
   const calculateAverageRating = (reviews: { rating: number }[] = []) => {
     if (!reviews.length) return 0;
@@ -69,7 +87,7 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
     }
   };
 
-  const averageRating = calculateAverageRating(editedCompany.reviews);
+  const averageRating = calculateAverageRating(companyWithReviews?.reviews);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -115,8 +133,8 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[200px]">
-                  {company.reviews && company.reviews.length > 0 ? (
-                    <ReviewList reviews={company.reviews} />
+                  {companyWithReviews?.reviews && companyWithReviews.reviews.length > 0 ? (
+                    <ReviewList reviews={companyWithReviews.reviews} />
                   ) : (
                     <p className="text-sm text-muted-foreground">No reviews yet.</p>
                   )}
