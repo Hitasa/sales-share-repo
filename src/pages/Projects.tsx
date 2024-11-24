@@ -8,7 +8,7 @@ import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
 import { ProjectCompanies } from "@/components/projects/ProjectCompanies";
 import * as z from "zod";
 
-// Define the project schema
+// Move project schema to a separate types file if needed
 const projectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
   teamId: z.string().optional()
@@ -21,6 +21,7 @@ const Projects = () => {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [isAddCompanyDialogOpen, setIsAddCompanyDialogOpen] = useState(false);
 
+  // Fetch both user's teams and team memberships
   const { data: teams } = useQuery({
     queryKey: ["user-teams"],
     queryFn: async () => {
@@ -34,17 +35,29 @@ const Projects = () => {
     },
   });
 
+  // Updated query to fetch both owned and team projects
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
+      if (!user?.id) return [];
+
       const { data, error } = await supabase
         .from("projects")
-        .select("*")
+        .select(`
+          *,
+          teams:team_id (
+            name
+          )
+        `)
+        .or(`created_by.eq.${user.id},team_id.in.(
+          select team_id from team_members where user_id = '${user.id}'
+        )`)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data;
     },
+    enabled: !!user?.id,
   });
 
   const { data: projectCompanies, isLoading: isLoadingCompanies } = useQuery({
@@ -104,11 +117,13 @@ const Projects = () => {
 
   const createProjectMutation = useMutation({
     mutationFn: async (values: z.infer<typeof projectSchema>) => {
+      if (!user?.id) throw new Error("User not authenticated");
+      
       const { error } = await supabase
         .from("projects")
         .insert([{ 
           name: values.name, 
-          created_by: user?.id,
+          created_by: user.id,
           team_id: values.teamId || null 
         }]);
       if (error) throw error;
