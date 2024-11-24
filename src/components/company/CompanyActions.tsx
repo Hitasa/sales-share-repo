@@ -7,6 +7,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Company } from "@/services/types";
 import { ProjectActions } from "./ProjectActions";
 import { ReviewActions } from "./ReviewActions";
+import { TeamShareDialog } from "../team/TeamShareDialog";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Team } from "@/types/team";
+
+interface TeamResponse {
+  team: Team;
+}
 
 interface CompanyActionsProps {
   company: Company;
@@ -18,6 +26,50 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+
+  const { data: userTeams = [] } = useQuery({
+    queryKey: ["userTeams", user?.id],
+    queryFn: async () => {
+      const { data: teamMembers, error } = await supabase
+        .from("team_members")
+        .select("team:teams(id, name)")
+        .eq("user_id", user?.id);
+
+      if (error) throw error;
+      
+      return (teamMembers as unknown as TeamResponse[])
+        .map(member => ({
+          id: member.team.id,
+          name: member.team.name
+        }));
+    },
+    enabled: !!user,
+  });
+
+  const linkToTeamMutation = useMutation({
+    mutationFn: async ({ companyId, teamId }: { companyId: string; teamId: string }) => {
+      const { error } = await supabase
+        .from("companies")
+        .update({ team_id: teamId })
+        .eq("id", companyId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
+      toast({
+        title: "Success",
+        description: "Company linked to team successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to link company to team",
+      });
+    },
+  });
 
   const addToRepositoryMutation = useMutation({
     mutationFn: async () => {
@@ -71,19 +123,41 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
     },
   });
 
+  const handleTeamSelect = (teamId: string) => {
+    linkToTeamMutation.mutate({
+      companyId: company.id,
+      teamId,
+    });
+  };
+
   return (
     <div className="flex space-x-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => removeFromRepositoryMutation.mutate()}
-        disabled={removeFromRepositoryMutation.isPending}
-      >
-        <Trash2 className="h-4 w-4 mr-1" />
-        {removeFromRepositoryMutation.isPending ? "Removing..." : "Remove"}
-      </Button>
-      <ProjectActions company={company} projectId={projectId} />
-      <ReviewActions company={company} />
+      {!isPrivate ? (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => addToRepositoryMutation.mutate()}
+          disabled={addToRepositoryMutation.isPending}
+        >
+          <PlusSquare className="h-4 w-4 mr-1" />
+          {addToRepositoryMutation.isPending ? "Adding..." : "Add"}
+        </Button>
+      ) : (
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => removeFromRepositoryMutation.mutate()}
+            disabled={removeFromRepositoryMutation.isPending}
+          >
+            <Trash2 className="h-4 w-4 mr-1" />
+            {removeFromRepositoryMutation.isPending ? "Removing..." : "Remove"}
+          </Button>
+          <ProjectActions company={company} projectId={projectId} />
+          <ReviewActions company={company} />
+          <TeamShareDialog teams={userTeams} onTeamSelect={handleTeamSelect} />
+        </>
+      )}
     </div>
   );
 };
