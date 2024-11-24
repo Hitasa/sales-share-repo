@@ -35,12 +35,14 @@ export const TeamList = () => {
 
       if (error) throw error;
       
-      // Transform the nested team data structure
-      return (userTeams as unknown as TeamMemberResponse[]).map(item => ({
-        id: item.team.id,
-        name: item.team.name,
-        created_at: item.team.created_at
-      } as Team));
+      // Transform the nested team data structure and handle potential null values
+      return (userTeams as unknown as TeamMemberResponse[])
+        .filter(item => item.team) // Filter out any null teams
+        .map(item => ({
+          id: item.team.id,
+          name: item.team.name,
+          created_at: item.team.created_at
+        } as Team));
     },
   });
 

@@ -24,14 +24,15 @@ export const TeamInvite = ({ teamId, onInviteSuccess }: TeamInviteProps) => {
       setIsLoading(true);
 
       // Check if user is already a member
-      const { data: existingMember } = await supabase
+      const { data: existingMembers, error: memberError } = await supabase
         .from("team_members")
         .select("id")
         .eq("team_id", teamId)
-        .eq("user_id", (await supabase.from("profiles").select("id").eq("email", email).single()).data?.id)
-        .single();
+        .eq("user_id", (await supabase.from("profiles").select("id").eq("email", email).maybeSingle())?.data?.id);
 
-      if (existingMember) {
+      if (memberError) throw memberError;
+      
+      if (existingMembers && existingMembers.length > 0) {
         toast({
           variant: "destructive",
           title: "Error",
@@ -41,15 +42,16 @@ export const TeamInvite = ({ teamId, onInviteSuccess }: TeamInviteProps) => {
       }
 
       // Check if there's already a pending invitation
-      const { data: existingInvitation } = await supabase
+      const { data: existingInvitations, error: inviteError } = await supabase
         .from("team_invitations")
         .select("id")
         .eq("team_id", teamId)
         .eq("email", email)
-        .eq("status", "pending")
-        .single();
+        .eq("status", "pending");
 
-      if (existingInvitation) {
+      if (inviteError) throw inviteError;
+      
+      if (existingInvitations && existingInvitations.length > 0) {
         toast({
           variant: "destructive",
           title: "Error",
@@ -62,7 +64,7 @@ export const TeamInvite = ({ teamId, onInviteSuccess }: TeamInviteProps) => {
       const token = crypto.randomUUID();
 
       // Create the invitation
-      const { error: inviteError } = await supabase
+      const { error: createError } = await supabase
         .from("team_invitations")
         .insert([
           {
@@ -73,7 +75,7 @@ export const TeamInvite = ({ teamId, onInviteSuccess }: TeamInviteProps) => {
           },
         ]);
 
-      if (inviteError) throw inviteError;
+      if (createError) throw createError;
 
       toast({
         title: "Success",
