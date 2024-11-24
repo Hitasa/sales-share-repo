@@ -22,17 +22,18 @@ import { AddCompanyForm } from "@/components/AddCompanyForm";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchCompanies, addCompany, searchCompanies, Company } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const Repositories = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 1000);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
   const { data: companies = [], isLoading } = useQuery({
-    queryKey: ['companies', searchQuery],
-    queryFn: () => searchQuery ? searchCompanies(searchQuery) : fetchCompanies(),
-    debounceTime: 1000,
+    queryKey: ['companies', debouncedSearch],
+    queryFn: () => debouncedSearch ? searchCompanies(debouncedSearch) : fetchCompanies(),
   });
 
   const addCompanyMutation = useMutation({
