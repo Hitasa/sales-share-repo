@@ -48,12 +48,20 @@ export const ProjectActions = ({ company, projectId }: ProjectActionsProps) => {
         throw new Error("Missing required information");
       }
 
-      // First verify the user owns the project or is part of the team
+      // First get team IDs where the user is a member
+      const { data: teamMembers } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", user.id);
+
+      const teamIds = teamMembers?.map(tm => tm.team_id) || [];
+
+      // Then verify project ownership
       const { data: project } = await supabase
         .from("projects")
         .select("*")
         .eq("id", projectId)
-        .or(`created_by.eq.${user.id},team_id.in.(select team_id from team_members where user_id = '${user.id}')`)
+        .or(`created_by.eq.${user.id}${teamIds.length > 0 ? `,team_id.in.(${teamIds.join(',')})` : ''}`)
         .single();
 
       if (!project) {
@@ -89,12 +97,20 @@ export const ProjectActions = ({ company, projectId }: ProjectActionsProps) => {
         throw new Error("Missing required information");
       }
 
-      // First verify the user owns the project or is part of the team
+      // First get team IDs where the user is a member
+      const { data: teamMembers } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", user.id);
+
+      const teamIds = teamMembers?.map(tm => tm.team_id) || [];
+
+      // Then verify project ownership
       const { data: project } = await supabase
         .from("projects")
         .select("*")
         .eq("id", projectId)
-        .or(`created_by.eq.${user.id},team_id.in.(select team_id from team_members where user_id = '${user.id}')`)
+        .or(`created_by.eq.${user.id}${teamIds.length > 0 ? `,team_id.in.(${teamIds.join(',')})` : ''}`)
         .single();
 
       if (!project) {
