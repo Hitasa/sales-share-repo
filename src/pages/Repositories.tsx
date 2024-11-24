@@ -16,15 +16,16 @@ const Repositories = () => {
   const { user } = useAuth();
 
   const { data: companies = [], isLoading } = useQuery({
-    queryKey: ['companies', debouncedSearch],
+    queryKey: ["companies", debouncedSearch],
     queryFn: () => debouncedSearch ? searchCompanies(debouncedSearch) : fetchCompanies(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const addCompanyMutation = useMutation({
     mutationFn: (newCompany: any) => addCompany(newCompany),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['companies'] });
-      queryClient.invalidateQueries({ queryKey: ['userCompanyRepository'] });
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
       toast({
         title: "Success",
         description: "Company added successfully",

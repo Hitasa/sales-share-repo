@@ -28,7 +28,7 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       toast({
         title: "Success",
-        description: "Company added to your repository",
+        description: `${company.name} added to your repository`,
       });
     },
     onError: (error) => {
