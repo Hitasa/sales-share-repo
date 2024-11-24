@@ -4,6 +4,25 @@ export * from './types';
 export * from './companySearch';
 export * from './companyRepository';
 
+interface TeamMember {
+  id: number;
+  email: string;
+  role: string;
+  status: string;
+}
+
+export const fetchTeamMembers = async (userId: string): Promise<TeamMember[]> => {
+  // This is a mock implementation. In a real app, this would fetch from your backend
+  return Promise.resolve([
+    {
+      id: 1,
+      email: "team.member@example.com",
+      role: "member",
+      status: "active"
+    }
+  ]);
+};
+
 export const updateCompany = async (companyId: number, updates: Partial<Company>): Promise<Company> => {
   const companyIndex = mockCompanies.findIndex(c => c.id === companyId);
   if (companyIndex === -1) {

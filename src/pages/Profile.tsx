@@ -8,7 +8,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserCompanies } from "@/components/UserCompanies";
+import { TeamSection } from "@/components/team/TeamSection";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -27,7 +27,6 @@ const Profile = () => {
   const [userComments, setUserComments] = useState("");
 
   const handleSaveComments = () => {
-    // In a real application, this would save to a backend
     toast.success("Comments saved successfully");
   };
 
@@ -37,7 +36,7 @@ const Profile = () => {
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="companies">Companies</TabsTrigger>
+            <TabsTrigger value="team">My Team</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
@@ -91,39 +90,11 @@ const Profile = () => {
                   </div>
                 </CardContent>
               </Card>
-
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Card className="glass-card mt-6">
-                  <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="text-sm">
-                        <p className="font-medium">Created new repository</p>
-                        <p className="text-gray-500">2 hours ago</p>
-                      </div>
-                      <div className="text-sm">
-                        <p className="font-medium">Shared repository with team</p>
-                        <p className="text-gray-500">1 day ago</p>
-                      </div>
-                      <div className="text-sm">
-                        <p className="font-medium">Updated sales strategy</p>
-                        <p className="text-gray-500">3 days ago</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
             </motion.div>
           </TabsContent>
 
-          <TabsContent value="companies">
-            <UserCompanies />
+          <TabsContent value="team">
+            <TeamSection />
           </TabsContent>
         </Tabs>
       </div>
