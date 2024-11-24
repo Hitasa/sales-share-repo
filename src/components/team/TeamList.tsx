@@ -7,6 +7,14 @@ import { Team } from "@/services/types";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
+interface TeamMemberResponse {
+  team: {
+    id: string;
+    name: string;
+    created_at: string;
+  };
+}
+
 export const TeamList = () => {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const { toast } = useToast();
@@ -28,7 +36,7 @@ export const TeamList = () => {
       if (error) throw error;
       
       // Transform the nested team data structure
-      return (userTeams || []).map(item => ({
+      return (userTeams as TeamMemberResponse[]).map(item => ({
         id: item.team.id,
         name: item.team.name,
         created_at: item.team.created_at
