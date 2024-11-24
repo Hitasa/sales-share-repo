@@ -316,6 +316,11 @@ export type Database = {
           is_active: boolean
           license_type: Database["public"]["Enums"]["license_type"]
           starts_at: string
+          stripe_price_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
           team_id: string | null
           updated_at: string
           user_id: string
@@ -328,6 +333,11 @@ export type Database = {
           is_active?: boolean
           license_type?: Database["public"]["Enums"]["license_type"]
           starts_at?: string
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
           team_id?: string | null
           updated_at?: string
           user_id: string
@@ -340,6 +350,11 @@ export type Database = {
           is_active?: boolean
           license_type?: Database["public"]["Enums"]["license_type"]
           starts_at?: string
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
           team_id?: string | null
           updated_at?: string
           user_id?: string
@@ -375,6 +390,7 @@ export type Database = {
     }
     Enums: {
       license_type: "free" | "basic" | "professional" | "enterprise"
+      subscription_status: "active" | "canceled" | "past_due" | "unpaid"
     }
     CompositeTypes: {
       [_ in never]: never

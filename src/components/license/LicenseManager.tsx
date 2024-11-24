@@ -3,6 +3,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { LICENSE_FEATURES, LicenseType } from "@/types/license";
 import { Check } from "lucide-react";
 import { useLicense } from "@/hooks/useLicense";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 
 const LICENSE_PRICES = {
   free: 0,
@@ -13,10 +17,48 @@ const LICENSE_PRICES = {
 
 export function LicenseManager() {
   const { license } = useLicense();
+  const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('success') === 'true') {
+      toast({
+        title: "Success!",
+        description: "Your license has been upgraded successfully.",
+      });
+    } else if (searchParams.get('canceled') === 'true') {
+      toast({
+        title: "Canceled",
+        description: "The upgrade process was canceled.",
+        variant: "destructive",
+      });
+    }
+  }, [searchParams, toast]);
 
   const handleUpgrade = async (newLicense: LicenseType) => {
-    // TODO: Implement Stripe integration for payment
-    console.log(`Upgrading to ${newLicense}`);
+    try {
+      if (newLicense === 'free') {
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: { licenseType: newLicense }
+      });
+
+      if (error) throw error;
+
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initiate upgrade process. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
