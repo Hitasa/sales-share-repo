@@ -23,7 +23,7 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
       return [];
     }
 
-    // Then try Google search specifically for teatmik.ee
+    // Then try Google search specifically for teatmik.ee in Estonia
     const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
     const SEARCH_ENGINE_ID = import.meta.env.VITE_GOOGLE_CSE_ID;
     
@@ -32,7 +32,7 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
       return localResults || [];
     }
 
-    const googleSearchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}+site:teatmik.ee`;
+    const googleSearchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}+site:teatmik.ee&cr=countryEE`;
     
     const googleResponse = await fetch(googleSearchUrl);
     
