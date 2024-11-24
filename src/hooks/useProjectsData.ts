@@ -9,7 +9,7 @@ const projectSchema = z.object({
   teamId: z.string().optional()
 });
 
-export const useProjectsData = () => {
+export const useProjectsData = (projectId?: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -57,21 +57,46 @@ export const useProjectsData = () => {
   });
 
   const { data: projectCompanies, isLoading: isLoadingCompanies } = useQuery({
-    queryKey: ["project-companies", /* projectId here */],
+    queryKey: ["project-companies", projectId],
     queryFn: async () => {
-      // Logic to fetch project companies
-      // ...
+      if (!projectId) return [];
+      const { data, error } = await supabase
+        .from("project_companies")
+        .select(`
+          companies (
+            id,
+            name,
+            industry,
+            website,
+            created_at
+          )
+        `)
+        .eq("project_id", projectId);
+
+      if (error) throw error;
+      return data?.map(item => item.companies) || [];
     },
-    enabled: !!/* projectId here */,
+    enabled: !!projectId,
   });
 
   const { data: availableCompanies } = useQuery({
-    queryKey: ["available-companies", /* projectId here */],
+    queryKey: ["available-companies", projectId],
     queryFn: async () => {
-      // Logic to fetch available companies
-      // ...
+      if (!projectId) return [];
+      const { data, error } = await supabase
+        .from("companies")
+        .select("*")
+        .not("id", "in", (
+          supabase
+            .from("project_companies")
+            .select("company_id")
+            .eq("project_id", projectId)
+        ));
+
+      if (error) throw error;
+      return data || [];
     },
-    enabled: !!/* projectId here */,
+    enabled: !!projectId,
   });
 
   const createProjectMutation = useMutation({
