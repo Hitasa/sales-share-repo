@@ -37,7 +37,7 @@ const Navigation = () => {
                   className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary transition-colors"
                 >
                   <BookMarked className="h-4 w-4 mr-2" />
-                  My Repository
+                  Company Repository
                 </Link>
                 <Link
                   to="/profile"
