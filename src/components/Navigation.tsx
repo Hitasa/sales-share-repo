@@ -12,7 +12,8 @@ const Navigation = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate("/auth/login");
+      // Force navigation to login page after logout
+      window.location.href = "/auth/login";
       toast({
         title: "Success",
         description: "You have been logged out successfully",

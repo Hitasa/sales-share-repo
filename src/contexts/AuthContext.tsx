@@ -40,8 +40,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      // Clear user state after successful logout
+      setUser(null);
+      // Clear any local storage items if needed
+      localStorage.removeItem('supabase.auth.token');
+    } catch (error) {
+      throw error;
+    }
   };
 
   const register = async (email: string, password: string) => {
