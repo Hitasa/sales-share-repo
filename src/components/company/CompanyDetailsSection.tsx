@@ -11,6 +11,7 @@ interface CompanyDetailsSectionProps {
   setEditedCompany: (company: Company) => void;
   setIsEditing: (isEditing: boolean) => void;
   averageRating: number;
+  onSave?: () => void;
 }
 
 export const CompanyDetailsSection = ({
@@ -20,6 +21,7 @@ export const CompanyDetailsSection = ({
   setEditedCompany,
   setIsEditing,
   averageRating,
+  onSave,
 }: CompanyDetailsSectionProps) => {
   return (
     <>
@@ -55,9 +57,18 @@ export const CompanyDetailsSection = ({
               </span>
             </div>
           </div>
-          {!isEditing && (
-            <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
-          )}
+          <div className="flex gap-2">
+            {isEditing ? (
+              <>
+                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={onSave}>Save Changes</Button>
+              </>
+            ) : (
+              <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
