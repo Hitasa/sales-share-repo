@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CompanyActions } from "./CompanyActions";
 import { CompanyDetailsDialog } from "./CompanyDetailsDialog";
+import { CompanyProfile } from "./CompanyProfile";
 import { Company } from "@/services/types";
 
 interface CompanyListProps {
@@ -20,6 +21,10 @@ export const CompanyList = ({ companies, isPrivate = false, onCompanySelect }: C
       setSelectedCompany(company);
     }
   };
+
+  if (selectedCompany && isPrivate) {
+    return <CompanyProfile company={selectedCompany} />;
+  }
 
   return (
     <>
