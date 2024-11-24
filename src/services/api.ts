@@ -10,6 +10,14 @@ export interface Offer {
   date: string;
 }
 
+export interface CompanyInvitation {
+  id: number;
+  companyId: number;
+  email: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  role: 'admin' | 'member';
+}
+
 export interface Company {
   id: number;
   name: string;
@@ -25,6 +33,7 @@ export interface Company {
     date: string;
   }>;
   offers?: Offer[];
+  invitations?: CompanyInvitation[];
 }
 
 export const fetchCompanies = async (): Promise<Company[]> => {
@@ -46,9 +55,7 @@ export const fetchCompanies = async (): Promise<Company[]> => {
   });
 };
 
-// Fetch companies for the current user (including shared ones)
 export const fetchUserCompanies = async (userId: string): Promise<Company[]> => {
-  // For demonstration, we'll return mock data
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve([
@@ -71,17 +78,32 @@ export const fetchUserCompanies = async (userId: string): Promise<Company[]> => 
               date: "2024-02-20",
             }
           ],
-          reviews: [
+          invitations: [
             {
               id: 1,
-              rating: 4,
-              comment: "Great company to work with!",
-              date: "2024-02-20",
-            },
+              companyId: 1,
+              email: "invited@example.com",
+              status: "pending",
+              role: "member"
+            }
           ],
         },
       ]);
     }, 1000);
+  });
+};
+
+export const inviteUserToCompany = async (companyId: number, email: string, role: 'admin' | 'member'): Promise<CompanyInvitation> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        id: Date.now(),
+        companyId,
+        email,
+        status: 'pending',
+        role
+      });
+    }, 500);
   });
 };
 

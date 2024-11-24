@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchUserCompanies, Company, shareCompany, createOffer } from "@/services/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
@@ -7,12 +7,14 @@ import { Input } from "./ui/input";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Share2, Send } from "lucide-react";
+import { CompanyInvite } from "./CompanyInvite";
 
 export const UserCompanies = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [shareEmail, setShareEmail] = useState("");
   const [offerAmount, setOfferAmount] = useState("");
+  const queryClient = useQueryClient();
 
   const { data: companies, isLoading } = useQuery({
     queryKey: ["userCompanies", user?.id],
@@ -63,6 +65,10 @@ export const UserCompanies = () => {
     }
   };
 
+  const handleInviteSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["userCompanies", user?.id] });
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -84,6 +90,21 @@ export const UserCompanies = () => {
                   <p>Growth: {company.growth}</p>
                 </div>
                 
+                <div className="border-t pt-4">
+                  <h4 className="font-semibold mb-2">Team Members</h4>
+                  {company.invitations?.map((invitation) => (
+                    <div key={invitation.id} className="text-sm">
+                      <p>{invitation.email} ({invitation.role})</p>
+                      <p className="text-muted-foreground">Status: {invitation.status}</p>
+                    </div>
+                  ))}
+                  
+                  <CompanyInvite 
+                    companyId={company.id}
+                    onInviteSuccess={handleInviteSuccess}
+                  />
+                </div>
+
                 <div className="border-t pt-4">
                   <h4 className="font-semibold mb-2">Offers</h4>
                   {company.offers?.map((offer) => (
