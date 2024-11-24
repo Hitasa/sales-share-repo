@@ -27,26 +27,20 @@ export const TeamInvite = ({ teamId, onInviteSuccess }: TeamInviteProps) => {
       const { data: profiles, error: profileError } = await supabase
         .from("profiles")
         .select("id")
-        .eq("email", email)
-        .single();
+        .eq("email", email);
 
-      if (profileError || !profiles) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "User not found. They need to sign up first.",
-        });
-        return;
-      }
+      // Generate a unique token for the invitation
+      const token = crypto.randomUUID();
 
-      // Add the user to the team
+      // Create the invitation
       const { error: inviteError } = await supabase
-        .from("team_members")
+        .from("team_invitations")
         .insert([
           {
             team_id: teamId,
-            user_id: profiles.id,
+            email,
             role,
+            token,
           },
         ]);
 
@@ -54,8 +48,11 @@ export const TeamInvite = ({ teamId, onInviteSuccess }: TeamInviteProps) => {
 
       toast({
         title: "Success",
-        description: `${email} has been added to the team`,
+        description: profiles && profiles.length > 0 
+          ? `Invitation sent to existing user ${email}`
+          : `Invitation sent to new user ${email}`,
       });
+      
       setEmail("");
       onInviteSuccess();
     } catch (error: any) {
