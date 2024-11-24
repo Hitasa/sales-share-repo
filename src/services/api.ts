@@ -59,8 +59,14 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
     if (localError) throw localError;
 
     // Then try Google search
-    const GOOGLE_API_KEY = 'YOUR_GOOGLE_API_KEY';
-    const SEARCH_ENGINE_ID = 'YOUR_SEARCH_ENGINE_ID';
+    const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
+    const SEARCH_ENGINE_ID = import.meta.env.VITE_GOOGLE_CSE_ID;
+    
+    if (!GOOGLE_API_KEY || !SEARCH_ENGINE_ID) {
+      console.warn('Google Search API configuration missing');
+      return localResults || [];
+    }
+
     const googleSearchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}`;
 
     const response = await fetch(googleSearchUrl);
