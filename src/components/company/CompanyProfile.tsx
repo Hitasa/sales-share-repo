@@ -22,6 +22,12 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
   const [newComment, setNewComment] = useState("");
   const { toast } = useToast();
 
+  const calculateAverageRating = (reviews: { rating: number }[] = []) => {
+    if (!reviews.length) return 0;
+    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+    return Number((sum / reviews.length).toFixed(1));
+  };
+
   const updateCompanyMutation = useMutation({
     mutationFn: (updates: Partial<Company>) => updateCompany(initialCompany.id, updates),
     onSuccess: (updatedCompany) => {
@@ -66,13 +72,17 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
       date: new Date().toISOString().split('T')[0],
     };
 
+    const updatedReviews = [...(editedCompany.reviews || []), newReview];
     const updatedCompany = {
       ...editedCompany,
-      reviews: [...(editedCompany.reviews || []), newReview],
+      reviews: updatedReviews,
+      averageRating: calculateAverageRating(updatedReviews),
     };
 
     updateCompanyMutation.mutate(updatedCompany);
   };
+
+  const averageRating = calculateAverageRating(editedCompany.reviews);
 
   return (
     <div className="container mx-auto py-8">
@@ -94,6 +104,7 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
           isEditing={isEditing}
           setEditedCompany={setEditedCompany}
           setIsEditing={setIsEditing}
+          averageRating={averageRating}
         />
 
         {isEditing && (

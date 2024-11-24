@@ -47,4 +47,5 @@ export interface Company {
   reviews?: Review[];
   offers?: Offer[];
   invitations?: CompanyInvitation[];
+  averageRating?: number;
 }

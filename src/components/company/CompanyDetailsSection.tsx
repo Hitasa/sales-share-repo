@@ -1,15 +1,16 @@
-import { Building2, Mail, Phone, Globe } from "lucide-react";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Company } from "@/services/types";
+import { Star } from "lucide-react";
 
 interface CompanyDetailsSectionProps {
   company: Company;
   editedCompany: Company;
   isEditing: boolean;
   setEditedCompany: (company: Company) => void;
-  setIsEditing: (editing: boolean) => void;
+  setIsEditing: (isEditing: boolean) => void;
+  averageRating: number;
 }
 
 export const CompanyDetailsSection = ({
@@ -18,90 +19,75 @@ export const CompanyDetailsSection = ({
   isEditing,
   setEditedCompany,
   setIsEditing,
+  averageRating,
 }: CompanyDetailsSectionProps) => {
-  const formatWebsiteUrl = (url: string) => {
-    if (!url) return '';
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return `https://${url}`;
-  };
-
-  const handleInputChange = (field: keyof Company, value: string) => {
-    setEditedCompany({
-      ...editedCompany,
-      [field]: value,
-    });
-  };
-
   return (
-    <div>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
-              <Building2 className="h-10 w-10 text-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-2xl">{company.name}</CardTitle>
-              <CardDescription>{company.industry}</CardDescription>
+    <>
+      <CardHeader className="space-y-1">
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="text-2xl">
+              {isEditing ? (
+                <Input
+                  value={editedCompany.name}
+                  onChange={(e) =>
+                    setEditedCompany({ ...editedCompany, name: e.target.value })
+                  }
+                  className="text-2xl font-bold"
+                />
+              ) : (
+                company.name
+              )}
+            </CardTitle>
+            <div className="flex items-center mt-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`h-5 w-5 ${
+                    star <= averageRating
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
+                  }`}
+                />
+              ))}
+              <span className="ml-2 text-sm text-gray-600">
+                ({averageRating} / 5)
+              </span>
             </div>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            {isEditing ? "Cancel" : "Edit"}
-          </Button>
+          {!isEditing && (
+            <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+          )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div className="flex items-center space-x-3">
-            <Globe className="h-5 w-5 text-primary" />
-            {isEditing ? (
-              <Input
-                value={editedCompany.website || ''}
-                onChange={(e) => handleInputChange('website', e.target.value)}
-                placeholder="Website URL"
-              />
-            ) : (
-              <a 
-                href={formatWebsiteUrl(company.website || '')} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="hover:underline text-primary"
-              >
-                {company.website || 'No website provided'}
-              </a>
-            )}
+      <CardContent className="space-y-4">
+        <div className="flex flex-col">
+          <div className="flex justify-between">
+            <span className="font-bold">Industry:</span>
+            <span>{editedCompany.industry}</span>
           </div>
-          
-          <div className="flex items-center space-x-3">
-            <Phone className="h-5 w-5 text-primary" />
-            {isEditing ? (
-              <Input
-                value={editedCompany.phoneNumber || ''}
-                onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-                placeholder="Phone number"
-              />
-            ) : (
-              <span>{company.phoneNumber || 'No phone number provided'}</span>
-            )}
+          <div className="flex justify-between">
+            <span className="font-bold">Sales Volume:</span>
+            <span>{editedCompany.salesVolume}</span>
           </div>
-
-          <div className="flex items-center space-x-3">
-            <Mail className="h-5 w-5 text-primary" />
-            {isEditing ? (
-              <Input
-                value={editedCompany.email || ''}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                placeholder="Email address"
-              />
-            ) : (
-              <span>{company.email || 'No email provided'}</span>
-            )}
+          <div className="flex justify-between">
+            <span className="font-bold">Growth:</span>
+            <span>{editedCompany.growth}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-bold">Website:</span>
+            <span>{editedCompany.website}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-bold">Phone Number:</span>
+            <span>{editedCompany.phoneNumber}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-bold">Email:</span>
+            <span>{editedCompany.email}</span>
           </div>
         </div>
       </CardContent>
-    </div>
+    </>
   );
 };
