@@ -23,15 +23,23 @@ export const fetchTeamMembers = async (userId: string): Promise<TeamMember[]> =>
 };
 
 export const updateCompany = async (companyId: string, updates: Partial<Company>): Promise<Company> => {
+  // Transform the updates to match the database column names
+  const dbUpdates = {
+    ...updates,
+    sales_volume: updates.salesVolume,
+    phone_number: updates.phoneNumber,
+    created_by: updates.createdBy,
+  };
+
   const { data, error } = await supabase
     .from('companies')
-    .update(updates)
+    .update(dbUpdates)
     .eq('id', companyId)
     .select()
     .single();
 
   if (error) throw error;
-  return data;
+  return transformCompanyFromDB(data);
 };
 
 export const fetchCompanies = async (): Promise<Company[]> => {
@@ -44,7 +52,7 @@ export const fetchCompanies = async (): Promise<Company[]> => {
     throw error;
   }
   
-  return data || [];
+  return (data || []).map(transformCompanyFromDB);
 };
 
 export const fetchUserCompanies = async (userId: string): Promise<Company[]> => {
@@ -56,8 +64,26 @@ export const fetchUserCompanies = async (userId: string): Promise<Company[]> => 
     .eq('created_by', userId);
 
   if (error) throw error;
-  return data || [];
+  return (data || []).map(transformCompanyFromDB);
 };
+
+// Helper function to transform database response to Company type
+const transformCompanyFromDB = (dbCompany: any): Company => ({
+  id: dbCompany.id,
+  name: dbCompany.name,
+  industry: dbCompany.industry || undefined,
+  salesVolume: dbCompany.sales_volume || undefined,
+  growth: dbCompany.growth || undefined,
+  website: dbCompany.website || undefined,
+  phoneNumber: dbCompany.phone_number || undefined,
+  email: dbCompany.email || undefined,
+  review: dbCompany.review || undefined,
+  notes: dbCompany.notes || undefined,
+  createdBy: dbCompany.created_by || "",
+  sharedWith: [],
+  reviews: dbCompany.reviews || [],
+  comments: [],
+});
 
 export const inviteUserToCompany = async (companyId: string, email: string, role: 'admin' | 'member'): Promise<CompanyInvitation> => {
   const { data, error } = await supabase.functions.invoke('invite-user', {

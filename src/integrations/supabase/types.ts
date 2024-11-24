@@ -21,6 +21,7 @@ export type Database = {
           notes: string | null
           phone_number: string | null
           review: string | null
+          reviews: Json | null
           sales_volume: string | null
           team_id: string | null
           website: string | null
@@ -36,6 +37,7 @@ export type Database = {
           notes?: string | null
           phone_number?: string | null
           review?: string | null
+          reviews?: Json | null
           sales_volume?: string | null
           team_id?: string | null
           website?: string | null
@@ -51,6 +53,7 @@ export type Database = {
           notes?: string | null
           phone_number?: string | null
           review?: string | null
+          reviews?: Json | null
           sales_volume?: string | null
           team_id?: string | null
           website?: string | null
