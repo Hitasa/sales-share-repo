@@ -7,12 +7,12 @@ import { Team } from "@/services/types";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-interface TeamResponse {
+interface TeamMemberResponse {
   team: {
     id: string;
     name: string;
     created_at: string;
-  };
+  }[];
 }
 
 export const TeamList = () => {
@@ -35,11 +35,13 @@ export const TeamList = () => {
 
       if (error) throw error;
       
-      return (userTeams as TeamResponse[]).map((item) => ({
-        id: item.team.id,
-        name: item.team.name,
-        created_at: item.team.created_at
-      } as Team));
+      return (userTeams as TeamMemberResponse[]).flatMap(item => 
+        item.team.map(teamData => ({
+          id: teamData.id,
+          name: teamData.name,
+          created_at: teamData.created_at
+        } as Team))
+      );
     },
   });
 
