@@ -19,7 +19,7 @@ export const addToUserRepository = async (companyId: number, userId: string): Pr
   
   const company = mockCompanies.find(c => c.id === companyId);
   if (!company) {
-    throw new Error("Company not found");
+    throw new Error(`Unable to add company to repository. Please try again.`);
   }
   
   if (userRepositories[userId].includes(companyId)) {

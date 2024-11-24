@@ -6,7 +6,7 @@ const GOOGLE_CSE_ID = import.meta.env.VITE_GOOGLE_CSE_ID;
 const getFallbackCompanies = (query: string): Company[] => {
   return [
     {
-      id: 1,
+      id: Date.now(),
       name: `Search results for: ${query}`,
       industry: 'Technology',
       salesVolume: 'N/A',
@@ -63,16 +63,30 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
     const data = await response.json();
     const items = data.items || [];
     
-    return items.map((item: any, index: number) => ({
-      id: index + 1,
+    // Add searched companies to mockCompanies
+    const searchResults = items.map((item: any) => ({
+      id: Date.now() + Math.random(), // Ensure unique IDs
       name: item.title || 'Unknown',
       industry: item.pagemap?.metatags?.[0]?.['og:type'] || 'Various',
       salesVolume: 'N/A',
       growth: 'N/A',
       createdBy: 'system',
       sharedWith: [],
-      link: item.link || ''
+      link: item.link || '',
+      reviews: [],
+      offers: [],
+      invitations: []
     }));
+
+    // Import mockCompanies and add the search results to it
+    const { mockCompanies } = await import('./mockData');
+    searchResults.forEach(company => {
+      if (!mockCompanies.some(c => c.id === company.id)) {
+        mockCompanies.push(company);
+      }
+    });
+
+    return searchResults;
   } catch (error) {
     console.error('Google search error:', error);
     return getFallbackCompanies(query);
