@@ -43,7 +43,7 @@ export const useProjectsData = (projectId?: string) => {
         .from("projects")
         .select(`
           *,
-          teams:team_id (
+          team:team_id (
             name
           )
         `)
