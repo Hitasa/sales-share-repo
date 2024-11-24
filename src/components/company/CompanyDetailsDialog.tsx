@@ -91,7 +91,7 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
                         href={company.website} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="hover:underline"
+                        className="hover:underline text-primary"
                       >
                         {company.website || 'No website provided'}
                       </a>
