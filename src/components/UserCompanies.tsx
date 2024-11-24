@@ -1,17 +1,40 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchUserCompanies } from "@/services/api";
+import { fetchUserCompanies, addCompany } from "@/services/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { CompanyInvite } from "./CompanyInvite";
 import { ScrollArea } from "./ui/scroll-area";
+import { AddCompanyForm } from "./AddCompanyForm";
+import { useToast } from "@/hooks/use-toast";
 
 export const UserCompanies = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: companies, isLoading } = useQuery({
     queryKey: ["userCompanies", user?.id],
     queryFn: () => fetchUserCompanies(user?.id || ""),
     enabled: !!user,
+  });
+
+  const createCompanyMutation = useMutation({
+    mutationFn: (companyData: { name: string; industry: string; salesVolume: string; growth: string }) =>
+      addCompany({ ...companyData, createdBy: user?.id || "", sharedWith: [] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userCompanies"] });
+      toast({
+        title: "Success",
+        description: "Company created successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create company",
+      });
+    },
   });
 
   if (isLoading) {
@@ -25,9 +48,12 @@ export const UserCompanies = () => {
       <div className="container mx-auto py-8">
         <Card>
           <CardHeader>
-            <CardTitle>No Company Found</CardTitle>
-            <CardDescription>You haven't created or joined any company yet.</CardDescription>
+            <CardTitle>Create Your Company</CardTitle>
+            <CardDescription>Get started by creating your company profile.</CardDescription>
           </CardHeader>
+          <CardContent>
+            <AddCompanyForm onSubmit={(data) => createCompanyMutation.mutate(data)} />
+          </CardContent>
         </Card>
       </div>
     );
@@ -76,7 +102,9 @@ export const UserCompanies = () => {
             <h3 className="text-lg font-semibold mb-4">Invite New Member</h3>
             <CompanyInvite 
               companyId={company.id}
-              onInviteSuccess={() => {}}
+              onInviteSuccess={() => {
+                queryClient.invalidateQueries({ queryKey: ["userCompanies"] });
+              }}
             />
           </div>
         </CardContent>
