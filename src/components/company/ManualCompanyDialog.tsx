@@ -29,11 +29,11 @@ export function ManualCompanyDialog() {
 
     try {
       await addCompany({
-        ...formData,
-        createdBy: user.id,
-        sharedWith: [],
-        reviews: [],
-        comments: [],
+        name: formData.name,
+        industry: formData.industry,
+        sales_volume: formData.salesVolume,
+        growth: formData.growth,
+        created_by: user.id,
       });
       
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });

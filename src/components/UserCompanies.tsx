@@ -24,11 +24,11 @@ export const UserCompanies = () => {
   const createCompanyMutation = useMutation({
     mutationFn: (companyData: { name: string; industry: string; salesVolume: string; growth: string }) =>
       addCompany({ 
-        ...companyData, 
-        createdBy: user?.id || "", 
-        sharedWith: [], 
-        reviews: [],
-        comments: [],
+        name: companyData.name,
+        industry: companyData.industry,
+        sales_volume: companyData.salesVolume,
+        growth: companyData.growth,
+        created_by: user?.id || "",
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userCompanies"] });
