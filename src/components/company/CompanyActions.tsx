@@ -130,6 +130,8 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
     });
   };
 
+  const isTeamRepository = company.team_id !== null && company.team_id !== undefined;
+
   return (
     <div className="flex space-x-2">
       {!isPrivate ? (
@@ -157,9 +159,10 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
             {removeFromRepositoryMutation.isPending ? "Removing..." : "Remove"}
           </Button>
           <ProjectActions company={company} projectId={projectId} />
-          <TeamShareDialog teams={userTeams} onTeamSelect={handleTeamSelect} />
+          {!isTeamRepository && <TeamShareDialog teams={userTeams} onTeamSelect={handleTeamSelect} />}
         </>
       )}
+      {isTeamRepository && <ProjectActions company={company} projectId={projectId} />}
     </div>
   );
 };
