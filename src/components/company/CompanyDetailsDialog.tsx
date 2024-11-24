@@ -19,6 +19,11 @@ interface CompanyDetailsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+interface CompanyReviewsResponse {
+  reviews: any[];
+  team_id: string | null;
+}
+
 export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDetailsDialogProps) => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
@@ -40,12 +45,12 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
 
       // If the company belongs to a team (private), don't show its reviews in public view
       if (data.team_id) {
-        return { ...data, reviews: [] };
+        return { reviews: [], team_id: data.team_id } as CompanyReviewsResponse;
       }
       
-      return data;
+      return { reviews: data.reviews || [], team_id: data.team_id } as CompanyReviewsResponse;
     },
-    initialData: company
+    initialData: { reviews: company.reviews || [], team_id: company.team_id } as CompanyReviewsResponse
   });
 
   const calculateAverageRating = (reviews: { rating: number }[] = []) => {
