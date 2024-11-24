@@ -32,11 +32,17 @@ export const AddCompanyToProjectDialog = ({
 
       const existingIds = existingCompanies?.map(c => c.company_id) || [];
 
-      const { data: companies, error } = await supabase
+      // Only add the not.in clause if there are existing companies
+      const query = supabase
         .from("companies")
         .select("*")
-        .eq("team_id", teamId)
-        .not("id", "in", `(${existingIds.join(",")})`.replace(/\(\)/, "(null)"));
+        .eq("team_id", teamId);
+
+      if (existingIds.length > 0) {
+        query.not('id', 'in', `(${existingIds.join(',')})`);
+      }
+
+      const { data: companies, error } = await query;
 
       if (error) throw error;
 

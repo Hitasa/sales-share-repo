@@ -8,6 +8,7 @@ import { ProjectCompanies } from "./ProjectCompanies";
 import { ProjectHeader } from "./ProjectHeader";
 import { ProjectNotes } from "./ProjectNotes";
 import { AddCompanyToProjectDialog } from "./AddCompanyToProjectDialog";
+import { Company } from "@/services/types";
 
 interface Note {
   content: string;
@@ -23,10 +24,11 @@ interface ProjectProfileProps {
     notes_list?: Note[];
     team_id?: string | null;
   };
-  companies?: any[];
+  companies?: Company[];
+  availableCompanies?: Company[];
   isLoadingCompanies?: boolean;
   onBack?: () => void;
-  onAddCompany: (company: any) => void;
+  onAddCompany: (company: Company) => void;
   onRemoveCompany: (companyId: string) => void;
 }
 
