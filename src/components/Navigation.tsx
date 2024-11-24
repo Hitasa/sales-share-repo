@@ -18,10 +18,11 @@ const Navigation = () => {
         description: "You have been logged out successfully",
       });
     } catch (error: any) {
+      console.error("Logout error:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to log out. Please try again.",
+        description: error?.message || "Failed to log out. Please try again.",
       });
     }
   };
