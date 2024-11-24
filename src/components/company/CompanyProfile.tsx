@@ -7,7 +7,7 @@ import { Company } from "@/services/types";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { updateCompany } from "@/services/api";
 import { ArrowLeft } from "lucide-react";
 
@@ -21,13 +21,11 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
   const [editedCompany, setEditedCompany] = useState(initialCompany);
   const [newComment, setNewComment] = useState("");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const updateCompanyMutation = useMutation({
     mutationFn: (updates: Partial<Company>) => updateCompany(initialCompany.id, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["userCompanies"] });
-      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
+    onSuccess: (updatedCompany) => {
+      setEditedCompany(updatedCompany);
       setIsEditing(false);
       toast({
         title: "Success",
@@ -37,7 +35,6 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
   });
 
   const handleSave = () => {
-    // Save all company details including email, phone, and website
     updateCompanyMutation.mutate(editedCompany);
   };
 
@@ -53,17 +50,12 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
       },
     ];
 
-    // Update both local state and save to backend
-    setEditedCompany(prev => ({
-      ...prev,
-      comments: updatedComments
-    }));
-
-    updateCompanyMutation.mutate({
+    const updatedCompany = {
       ...editedCompany,
       comments: updatedComments,
-    });
+    };
 
+    updateCompanyMutation.mutate(updatedCompany);
     setNewComment("");
   };
 
@@ -79,7 +71,6 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
       reviews: [...(editedCompany.reviews || []), newReview],
     };
 
-    setEditedCompany(updatedCompany);
     updateCompanyMutation.mutate(updatedCompany);
   };
 
@@ -98,7 +89,7 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
       
       <Card className="max-w-4xl mx-auto">
         <CompanyDetailsSection
-          company={initialCompany}
+          company={editedCompany}
           editedCompany={editedCompany}
           isEditing={isEditing}
           setEditedCompany={setEditedCompany}
