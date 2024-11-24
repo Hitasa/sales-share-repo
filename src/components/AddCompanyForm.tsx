@@ -12,7 +12,7 @@ interface AddCompanyFormProps {
   }) => void;
 }
 
-const AddCompanyForm = ({ onSubmit }: AddCompanyFormProps) => {
+export const AddCompanyForm = ({ onSubmit }: AddCompanyFormProps) => {
   const [formData, setFormData] = useState({
     name: "",
     industry: "",
@@ -85,5 +85,3 @@ const AddCompanyForm = ({ onSubmit }: AddCompanyFormProps) => {
     </form>
   );
 };
-
-export default AddCompanyForm;
