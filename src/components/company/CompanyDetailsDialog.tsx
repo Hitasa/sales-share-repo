@@ -26,21 +26,19 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
   const [comments, setComments] = useState(company.notes || "");
   const queryClient = useQueryClient();
 
-  const handleSave = async () => {
+  const handleSaveComments = async () => {
     try {
       await updateCompany(company.id, { ...editedCompany, notes: comments });
-      setIsEditing(false);
-      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
-      queryClient.invalidateQueries({ queryKey: ["companies"] });
       toast({
         title: "Success",
-        description: "Company information updated successfully",
+        description: "Comments saved successfully",
       });
+      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update company information",
+        description: error instanceof Error ? error.message : "Failed to save comments",
       });
     }
   };
@@ -135,7 +133,7 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
 
                 {isEditing && (
                   <div className="flex justify-end">
-                    <Button onClick={handleSave}>Save Changes</Button>
+                    <Button onClick={handleSaveComments}>Save Changes</Button>
                   </div>
                 )}
 
@@ -152,7 +150,7 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
                       className="min-h-[100px]"
                     />
                     <Button 
-                      onClick={handleSave}
+                      onClick={handleSaveComments}
                       className="w-full"
                     >
                       Save Comments
