@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { MessageSquare, Star, PlusSquare, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addToUserRepository, removeFromUserRepository, addReview } from "@/services/api";
+import { addToUserRepository, removeFromUserRepository, addReview, addCompany } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import ReviewList from "@/components/ReviewList";
 import ReviewForm from "@/components/ReviewForm";
@@ -21,10 +21,29 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
 
   const addToRepositoryMutation = useMutation({
     mutationFn: async () => {
-      if (!user?.id || !company.id) {
+      if (!user?.id || !company) {
         throw new Error("Missing required information");
       }
-      await addToUserRepository(company.id, user.id);
+
+      // First create the company
+      const createdCompany = await addCompany({
+        name: company.name,
+        industry: company.industry || "",
+        salesVolume: company.salesVolume || "",
+        growth: company.growth || "",
+        website: company.website || "",
+        phoneNumber: company.phoneNumber || "",
+        email: company.email || "",
+        review: company.review || "",
+        notes: company.notes || "",
+        createdBy: user.id,
+        sharedWith: [],
+        reviews: [],
+        comments: [],
+      });
+
+      // Then add it to repository
+      await addToUserRepository(createdCompany.id, user.id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });

@@ -95,7 +95,10 @@ export const addCompany = async (company: Omit<Company, "id">): Promise<Company>
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error adding company:", error);
+    throw error;
+  }
   return data;
 };
 
