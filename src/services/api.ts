@@ -59,7 +59,7 @@ export const addToUserRepository = async (companyId: number, userId: string): Pr
     throw new Error("Company already in repository");
   }
   
-  // Add to user's repository and ensure it exists in mockCompanies
+  // Add to user's repository
   userRepositories[userId].push(companyId);
   console.log('Updated repositories:', { userRepositories, mockCompanies }); // Debug log
   
@@ -152,11 +152,24 @@ export const createOffer = async (companyId: number, offer: Omit<Offer, "id">): 
 export const addCompany = async (company: Omit<Company, "id">): Promise<Company> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve({
+      const newCompany = {
         ...company,
         id: Date.now(),
         reviews: []
-      });
+      };
+      
+      // Add the new company to mockCompanies
+      mockCompanies.push(newCompany);
+      
+      // If there's a createdBy field, add it to that user's repository
+      if (company.createdBy) {
+        if (!userRepositories[company.createdBy]) {
+          userRepositories[company.createdBy] = [];
+        }
+        userRepositories[company.createdBy].push(newCompany.id);
+      }
+      
+      resolve(newCompany);
     }, 500);
   });
 };
