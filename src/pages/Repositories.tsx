@@ -19,29 +19,29 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import AddCompanyForm from "@/components/AddCompanyForm";
-
-// Mock data
-const initialCompanies = [
-  {
-    id: 1,
-    name: "Acme Corp",
-    industry: "Technology",
-    salesVolume: "$1.2M",
-    growth: "+15%",
-  },
-  {
-    id: 2,
-    name: "Beta Industries",
-    industry: "Manufacturing",
-    salesVolume: "$850K",
-    growth: "+8%",
-  },
-];
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchCompanies, addCompany } from "@/services/api";
 
 const Repositories = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [companies, setCompanies] = useState(initialCompanies);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: companies = [], isLoading } = useQuery({
+    queryKey: ['companies'],
+    queryFn: fetchCompanies,
+  });
+
+  const addCompanyMutation = useMutation({
+    mutationFn: addCompany,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['companies'] });
+      toast({
+        title: "Company added",
+        description: "The company has been successfully added to the repository.",
+      });
+    },
+  });
 
   const filteredCompanies = companies.filter((company) =>
     company.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -53,16 +53,12 @@ const Repositories = () => {
     salesVolume: string;
     growth: string;
   }) => {
-    const companyWithId = {
-      ...newCompany,
-      id: companies.length + 1,
-    };
-    setCompanies([...companies, companyWithId]);
-    toast({
-      title: "Company added",
-      description: `${newCompany.name} has been added to the repository.`,
-    });
+    addCompanyMutation.mutate(newCompany);
   };
+
+  if (isLoading) {
+    return <div className="container mx-auto py-20 px-4">Loading...</div>;
+  }
 
   return (
     <div className="container mx-auto py-20 px-4 animate-fadeIn">

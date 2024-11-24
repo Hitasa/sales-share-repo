@@ -19,75 +19,49 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
-// Mock data with reviews
-const companies = [
-  {
-    id: 1,
-    name: "Acme Corp",
-    industry: "Technology",
-    salesVolume: "$1.2M",
-    growth: "+15%",
-    reviews: [
-      {
-        id: 1,
-        rating: 4,
-        comment: "Great company to work with!",
-        date: "2024-02-20",
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Beta Industries",
-    industry: "Manufacturing",
-    salesVolume: "$850K",
-    growth: "+8%",
-    reviews: [],
-  },
-  {
-    id: 3,
-    name: "Gamma Solutions",
-    industry: "Services",
-    salesVolume: "$2.1M",
-    growth: "+22%",
-    reviews: [],
-  },
-];
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchCompanies, addReview } from "@/services/api";
+import { useToast } from "@/components/ui/use-toast";
 
 const Metrics = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [localCompanies, setLocalCompanies] = useState(companies);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const filteredCompanies = localCompanies.filter((company) =>
+  const { data: companies = [], isLoading } = useQuery({
+    queryKey: ['companies'],
+    queryFn: fetchCompanies,
+  });
+
+  const addReviewMutation = useMutation({
+    mutationFn: ({ companyId, review }: { companyId: number; review: { rating: number; comment: string } }) =>
+      addReview(companyId, review),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['companies'] });
+      toast({
+        title: "Review added",
+        description: "Your review has been successfully added.",
+      });
+    },
+  });
+
+  const filteredCompanies = companies.filter((company) =>
     company.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleReviewSubmit = (companyId: number, review: { rating: number; comment: string }) => {
-    setLocalCompanies((prevCompanies) =>
-      prevCompanies.map((company) =>
-        company.id === companyId
-          ? {
-              ...company,
-              reviews: [
-                ...company.reviews,
-                {
-                  id: Date.now(),
-                  ...review,
-                  date: new Date().toISOString().split("T")[0],
-                },
-              ],
-            }
-          : company
-      )
-    );
+    addReviewMutation.mutate({ companyId, review });
   };
 
-  const getAverageRating = (reviews: any[]) => {
+  const getAverageRating = (reviews: any[] = []) => {
     if (reviews.length === 0) return 0;
     const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
     return (sum / reviews.length).toFixed(1);
   };
+
+  if (isLoading) {
+    return <div className="container mx-auto py-20 px-4">Loading...</div>;
+  }
 
   return (
     <div className="container mx-auto py-20 px-4 animate-fadeIn">
@@ -141,7 +115,7 @@ const Metrics = () => {
                         />
                         <div className="border-t pt-4">
                           <h3 className="font-medium mb-4">Previous Reviews</h3>
-                          <ReviewList reviews={company.reviews} />
+                          <ReviewList reviews={company.reviews || []} />
                         </div>
                       </div>
                     </DialogContent>
