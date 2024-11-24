@@ -1,14 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { PlusSquare, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { addToUserRepository, removeFromUserRepository } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Company } from "@/services/types";
 import { ProjectActions } from "./ProjectActions";
 import { ReviewActions } from "./ReviewActions";
 import { TeamShareDialog } from "../team/TeamShareDialog";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Team } from "@/types/team";
 
@@ -46,6 +45,48 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
     enabled: !!user,
   });
 
+  const checkExistingRepository = async () => {
+    const { data, error } = await supabase
+      .from("company_repositories")
+      .select("id")
+      .eq("company_id", company.id)
+      .eq("user_id", user?.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return !!data;
+  };
+
+  const addToRepositoryMutation = useMutation({
+    mutationFn: async () => {
+      if (!user?.id || !company) {
+        throw new Error("Missing required information");
+      }
+      const exists = await checkExistingRepository();
+      if (exists) {
+        throw new Error("Company already exists in your repository");
+      }
+      await addToUserRepository(company.id, user.id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
+      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      toast({
+        title: "Success",
+        description: `${company.name} added to your repository`,
+      });
+    },
+    onError: (error) => {
+      console.error("Error adding to repository:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to add company to repository",
+      });
+    },
+  });
+
   const linkToTeamMutation = useMutation({
     mutationFn: async ({ companyId, teamId }: { companyId: string; teamId: string }) => {
       const { error } = await supabase
@@ -67,32 +108,6 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
         variant: "destructive",
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to link company to team",
-      });
-    },
-  });
-
-  const addToRepositoryMutation = useMutation({
-    mutationFn: async () => {
-      if (!user?.id || !company) {
-        throw new Error("Missing required information");
-      }
-      await addToUserRepository(company.id, user.id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
-      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["companies"] });
-      toast({
-        title: "Success",
-        description: `${company.name} added to your repository`,
-      });
-    },
-    onError: (error) => {
-      console.error("Error adding to repository:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to add company to repository",
       });
     },
   });
