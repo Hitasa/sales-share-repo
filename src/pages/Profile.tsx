@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import type { ProfileData } from "@/components/profile/types";
+import { Team } from "@/services/types";
 
 const defaultProfile: ProfileData = {
   first_name: "",
@@ -27,10 +28,10 @@ const Profile = () => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<ProfileData>(defaultProfile);
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
 
   useEffect(() => {
     if (user) {
-      // Add a small delay to ensure auth is fully initialized
       const timer = setTimeout(() => {
         fetchProfile();
       }, 500);
@@ -130,7 +131,7 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="team">
-            <TeamSection />
+            <TeamSection selectedTeam={selectedTeam} />
           </TabsContent>
         </Tabs>
       </div>

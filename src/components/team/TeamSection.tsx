@@ -22,14 +22,13 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
     
     try {
       const invitation = {
-        id: crypto.randomUUID(), // Use string ID
+        id: crypto.randomUUID(),
         companyId: selectedTeam.id,
         email,
         status: 'pending',
         role: 'member'
       };
 
-      // Logic to send an invitation
       toast({
         title: "Success",
         description: `Invitation sent to ${email}`,
@@ -45,14 +44,11 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
 
   return (
     <div>
-      {/* Team members list and invite form */}
       <div>
         <h2 className="text-lg font-bold">Team Members</h2>
-        {/* Render team members */}
       </div>
       <div>
         <h3 className="text-md font-semibold">Invite a User</h3>
-        {/* Invite form with input for email and invite button */}
         <Button onClick={() => handleInviteUser("test@example.com")}>Send Invite</Button>
       </div>
     </div>

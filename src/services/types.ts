@@ -29,6 +29,12 @@ export interface Company {
   averageRating?: number;
 }
 
+export interface Team {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
 export interface CompanyInvitation {
   id: string;
   companyId: string;
