@@ -32,7 +32,7 @@ export interface Company {
 export interface Team {
   id: string;
   name: string;
-  createdAt: string;
+  created_at: string;
 }
 
 export interface CompanyInvitation {
