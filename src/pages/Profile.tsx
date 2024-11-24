@@ -30,7 +30,11 @@ const Profile = () => {
 
   useEffect(() => {
     if (user) {
-      fetchProfile();
+      // Add a small delay to ensure auth is fully initialized
+      const timer = setTimeout(() => {
+        fetchProfile();
+      }, 500);
+      return () => clearTimeout(timer);
     }
   }, [user]);
 
@@ -49,6 +53,14 @@ const Profile = () => {
       if (data) {
         setProfile(data);
       } else {
+        // Verify user exists in auth.users before creating profile
+        const { data: authUser, error: authError } = await supabase.auth.getUser(user.id);
+        
+        if (authError || !authUser.user) {
+          toast.error("User authentication error");
+          return;
+        }
+
         // Create a new profile if one doesn't exist
         const { error: createError } = await supabase
           .from("profiles")
