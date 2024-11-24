@@ -49,14 +49,14 @@ export const ProjectActions = ({ company, projectId }: ProjectActionsProps) => {
       }
 
       // First verify the user owns the project or is part of the team
-      const { data: project, error: projectError } = await supabase
+      const { data: project } = await supabase
         .from("projects")
-        .select("*, team_members!inner(*)")
+        .select("*")
         .eq("id", projectId)
-        .or(`created_by.eq.${user.id},team_members.user_id.eq.${user.id}`)
+        .or(`created_by.eq.${user.id},team_id.in.(select team_id from team_members where user_id = '${user.id}')`)
         .single();
 
-      if (projectError || !project) {
+      if (!project) {
         throw new Error("You don't have permission to add companies to this project");
       }
 
@@ -90,14 +90,14 @@ export const ProjectActions = ({ company, projectId }: ProjectActionsProps) => {
       }
 
       // First verify the user owns the project or is part of the team
-      const { data: project, error: projectError } = await supabase
+      const { data: project } = await supabase
         .from("projects")
-        .select("*, team_members!inner(*)")
+        .select("*")
         .eq("id", projectId)
-        .or(`created_by.eq.${user.id},team_members.user_id.eq.${user.id}`)
+        .or(`created_by.eq.${user.id},team_id.in.(select team_id from team_members where user_id = '${user.id}')`)
         .single();
 
-      if (projectError || !project) {
+      if (!project) {
         throw new Error("You don't have permission to remove companies from this project");
       }
 
