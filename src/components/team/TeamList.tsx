@@ -7,6 +7,14 @@ import { Team } from "@/services/types";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
+interface TeamResponse {
+  team: {
+    id: string;
+    name: string;
+    created_at: string;
+  } | null;
+}
+
 export const TeamList = () => {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const { toast } = useToast();
@@ -28,9 +36,14 @@ export const TeamList = () => {
       if (error) throw error;
       
       // Transform the data to match the Team type
-      return userTeams
+      return (userTeams as TeamResponse[])
         .map(({ team }) => team)
-        .filter((team): team is Team => team !== null) as Team[];
+        .filter((team): team is Team => 
+          team !== null && 
+          typeof team.id === 'string' && 
+          typeof team.name === 'string' && 
+          typeof team.created_at === 'string'
+        );
     },
   });
 
