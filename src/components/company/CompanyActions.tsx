@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { MessageSquare, Star, PlusSquare } from "lucide-react";
+import { MessageSquare, Star, PlusSquare, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addToUserRepository } from "@/services/api";
+import { addToUserRepository, removeFromUserRepository } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import ReviewList from "@/components/ReviewList";
 import ReviewForm from "@/components/ReviewForm";
@@ -22,7 +22,6 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
   const addToRepositoryMutation = useMutation({
     mutationFn: () => addToUserRepository(company.id, user?.id || ""),
     onSuccess: () => {
-      // Invalidate both queries to ensure proper updates
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository", user?.id] });
       queryClient.invalidateQueries({ queryKey: ["companies"] });
@@ -40,6 +39,26 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
     },
   });
 
+  const removeFromRepositoryMutation = useMutation({
+    mutationFn: () => removeFromUserRepository(company.id, user?.id || ""),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
+      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      toast({
+        title: "Success",
+        description: `${company.name} removed from your repository`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to remove company from repository",
+      });
+    },
+  });
+
   const handleAddToRepository = () => {
     if (!user) {
       toast({
@@ -52,9 +71,21 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
     addToRepositoryMutation.mutate();
   };
 
+  const handleRemoveFromRepository = () => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please login to remove companies from your repository",
+      });
+      return;
+    }
+    removeFromRepositoryMutation.mutate();
+  };
+
   return (
     <div className="flex space-x-2">
-      {!isPrivate && (
+      {!isPrivate ? (
         <Button
           variant="outline"
           size="sm"
@@ -63,6 +94,16 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
         >
           <PlusSquare className="h-4 w-4 mr-1" />
           {addToRepositoryMutation.isPending ? "Adding..." : "Add"}
+        </Button>
+      ) : (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRemoveFromRepository}
+          disabled={removeFromRepositoryMutation.isPending}
+        >
+          <Trash2 className="h-4 w-4 mr-1" />
+          {removeFromRepositoryMutation.isPending ? "Removing..." : "Remove"}
         </Button>
       )}
       <Dialog>
@@ -85,12 +126,7 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
             {user && (
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold mb-4">Write a Review</h3>
-                <ReviewForm
-                  companyId={company.id}
-                  onSubmit={(review) =>
-                    addToRepositoryMutation.mutate()
-                  }
-                />
+                <ReviewForm companyId={company.id} />
               </div>
             )}
           </div>

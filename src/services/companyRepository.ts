@@ -30,3 +30,21 @@ export const addToUserRepository = async (companyId: number, userId: string): Pr
   
   return Promise.resolve(company);
 };
+
+export const removeFromUserRepository = async (companyId: number, userId: string): Promise<void> => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  if (!userRepositories[userId]) {
+    throw new Error("User repository not found");
+  }
+
+  const index = userRepositories[userId].indexOf(companyId);
+  if (index === -1) {
+    throw new Error("Company not found in repository");
+  }
+
+  userRepositories[userId].splice(index, 1);
+  return Promise.resolve();
+};
