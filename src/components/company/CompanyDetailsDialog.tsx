@@ -69,34 +69,22 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
                   )}
                 </div>
 
-                {company.review && (
-                  <div className="pt-4 border-t">
-                    <h3 className="text-lg font-semibold mb-2">About</h3>
-                    <p className="text-gray-600">{company.review}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
+                <div className="pt-4 border-t">
+                  <h3 className="text-lg font-semibold mb-2">About</h3>
+                  <p className="text-gray-600">{company.review}</p>
+                </div>
 
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>Statistics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span>Sales Volume</span>
-                    <span className="font-semibold">{company.salesVolume}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Growth</span>
-                    <span className="font-semibold">{company.growth}</span>
+                <div className="pt-4 border-t">
+                  <h3 className="text-lg font-semibold mb-2">Sales Information</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium">Sales Volume</p>
+                      <p className="text-2xl font-bold">{company.salesVolume}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Growth</p>
+                      <p className="text-2xl font-bold">{company.growth}</p>
+                    </div>
                   </div>
                 </div>
               </CardContent>

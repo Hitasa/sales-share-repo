@@ -31,6 +31,7 @@ export interface Company {
   growth?: string;
   website?: string;
   phoneNumber?: string;
+  email?: string;
   review?: string;
   notes?: string;
   createdBy: string;
