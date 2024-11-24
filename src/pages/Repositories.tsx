@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import AddCompanyForm from "@/components/AddCompanyForm";
+import { AddCompanyForm } from "@/components/AddCompanyForm";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchCompanies, addCompany, Company } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
