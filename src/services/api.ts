@@ -1,5 +1,6 @@
 import { Company, Offer, CompanyInvitation } from './types';
 import { mockCompanies } from './mockData';
+import { supabase } from '@/integrations/supabase/client';
 export * from './types';
 export * from './companySearch';
 export * from './companyRepository';
@@ -37,7 +38,22 @@ export const updateCompany = async (companyId: string, updates: Partial<Company>
 };
 
 export const fetchCompanies = async (): Promise<Company[]> => {
-  return Promise.resolve([...mockCompanies]);
+  const { data, error } = await supabase
+    .from('companies')
+    .select('*');
+
+  if (error) throw error;
+  return data || [];
+};
+
+export const searchCompanies = async (query: string): Promise<Company[]> => {
+  const { data, error } = await supabase
+    .from('companies')
+    .select('*')
+    .ilike('name', `%${query}%`);
+
+  if (error) throw error;
+  return data || [];
 };
 
 export const fetchUserCompanies = async (userId: string): Promise<Company[]> => {

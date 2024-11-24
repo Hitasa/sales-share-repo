@@ -10,12 +10,12 @@ import { fetchCompanies, searchCompanies, addCompany } from "@/services/api";
 
 const Repositories = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const debouncedSearch = useDebounce(searchQuery, 1000);
+  const debouncedSearch = useDebounce(searchQuery, 500);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const { data: companies = [], isLoading } = useQuery({
+  const { data: companies = [], isLoading, error } = useQuery({
     queryKey: ["companies", debouncedSearch],
     queryFn: () => debouncedSearch ? searchCompanies(debouncedSearch) : fetchCompanies(),
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -54,8 +54,12 @@ const Repositories = () => {
     setSearchQuery(value);
   };
 
-  if (isLoading) {
-    return <div className="container mx-auto py-20 px-4">Loading...</div>;
+  if (error) {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Failed to fetch companies. Please try again.",
+    });
   }
 
   return (
@@ -70,7 +74,13 @@ const Repositories = () => {
         onSearch={handleSearch}
       />
 
-      <CompanyList companies={companies} />
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      ) : (
+        <CompanyList companies={companies} />
+      )}
     </div>
   );
 };
