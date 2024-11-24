@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { MessageSquare, Star, PlusSquare, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addToUserRepository, removeFromUserRepository } from "@/services/api";
+import { addToUserRepository, removeFromUserRepository, addReview } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import ReviewList from "@/components/ReviewList";
 import ReviewForm from "@/components/ReviewForm";
@@ -55,6 +55,26 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
         variant: "destructive",
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to remove company from repository",
+      });
+    },
+  });
+
+  const addReviewMutation = useMutation({
+    mutationFn: (review: { rating: number; comment: string }) => 
+      addReview(company.id, review),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
+      toast({
+        title: "Success",
+        description: "Review added successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to add review",
       });
     },
   });
@@ -126,7 +146,10 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
             {user && (
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold mb-4">Write a Review</h3>
-                <ReviewForm companyId={company.id} onSubmit={() => {}} />
+                <ReviewForm 
+                  companyId={company.id} 
+                  onSubmit={(review) => addReviewMutation.mutate(review)} 
+                />
               </div>
             )}
           </div>
