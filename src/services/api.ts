@@ -27,6 +27,25 @@ export interface Company {
   offers?: Offer[];
 }
 
+export const fetchCompanies = async (): Promise<Company[]> => {
+  // For demonstration, returning mock data
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        {
+          id: 1,
+          name: "Acme Corp",
+          industry: "Technology",
+          salesVolume: "$1.2M",
+          growth: "+15%",
+          createdBy: "user1",
+          sharedWith: [],
+        },
+      ]);
+    }, 1000);
+  });
+};
+
 // Fetch companies for the current user (including shared ones)
 export const fetchUserCompanies = async (userId: string): Promise<Company[]> => {
   // For demonstration, we'll return mock data
@@ -66,7 +85,7 @@ export const fetchUserCompanies = async (userId: string): Promise<Company[]> => 
   });
 };
 
-export const shareCompany = async (companyId: number, userId: string): Promise<Company> => {
+export const shareCompany = async (companyId: number, email: string): Promise<Company> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
@@ -76,7 +95,7 @@ export const shareCompany = async (companyId: number, userId: string): Promise<C
         salesVolume: "$1.2M",
         growth: "+15%",
         createdBy: "user1",
-        sharedWith: [userId],
+        sharedWith: [email],
         offers: [],
         reviews: [],
       });
@@ -97,7 +116,6 @@ export const createOffer = async (companyId: number, offer: Omit<Offer, "id">): 
 };
 
 export const addCompany = async (company: Omit<Company, "id">): Promise<Company> => {
-  // Replace with actual API call: return fetch(`${API_URL}/companies`, { method: 'POST', body: JSON.stringify(company) })
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
@@ -109,7 +127,6 @@ export const addCompany = async (company: Omit<Company, "id">): Promise<Company>
 };
 
 export const addReview = async (companyId: number, review: { rating: number; comment: string }): Promise<Company> => {
-  // Replace with actual API call
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
@@ -118,6 +135,8 @@ export const addReview = async (companyId: number, review: { rating: number; com
         industry: "Updated Industry",
         salesVolume: "Updated Sales",
         growth: "Updated Growth",
+        createdBy: "user1",
+        sharedWith: [],
         reviews: [{
           id: Date.now(),
           ...review,

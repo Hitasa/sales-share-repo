@@ -17,15 +17,17 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import AddCompanyForm from "@/components/AddCompanyForm";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchCompanies, addCompany } from "@/services/api";
+import { fetchCompanies, addCompany, Company } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Repositories = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ['companies'],
@@ -33,7 +35,7 @@ const Repositories = () => {
   });
 
   const addCompanyMutation = useMutation({
-    mutationFn: addCompany,
+    mutationFn: (newCompany: Omit<Company, "id">) => addCompany(newCompany),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       toast({
@@ -47,12 +49,20 @@ const Repositories = () => {
     company.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleAddCompany = (newCompany: {
+  const handleAddCompany = (formData: {
     name: string;
     industry: string;
     salesVolume: string;
     growth: string;
   }) => {
+    if (!user) return;
+    
+    const newCompany: Omit<Company, "id"> = {
+      ...formData,
+      createdBy: user.id,
+      sharedWith: [],
+    };
+    
     addCompanyMutation.mutate(newCompany);
   };
 

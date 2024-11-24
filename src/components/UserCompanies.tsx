@@ -42,6 +42,7 @@ export const UserCompanies = () => {
     
     try {
       await createOffer(companyId, {
+        companyId,
         userId: user.id,
         type: "sent",
         amount: offerAmount,
