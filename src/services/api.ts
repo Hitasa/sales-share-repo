@@ -1,9 +1,6 @@
 import { Company, Offer, CompanyInvitation } from './types';
 import { mockCompanies } from './mockData';
 import { supabase } from '@/integrations/supabase/client';
-import { google } from '@googleapis/customsearch';
-
-const customsearch = google.customsearch('v1');
 
 export * from './types';
 export * from './companySearch';
@@ -61,30 +58,14 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
       return data || [];
     }
 
-    const response = await customsearch.cse.list({
-      auth: process.env.GOOGLE_API_KEY,
-      cx: process.env.GOOGLE_SEARCH_ENGINE_ID,
-      q: query,
+    // Call the Edge Function for Google search
+    const { data: companies, error } = await supabase.functions.invoke('search-companies', {
+      body: { query }
     });
 
-    const searchResults = response.data.items || [];
+    if (error) throw error;
+    return companies || [];
     
-    // Transform Google results into Company format
-    const companies: Company[] = searchResults.map((item, index) => ({
-      id: `google-${index}`,
-      name: item.title || '',
-      industry: item.snippet || '',
-      salesVolume: '',
-      growth: '',
-      createdBy: '',
-      sharedWith: [],
-      reviews: [],
-      website: item.link || '',
-      phoneNumber: '',
-      email: '',
-    }));
-
-    return companies;
   } catch (error) {
     console.error('Search error:', error);
     // Fallback to database search if Google search fails
