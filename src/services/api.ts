@@ -60,7 +60,7 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
 
     // Then try Google search via Edge Function
     const { data: googleResults, error: functionError } = await supabase.functions.invoke('search-companies', {
-      body: { query }
+      body: JSON.stringify({ query })
     });
 
     if (functionError) {
