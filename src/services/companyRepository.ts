@@ -1,50 +1,37 @@
+import { supabase } from '@/integrations/supabase/client';
 import { Company } from './types';
-import { mockCompanies, userRepositories } from './mockData';
 
 export const fetchUserCompanyRepository = async (userId: string): Promise<Company[]> => {
   if (!userId) return [];
-  const userCompanyIds = userRepositories[userId] || [];
-  const userCompanies = mockCompanies.filter(company => userCompanyIds.includes(company.id));
-  return Promise.resolve(userCompanies);
+
+  const { data, error } = await supabase
+    .from('companies')
+    .select('*')
+    .in('id', (
+      await supabase
+        .from('company_repositories')
+        .select('company_id')
+        .eq('user_id', userId)
+    ).data?.map(row => row.company_id) || []);
+
+  if (error) throw error;
+  return data || [];
 };
 
-export const addToUserRepository = async (companyId: string, userId: string): Promise<Company> => {
-  if (!userId) {
-    throw new Error("User ID is required");
-  }
+export const addToUserRepository = async (companyId: string, userId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('company_repositories')
+    .insert([{ company_id: companyId, user_id: userId }]);
 
-  if (!userRepositories[userId]) {
-    userRepositories[userId] = [];
-  }
-  
-  const company = mockCompanies.find(c => c.id === companyId);
-  if (!company) {
-    throw new Error(`Unable to add company to repository. Please try again.`);
-  }
-  
-  if (userRepositories[userId].includes(companyId)) {
-    throw new Error(`${company.name} is already in your repository`);
-  }
-  
-  userRepositories[userId].push(companyId);
-  
-  return Promise.resolve(company);
+  if (error) throw error;
 };
 
 export const removeFromUserRepository = async (companyId: string, userId: string): Promise<void> => {
-  if (!userId) {
-    throw new Error("User ID is required");
-  }
+  const { error } = await supabase
+    .from('company_repositories')
+    .delete()
+    .eq('company_id', companyId)
+    .eq('user_id', userId);
 
-  if (!userRepositories[userId]) {
-    throw new Error("User repository not found");
-  }
-
-  const index = userRepositories[userId].indexOf(companyId);
-  if (index === -1) {
-    throw new Error("Company not found in repository");
-  }
-
-  userRepositories[userId].splice(index, 1);
-  return Promise.resolve();
+  if (error) throw error;
 };
