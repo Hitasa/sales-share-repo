@@ -37,6 +37,7 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
   });
 
   const handleSave = () => {
+    // Save all company details including email, phone, and website
     updateCompanyMutation.mutate(editedCompany);
   };
 
@@ -51,6 +52,12 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
         createdAt: new Date().toISOString(),
       },
     ];
+
+    // Update both local state and save to backend
+    setEditedCompany(prev => ({
+      ...prev,
+      comments: updatedComments
+    }));
 
     updateCompanyMutation.mutate({
       ...editedCompany,
@@ -67,10 +74,13 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
       date: new Date().toISOString().split('T')[0],
     };
 
-    updateCompanyMutation.mutate({
+    const updatedCompany = {
       ...editedCompany,
       reviews: [...(editedCompany.reviews || []), newReview],
-    });
+    };
+
+    setEditedCompany(updatedCompany);
+    updateCompanyMutation.mutate(updatedCompany);
   };
 
   return (
