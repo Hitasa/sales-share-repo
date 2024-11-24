@@ -36,7 +36,7 @@ export const TeamList = () => {
       if (error) throw error;
       
       // Transform the nested team data structure
-      return (userTeams as TeamMemberResponse[]).map(item => ({
+      return (userTeams as unknown as TeamMemberResponse[]).map(item => ({
         id: item.team.id,
         name: item.team.name,
         created_at: item.team.created_at
