@@ -13,6 +13,7 @@ const getFallbackCompanies = (query: string): Company[] => {
       growth: 'N/A',
       createdBy: 'system',
       sharedWith: [],
+      link: ''
     },
     {
       id: 2,
@@ -22,6 +23,7 @@ const getFallbackCompanies = (query: string): Company[] => {
       growth: 'N/A',
       createdBy: 'system',
       sharedWith: [],
+      link: ''
     },
     {
       id: 3,
@@ -31,6 +33,7 @@ const getFallbackCompanies = (query: string): Company[] => {
       growth: 'N/A',
       createdBy: 'system',
       sharedWith: [],
+      link: ''
     }
   ];
 };
@@ -68,6 +71,7 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
       growth: 'N/A',
       createdBy: 'system',
       sharedWith: [],
+      link: item.link || ''
     }));
   } catch (error) {
     console.error('Google search error:', error);

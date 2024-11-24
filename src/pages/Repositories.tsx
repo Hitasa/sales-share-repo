@@ -115,7 +115,20 @@ const Repositories = () => {
           <TableBody>
             {companies.map((company) => (
               <TableRow key={company.id}>
-                <TableCell className="font-medium">{company.name}</TableCell>
+                <TableCell className="font-medium">
+                  {company.link ? (
+                    <a
+                      href={company.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      {company.name}
+                    </a>
+                  ) : (
+                    company.name
+                  )}
+                </TableCell>
                 <TableCell>{company.industry}</TableCell>
                 <TableCell>{company.salesVolume}</TableCell>
                 <TableCell className="text-green-600">{company.growth}</TableCell>
