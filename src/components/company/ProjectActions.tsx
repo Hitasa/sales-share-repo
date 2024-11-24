@@ -68,9 +68,15 @@ export const ProjectActions = ({ company, projectId }: ProjectActionsProps) => {
         throw new Error("You don't have permission to add companies to this project");
       }
 
+      // Now insert the project company with the verified project ID
       const { error } = await supabase
         .from("project_companies")
-        .insert([{ project_id: projectId, company_id: company.id }]);
+        .insert([{ 
+          project_id: projectId, 
+          company_id: company.id,
+        }])
+        .select()
+        .single();
       
       if (error) throw error;
     },
@@ -121,7 +127,9 @@ export const ProjectActions = ({ company, projectId }: ProjectActionsProps) => {
         .from("project_companies")
         .delete()
         .eq("project_id", projectId)
-        .eq("company_id", company.id);
+        .eq("company_id", company.id)
+        .select()
+        .single();
       
       if (error) throw error;
     },
