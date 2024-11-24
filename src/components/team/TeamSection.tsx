@@ -59,6 +59,7 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
     }
 
     try {
+      // First create the team
       const { data: team, error: teamError } = await supabase
         .from("teams")
         .insert([{ name: newTeamName }])
@@ -66,6 +67,9 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
         .single();
 
       if (teamError) throw teamError;
+
+      // The trigger handle_new_team will automatically create a team_member entry
+      // with the current user as admin
 
       toast({
         title: "Success",
