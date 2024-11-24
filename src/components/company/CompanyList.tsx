@@ -10,9 +10,15 @@ interface CompanyListProps {
   companies: Company[];
   isPrivate?: boolean;
   onCompanySelect?: (company: Company) => void;
+  additionalActions?: (company: Company) => React.ReactNode;
 }
 
-export const CompanyList = ({ companies, isPrivate = false, onCompanySelect }: CompanyListProps) => {
+export const CompanyList = ({ 
+  companies, 
+  isPrivate = false, 
+  onCompanySelect,
+  additionalActions 
+}: CompanyListProps) => {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   const handleCompanyClick = (company: Company) => {
@@ -62,8 +68,9 @@ export const CompanyList = ({ companies, isPrivate = false, onCompanySelect }: C
                     />
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="flex items-center gap-2">
                   <CompanyActions company={company} isPrivate={isPrivate} />
+                  {additionalActions && additionalActions(company)}
                 </TableCell>
               </TableRow>
             ))}

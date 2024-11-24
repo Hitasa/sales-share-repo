@@ -257,7 +257,7 @@ const Projects = () => {
             ) : projectCompanies && projectCompanies.length > 0 ? (
               <CompanyList
                 companies={projectCompanies}
-                customActions={(company) => (
+                additionalActions={(company) => (
                   <Button
                     variant="ghost"
                     size="icon"
