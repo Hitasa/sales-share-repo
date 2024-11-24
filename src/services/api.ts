@@ -92,22 +92,24 @@ export const addCompany = async (company: Omit<Company, "id">): Promise<Company>
 };
 
 export const addReview = async (companyId: number, review: { rating: number; comment: string }): Promise<Company> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        id: companyId,
-        name: "Updated Company",
-        industry: "Updated Industry",
-        salesVolume: "Updated Sales",
-        growth: "Updated Growth",
-        createdBy: "user1",
-        sharedWith: [],
-        reviews: [{
-          id: Date.now(),
-          ...review,
-          date: new Date().toISOString().split("T")[0],
-        }],
-      });
-    }, 500);
-  });
+  const companyIndex = mockCompanies.findIndex(c => c.id === companyId);
+  if (companyIndex === -1) {
+    throw new Error("Company not found");
+  }
+
+  const company = mockCompanies[companyIndex];
+  const newReview = {
+    id: Date.now(),
+    ...review,
+    date: new Date().toISOString().split("T")[0],
+  };
+
+  const updatedReviews = [...(company.reviews || []), newReview];
+  const updatedCompany = {
+    ...company,
+    reviews: updatedReviews,
+  };
+
+  mockCompanies[companyIndex] = updatedCompany;
+  return Promise.resolve(updatedCompany);
 };
