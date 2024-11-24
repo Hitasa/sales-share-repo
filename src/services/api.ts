@@ -15,6 +15,14 @@ export const fetchCompanies = async (): Promise<Company[]> => {
           growth: "+15%",
           createdBy: "user1",
           sharedWith: [],
+          reviews: [
+            {
+              id: 1,
+              rating: 4,
+              comment: "Great company to work with!",
+              date: "2024-02-20",
+            }
+          ]
         },
       ]);
     }, 1000);
@@ -53,6 +61,7 @@ export const fetchUserCompanies = async (userId: string): Promise<Company[]> => 
               role: "member"
             }
           ],
+          reviews: []
         },
       ]);
     }, 1000);
@@ -109,6 +118,7 @@ export const addCompany = async (company: Omit<Company, "id">): Promise<Company>
       resolve({
         ...company,
         id: Date.now(),
+        reviews: []
       });
     }, 500);
   });

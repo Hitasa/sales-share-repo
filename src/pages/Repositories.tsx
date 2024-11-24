@@ -20,12 +20,15 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AddCompanyForm } from "@/components/AddCompanyForm";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchCompanies, addCompany, searchCompanies, Company } from "@/services/api";
+import { fetchCompanies, addCompany, searchCompanies, addReview } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDebounce } from "@/hooks/useDebounce";
+import ReviewList from "@/components/ReviewList";
+import ReviewForm from "@/components/ReviewForm";
 
 const Repositories = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCompany, setSelectedCompany] = useState<number | null>(null);
   const debouncedSearch = useDebounce(searchQuery, 1000);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -37,13 +40,26 @@ const Repositories = () => {
   });
 
   const addCompanyMutation = useMutation({
-    mutationFn: (newCompany: Omit<Company, "id">) => addCompany(newCompany),
+    mutationFn: (newCompany: any) => addCompany(newCompany),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       toast({
         title: "Success",
         description: "Company added to your repository",
       });
+    },
+  });
+
+  const addReviewMutation = useMutation({
+    mutationFn: ({ companyId, review }: { companyId: number; review: { rating: number; comment: string } }) =>
+      addReview(companyId, review),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['companies'] });
+      toast({
+        title: "Success",
+        description: "Review added successfully",
+      });
+      setSelectedCompany(null);
     },
   });
 
@@ -55,7 +71,7 @@ const Repositories = () => {
   }) => {
     if (!user) return;
     
-    const newCompany: Omit<Company, "id"> = {
+    const newCompany = {
       ...formData,
       createdBy: user.id,
       sharedWith: [],
@@ -155,22 +171,53 @@ const Repositories = () => {
                       <PlusSquare className="h-4 w-4 mr-1" />
                       Add
                     </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedCompany(company.id)}
+                        >
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          Reviews
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Reviews for {company.name}</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-6">
+                          {company.reviews && company.reviews.length > 0 ? (
+                            <ReviewList reviews={company.reviews} />
+                          ) : (
+                            <p className="text-muted-foreground">No reviews yet.</p>
+                          )}
+                          {user && (
+                            <div className="border-t pt-6">
+                              <h3 className="text-lg font-semibold mb-4">Write a Review</h3>
+                              <ReviewForm
+                                companyId={company.id}
+                                onSubmit={(review) =>
+                                  addReviewMutation.mutate({ companyId: company.id, review })
+                                }
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => toast({
-                        description: "Reviews feature coming soon",
-                      })}
-                    >
-                      <MessageSquare className="h-4 w-4 mr-1" />
-                      Reviews
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => toast({
-                        description: "Ratings feature coming soon",
-                      })}
+                      onClick={() => {
+                        const avgRating = company.reviews?.reduce((acc, review) => acc + review.rating, 0) || 0;
+                        const total = company.reviews?.length || 0;
+                        toast({
+                          description: total > 0 
+                            ? `Average rating: ${(avgRating / total).toFixed(1)} / 5.0 (${total} reviews)`
+                            : "No ratings yet",
+                        });
+                      }}
                     >
                       <Star className="h-4 w-4 mr-1" />
                       Ratings

@@ -16,6 +16,13 @@ export interface CompanyInvitation {
   role: 'admin' | 'member';
 }
 
+export interface Review {
+  id: number;
+  rating: number;
+  comment: string;
+  date: string;
+}
+
 export interface Company {
   id: number;
   name: string;
@@ -25,12 +32,7 @@ export interface Company {
   createdBy: string;
   sharedWith: string[];
   link?: string;
-  reviews?: Array<{
-    id: number;
-    rating: number;
-    comment: string;
-    date: string;
-  }>;
+  reviews?: Review[];
   offers?: Offer[];
   invitations?: CompanyInvitation[];
 }
