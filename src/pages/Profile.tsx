@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { TeamPolicyTest } from "@/components/team/TeamPolicyTest";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -65,7 +66,6 @@ const Profile = () => {
               profile={profile}
               isEditing={isEditing}
               setProfile={(newProfile) => {
-                // Update local state
                 refetch();
               }}
               onSave={handleSave}
@@ -73,8 +73,9 @@ const Profile = () => {
             />
           )}
         </div>
-        <div>
+        <div className="space-y-8">
           <TeamList />
+          <TeamPolicyTest />
         </div>
       </div>
     </div>
