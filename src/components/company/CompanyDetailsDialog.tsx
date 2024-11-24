@@ -1,18 +1,15 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Building2, Mail, Phone, Globe } from "lucide-react";
 import { motion } from "framer-motion";
 import ReviewList from "@/components/ReviewList";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
-import { Company, Comment } from "@/services/types";
+import { Company } from "@/services/types";
 import { useToast } from "@/hooks/use-toast";
 import { updateCompany } from "@/services/api";
 import { useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { CompanyDetailsSection } from "./CompanyDetailsSection";
+import { CompanyCommentsSection } from "./CompanyCommentsSection";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface CompanyDetailsDialogProps {
   company: Company;
@@ -30,7 +27,7 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
-    const newCommentObj: Comment = {
+    const newCommentObj = {
       id: Date.now(),
       text: newComment.trim(),
       createdAt: new Date().toISOString(),
@@ -66,12 +63,6 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
     }
   };
 
-  const formatWebsiteUrl = (url: string) => {
-    if (!url) return '';
-    const cleanUrl = url.replace(/^(https?:\/\/)?(www\.)?/, '');
-    return `https://${cleanUrl}`;
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[80vh] overflow-y-auto">
@@ -86,113 +77,20 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
             transition={{ duration: 0.5 }}
           >
             <Card className="glass-card">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Building2 className="h-10 w-10 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-2xl">{company.name}</CardTitle>
-                      <CardDescription>{company.industry}</CardDescription>
-                    </div>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setIsEditing(!isEditing)}
-                  >
-                    {isEditing ? "Cancel" : "Edit"}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <Globe className="h-5 w-5 text-primary" />
-                    {isEditing ? (
-                      <Input
-                        value={editedCompany.website || ''}
-                        onChange={(e) => setEditedCompany({ ...editedCompany, website: e.target.value })}
-                        placeholder="Website URL"
-                      />
-                    ) : (
-                      <a 
-                        href={formatWebsiteUrl(company.website)} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="hover:underline text-primary"
-                      >
-                        {company.website || 'No website provided'}
-                      </a>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <Phone className="h-5 w-5 text-primary" />
-                    {isEditing ? (
-                      <Input
-                        value={editedCompany.phoneNumber || ''}
-                        onChange={(e) => setEditedCompany({ ...editedCompany, phoneNumber: e.target.value })}
-                        placeholder="Phone number"
-                      />
-                    ) : (
-                      <span>{company.phoneNumber || 'No phone number provided'}</span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center space-x-3">
-                    <Mail className="h-5 w-5 text-primary" />
-                    {isEditing ? (
-                      <Input
-                        value={editedCompany.email || ''}
-                        onChange={(e) => setEditedCompany({ ...editedCompany, email: e.target.value })}
-                        placeholder="Email address"
-                      />
-                    ) : (
-                      <span>{company.email || 'No email provided'}</span>
-                    )}
-                  </div>
-                </div>
-
-                {isEditing && (
-                  <div className="flex justify-end">
-                    <Button onClick={handleSaveComments}>Save Changes</Button>
-                  </div>
-                )}
-
-                <div className="pt-4 border-t">
-                  <h3 className="text-lg font-semibold mb-2">About</h3>
-                  <p className="text-gray-600 mb-4">{company.review}</p>
-                  
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium">Comments</h4>
-                    <Textarea
-                      placeholder="Add a new comment..."
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      className="min-h-[100px]"
-                    />
-                    <Button 
-                      onClick={handleAddComment}
-                      className="w-full"
-                    >
-                      Add Comment
-                    </Button>
-                  </div>
-
-                  <ScrollArea className="h-[200px] w-full">
-                    <div className="space-y-4">
-                      {editedCompany.comments?.map((comment) => (
-                        <Card key={comment.id} className="p-4">
-                          <p className="text-sm text-gray-600 mb-2">
-                            {format(new Date(comment.createdAt), "PPp")}
-                          </p>
-                          <p className="text-gray-900">{comment.text}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </div>
+              <CompanyDetailsSection
+                company={company}
+                editedCompany={editedCompany}
+                isEditing={isEditing}
+                setEditedCompany={setEditedCompany}
+                setIsEditing={setIsEditing}
+              />
+              <CardContent>
+                <CompanyCommentsSection
+                  editedCompany={editedCompany}
+                  newComment={newComment}
+                  setNewComment={setNewComment}
+                  onAddComment={handleAddComment}
+                />
               </CardContent>
             </Card>
           </motion.div>
