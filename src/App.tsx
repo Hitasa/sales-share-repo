@@ -7,7 +7,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Navigation from "./components/Navigation";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
-import Metrics from "./pages/Metrics";
 import Repositories from "./pages/Repositories";
 import MyRepositories from "./pages/MyRepositories";
 import Login from "./pages/Auth/Login";
@@ -27,7 +26,6 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/metrics" element={<Metrics />} />
             <Route path="/repositories" element={<Repositories />} />
             <Route path="/my-repositories" element={<MyRepositories />} />
             <Route path="/auth/login" element={<Login />} />
