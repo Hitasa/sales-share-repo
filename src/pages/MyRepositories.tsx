@@ -14,6 +14,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Team } from "@/types/team";
 import { TeamShareDialog } from "@/components/team/TeamShareDialog";
 
+interface TeamResponse {
+  team: Team;
+}
+
 const MyRepositories = () => {
   const { user } = useAuth();
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
@@ -37,7 +41,13 @@ const MyRepositories = () => {
         .eq("user_id", user?.id);
 
       if (error) throw error;
-      return teamMembers.map(tm => tm.team as Team);
+      
+      // Transform the response to match the Team type
+      return (teamMembers as unknown as TeamResponse[])
+        .map(member => ({
+          id: member.team.id,
+          name: member.team.name
+        }));
     },
     enabled: !!user,
   });
@@ -68,7 +78,6 @@ const MyRepositories = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
-      setIsProjectDialogOpen(false);
       toast({
         title: "Success",
         description: "Company linked to team successfully",
