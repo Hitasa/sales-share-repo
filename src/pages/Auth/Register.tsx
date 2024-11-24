@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -19,6 +20,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { register } = useAuth();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,17 +36,17 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Implement actual registration logic here
+      await register(email, password);
       toast({
         title: "Success!",
-        description: "Account created successfully. Please check your email to verify your account.",
+        description: "Account created successfully.",
       });
-      navigate("/auth/login");
+      navigate("/profile");
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to create account. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to create account. Please try again.",
       });
     } finally {
       setIsLoading(false);

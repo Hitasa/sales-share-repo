@@ -10,18 +10,20 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { resetPassword } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // TODO: Implement actual password reset logic here
+      await resetPassword(email);
       toast({
         title: "Check your email",
         description: "If an account exists with this email, you will receive password reset instructions.",
@@ -30,7 +32,7 @@ const ForgotPassword = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to send reset instructions. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to send reset instructions. Please try again.",
       });
     } finally {
       setIsLoading(false);

@@ -1,10 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Book, ChartLine, Share, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navigation = () => {
-  // TODO: Replace with actual auth state
-  const isAuthenticated = false;
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/auth/login");
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
@@ -17,7 +23,7 @@ const Navigation = () => {
             </Link>
           </div>
           <div className="flex items-center space-x-4">
-            {isAuthenticated ? (
+            {user ? (
               <>
                 <Link
                   to="/repositories"
@@ -47,6 +53,9 @@ const Navigation = () => {
                   <User className="h-4 w-4 mr-2" />
                   Profile
                 </Link>
+                <Button variant="ghost" onClick={handleLogout}>
+                  Sign out
+                </Button>
               </>
             ) : (
               <>
