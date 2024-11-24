@@ -22,7 +22,7 @@ export const ProjectActions = ({ company, projectId }: ProjectActionsProps) => {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // First get team IDs where the user is a member
+      // Get team IDs where the user is a member
       const { data: teamMembers } = await supabase
         .from("team_members")
         .select("team_id")
@@ -30,7 +30,7 @@ export const ProjectActions = ({ company, projectId }: ProjectActionsProps) => {
 
       const teamIds = teamMembers?.map(tm => tm.team_id) || [];
 
-      // Then fetch projects where user is creator OR projects belonging to teams where user is a member
+      // Fetch both user-created projects and team projects
       const { data, error } = await supabase
         .from("projects")
         .select("*")
@@ -48,12 +48,12 @@ export const ProjectActions = ({ company, projectId }: ProjectActionsProps) => {
         throw new Error("Missing required information");
       }
 
-      // First verify the user owns the project
+      // First verify the user owns the project or is part of the team
       const { data: project, error: projectError } = await supabase
         .from("projects")
-        .select("*")
+        .select("*, team_members!inner(*)")
         .eq("id", projectId)
-        .eq("created_by", user.id)
+        .or(`created_by.eq.${user.id},team_members.user_id.eq.${user.id}`)
         .single();
 
       if (projectError || !project) {
@@ -89,12 +89,12 @@ export const ProjectActions = ({ company, projectId }: ProjectActionsProps) => {
         throw new Error("Missing required information");
       }
 
-      // First verify the user owns the project
+      // First verify the user owns the project or is part of the team
       const { data: project, error: projectError } = await supabase
         .from("projects")
-        .select("*")
+        .select("*, team_members!inner(*)")
         .eq("id", projectId)
-        .eq("created_by", user.id)
+        .or(`created_by.eq.${user.id},team_members.user_id.eq.${user.id}`)
         .single();
 
       if (projectError || !project) {
