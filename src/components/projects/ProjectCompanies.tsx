@@ -24,6 +24,11 @@ export const ProjectCompanies = ({
   onAddCompany,
   onRemoveCompany,
 }: ProjectCompaniesProps) => {
+  const handleAddCompany = (company: Company) => {
+    onAddCompany(company);
+    onOpenChange(false); // Close the dialog after adding
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -39,7 +44,7 @@ export const ProjectCompanies = ({
             {availableCompanies && (
               <CompanyList
                 companies={availableCompanies}
-                onCompanySelect={onAddCompany}
+                onCompanySelect={handleAddCompany}
               />
             )}
           </DialogContent>
