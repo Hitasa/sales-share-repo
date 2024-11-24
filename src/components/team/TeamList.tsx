@@ -31,7 +31,7 @@ export const TeamList = () => {
             created_at
           )
         `)
-        .order('created_at', { ascending: false, foreignTable: 'teams' });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       
@@ -39,12 +39,7 @@ export const TeamList = () => {
         id: item.team.id,
         name: item.team.name,
         created_at: item.team.created_at
-      } as Team)).filter((team): team is Team => 
-        team !== null && 
-        typeof team.id === 'string' && 
-        typeof team.name === 'string' && 
-        typeof team.created_at === 'string'
-      );
+      } as Team));
     },
   });
 

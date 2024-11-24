@@ -45,14 +45,14 @@ export const TeamInvitationNotifications = () => {
       if (updateError) throw updateError;
 
       if (accept) {
-        // Get the invitation details to create team member entry
-        const { data: invitation } = await supabase
+        // Get the invitation details
+        const { data: invitations } = await supabase
           .from("team_invitations")
           .select("team_id, role")
-          .eq("id", invitationId)
-          .single();
+          .eq("id", invitationId);
 
-        if (invitation) {
+        if (invitations && invitations.length > 0) {
+          const invitation = invitations[0];
           // Create team member entry
           const { error: memberError } = await supabase
             .from("team_members")
