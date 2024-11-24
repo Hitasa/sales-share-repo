@@ -12,7 +12,7 @@ interface TeamResponse {
     id: string;
     name: string;
     created_at: string;
-  } | null;
+  };
 }
 
 export const TeamList = () => {
@@ -36,14 +36,16 @@ export const TeamList = () => {
       if (error) throw error;
       
       // Transform the data to match the Team type
-      return (userTeams as TeamResponse[])
-        .map(({ team }) => team)
-        .filter((team): team is Team => 
-          team !== null && 
-          typeof team.id === 'string' && 
-          typeof team.name === 'string' && 
-          typeof team.created_at === 'string'
-        );
+      return (userTeams as any[]).map((item) => ({
+        id: item.team.id,
+        name: item.team.name,
+        created_at: item.team.created_at
+      } as Team)).filter((team): team is Team => 
+        team !== null && 
+        typeof team.id === 'string' && 
+        typeof team.name === 'string' && 
+        typeof team.created_at === 'string'
+      );
     },
   });
 
