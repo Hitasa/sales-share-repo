@@ -14,28 +14,25 @@ interface TeamMember {
 }
 
 export const fetchTeamMembers = async (userId: string): Promise<TeamMember[]> => {
-  return Promise.resolve([
-    {
-      id: "1",
-      email: "team.member@example.com",
-      role: "member",
-      status: "active"
-    }
-  ]);
+  const { data, error } = await supabase
+    .from('team_members')
+    .select('*')
+    .eq('user_id', userId);
+
+  if (error) throw error;
+  return data || [];
 };
 
 export const updateCompany = async (companyId: string, updates: Partial<Company>): Promise<Company> => {
-  const companyIndex = mockCompanies.findIndex(c => c.id === companyId);
-  if (companyIndex === -1) {
-    throw new Error("Company not found");
-  }
-  
-  mockCompanies[companyIndex] = {
-    ...mockCompanies[companyIndex],
-    ...updates,
-  };
-  
-  return mockCompanies[companyIndex];
+  const { data, error } = await supabase
+    .from('companies')
+    .update(updates)
+    .eq('id', companyId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 };
 
 export const fetchCompanies = async (): Promise<Company[]> => {
@@ -50,121 +47,114 @@ export const fetchCompanies = async (): Promise<Company[]> => {
 export const searchCompanies = async (query: string): Promise<Company[]> => {
   try {
     if (!query) {
-      const { data, error } = await supabase
-        .from('companies')
-        .select('*');
-
-      if (error) throw error;
-      return data || [];
+      return fetchCompanies();
     }
 
-    // Call the Edge Function for Google search
-    const { data: companies, error } = await supabase.functions.invoke('search-companies', {
-      body: { query }
-    });
-
-    if (error) throw error;
-    return companies || [];
-    
-  } catch (error) {
-    console.error('Search error:', error);
-    // Fallback to database search if Google search fails
-    const { data, error: dbError } = await supabase
+    // First try local database search
+    const { data: localResults, error: localError } = await supabase
       .from('companies')
       .select('*')
       .ilike('name', `%${query}%`);
 
-    if (dbError) throw dbError;
-    return data || [];
+    if (localError) throw localError;
+
+    // Then try Google search via Edge Function
+    const { data: googleResults, error: functionError } = await supabase.functions.invoke('search-companies', {
+      body: { query }
+    });
+
+    if (functionError) {
+      console.error('Google search error:', functionError);
+      return localResults || [];
+    }
+
+    // Combine and deduplicate results
+    const allResults = [...(localResults || []), ...(googleResults || [])];
+    const uniqueResults = Array.from(new Map(allResults.map(item => [item.id, item])).values());
+    
+    return uniqueResults;
+  } catch (error) {
+    console.error('Search error:', error);
+    return [];
   }
 };
 
 export const fetchUserCompanies = async (userId: string): Promise<Company[]> => {
   if (!userId) return [];
-  const userCompanies = mockCompanies.filter(company => company.createdBy === userId);
-  return Promise.resolve(userCompanies);
+  
+  const { data, error } = await supabase
+    .from('companies')
+    .select('*')
+    .eq('created_by', userId);
+
+  if (error) throw error;
+  return data || [];
 };
 
 export const inviteUserToCompany = async (companyId: string, email: string, role: 'admin' | 'member'): Promise<CompanyInvitation> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        id: String(Date.now()),
-        companyId,
-        email,
-        status: 'pending',
-        role
-      });
-    }, 500);
+  const { data, error } = await supabase.functions.invoke('invite-user', {
+    body: { companyId, email, role }
   });
+
+  if (error) throw error;
+  return data;
 };
 
 export const shareCompany = async (companyId: string, email: string): Promise<Company> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        id: companyId,
-        name: "Shared Company",
-        industry: "Technology",
-        salesVolume: "$1.2M",
-        growth: "+15%",
-        createdBy: "user1",
-        sharedWith: [email],
-        reviews: [],
-      });
-    }, 500);
+  const { data, error } = await supabase.functions.invoke('share-company', {
+    body: { companyId, email }
   });
+
+  if (error) throw error;
+  return data;
 };
 
 export const createOffer = async (companyId: string, offer: Omit<Offer, "id">): Promise<Offer> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        ...offer,
-        id: String(Date.now()),
-        companyId,
-      });
-    }, 500);
-  });
+  const { data, error } = await supabase
+    .from('offers')
+    .insert([{ ...offer, company_id: companyId }])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 };
 
 export const addCompany = async (company: Omit<Company, "id">): Promise<Company> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newCompany: Company = {
-        ...company,
-        id: String(Date.now()),
-        reviews: [],
-        website: company.website || "",
-        phoneNumber: company.phoneNumber || "",
-        email: company.email || "",
-        sharedWith: company.sharedWith || [],
-      };
-      mockCompanies.push(newCompany);
-      resolve(newCompany);
-    }, 500);
-  });
+  const { data, error } = await supabase
+    .from('companies')
+    .insert([company])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 };
 
 export const addReview = async (companyId: string, review: { rating: number; comment: string }): Promise<Company> => {
-  const companyIndex = mockCompanies.findIndex(c => c.id === companyId);
-  if (companyIndex === -1) {
-    throw new Error("Company not found");
-  }
+  const { data: company, error: getError } = await supabase
+    .from('companies')
+    .select('*')
+    .eq('id', companyId)
+    .single();
 
-  const company = mockCompanies[companyIndex];
+  if (getError) throw getError;
+
   const newReview = {
-    id: String(Date.now()),
+    id: crypto.randomUUID(),
     ...review,
-    date: new Date().toISOString().split("T")[0],
+    date: new Date().toISOString().split('T')[0],
   };
 
   const updatedReviews = [...(company.reviews || []), newReview];
-  const updatedCompany = {
-    ...company,
-    reviews: updatedReviews,
-  };
+  
+  const { data: updatedCompany, error: updateError } = await supabase
+    .from('companies')
+    .update({ reviews: updatedReviews })
+    .eq('id', companyId)
+    .select()
+    .single();
 
-  mockCompanies[companyIndex] = updatedCompany;
-  return Promise.resolve(updatedCompany);
+  if (updateError) throw updateError;
+  return updatedCompany;
 };

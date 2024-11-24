@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     
     if (!query) {
       return new Response(
-        JSON.stringify({ error: 'Query parameter is required' }),
+        JSON.stringify({ error: 'Query parameter is required' }), 
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Search error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message }), 
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
