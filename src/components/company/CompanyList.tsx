@@ -23,7 +23,12 @@ export const CompanyList = ({ companies, isPrivate = false, onCompanySelect }: C
   };
 
   if (selectedCompany && isPrivate) {
-    return <CompanyProfile company={selectedCompany} />;
+    return (
+      <CompanyProfile 
+        company={selectedCompany} 
+        onBack={() => setSelectedCompany(null)} 
+      />
+    );
   }
 
   return (
