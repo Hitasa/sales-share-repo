@@ -25,21 +25,18 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
         throw new Error("Missing required information");
       }
 
-      // First create the company
+      // First create the company with only valid fields
       const createdCompany = await addCompany({
         name: company.name,
         industry: company.industry || "",
-        salesVolume: company.salesVolume || "",
+        sales_volume: company.salesVolume || "",
         growth: company.growth || "",
         website: company.website || "",
-        phoneNumber: company.phoneNumber || "",
+        phone_number: company.phoneNumber || "",
         email: company.email || "",
         review: company.review || "",
         notes: company.notes || "",
-        createdBy: user.id,
-        sharedWith: [],
-        reviews: [],
-        comments: [],
+        created_by: user.id,
       });
 
       // Then add it to repository

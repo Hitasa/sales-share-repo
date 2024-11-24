@@ -88,7 +88,18 @@ export const createOffer = async (companyId: string, offer: Omit<Offer, "id">): 
   return data;
 };
 
-export const addCompany = async (company: Omit<Company, "id">): Promise<Company> => {
+export const addCompany = async (company: {
+  name: string;
+  industry: string;
+  sales_volume: string;
+  growth: string;
+  website?: string;
+  phone_number?: string;
+  email?: string;
+  review?: string;
+  notes?: string;
+  created_by: string;
+}): Promise<Company> => {
   const { data, error } = await supabase
     .from('companies')
     .insert([company])
