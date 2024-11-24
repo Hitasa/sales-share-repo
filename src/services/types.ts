@@ -1,36 +1,12 @@
-export interface Offer {
-  id: number;
-  companyId: number;
-  userId: string;
-  type: 'sent' | 'received';
-  amount: string;
-  status: 'pending' | 'accepted' | 'rejected';
-  date: string;
-}
-
-export interface CompanyInvitation {
-  id: number;
-  companyId: number;
-  email: string;
-  status: 'pending' | 'accepted' | 'rejected';
-  role: 'admin' | 'member';
-}
-
 export interface Review {
-  id: number;
+  id: string;
   rating: number;
   comment: string;
   date: string;
 }
 
-export interface Comment {
-  id: number;
-  text: string;
-  createdAt: string;
-}
-
 export interface Company {
-  id: string; // Changed from number to string to match Supabase UUID
+  id: string;
   name: string;
   industry?: string;
   salesVolume?: string;
@@ -40,12 +16,24 @@ export interface Company {
   email?: string;
   review?: string;
   notes?: string;
-  comments?: Comment[];
   createdBy: string;
   sharedWith: string[];
-  link?: string;
-  reviews?: Review[];
-  offers?: Offer[];
-  invitations?: CompanyInvitation[];
+  reviews: Review[];
   averageRating?: number;
+}
+
+export interface CompanyInvitation {
+  id: string;
+  companyId: string;
+  email: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  role: 'admin' | 'member';
+}
+
+export interface Offer {
+  id: string;
+  companyId: string;
+  amount: number;
+  status: string;
+  date: string;
 }

@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Mail } from "lucide-react";
 
 interface CompanyInviteProps {
-  companyId: number;
+  companyId: string;
   onInviteSuccess: () => void;
 }
 

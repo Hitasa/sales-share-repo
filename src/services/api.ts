@@ -5,17 +5,16 @@ export * from './companySearch';
 export * from './companyRepository';
 
 interface TeamMember {
-  id: number;
+  id: string;
   email: string;
   role: string;
   status: string;
 }
 
 export const fetchTeamMembers = async (userId: string): Promise<TeamMember[]> => {
-  // This is a mock implementation. In a real app, this would fetch from your backend
   return Promise.resolve([
     {
-      id: 1,
+      id: "1",
       email: "team.member@example.com",
       role: "member",
       status: "active"
@@ -43,7 +42,6 @@ export const fetchCompanies = async (): Promise<Company[]> => {
 
 export const fetchUserCompanies = async (userId: string): Promise<Company[]> => {
   if (!userId) return [];
-  // Get companies from mockCompanies where the user is the creator
   const userCompanies = mockCompanies.filter(company => company.createdBy === userId);
   return Promise.resolve(userCompanies);
 };
@@ -52,7 +50,7 @@ export const inviteUserToCompany = async (companyId: string, email: string, role
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
-        id: Date.now(),
+        id: String(Date.now()),
         companyId,
         email,
         status: 'pending',
@@ -73,7 +71,6 @@ export const shareCompany = async (companyId: string, email: string): Promise<Co
         growth: "+15%",
         createdBy: "user1",
         sharedWith: [email],
-        offers: [],
         reviews: [],
       });
     }, 500);
@@ -85,7 +82,7 @@ export const createOffer = async (companyId: string, offer: Omit<Offer, "id">): 
     setTimeout(() => {
       resolve({
         ...offer,
-        id: Date.now(),
+        id: String(Date.now()),
         companyId,
       });
     }, 500);
@@ -95,14 +92,14 @@ export const createOffer = async (companyId: string, offer: Omit<Offer, "id">): 
 export const addCompany = async (company: Omit<Company, "id">): Promise<Company> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const newCompany = {
+      const newCompany: Company = {
         ...company,
-        id: `${Date.now()}`, // Convert to string
+        id: String(Date.now()),
         reviews: [],
         website: company.website || "",
         phoneNumber: company.phoneNumber || "",
         email: company.email || "",
-        comments: []
+        sharedWith: company.sharedWith || [],
       };
       mockCompanies.push(newCompany);
       resolve(newCompany);
@@ -118,7 +115,7 @@ export const addReview = async (companyId: string, review: { rating: number; com
 
   const company = mockCompanies[companyIndex];
   const newReview = {
-    id: Date.now(),
+    id: String(Date.now()),
     ...review,
     date: new Date().toISOString().split("T")[0],
   };

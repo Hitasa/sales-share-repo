@@ -1,36 +1,30 @@
-import { Company } from './types';
+import { Company } from "./types";
 
-// Initialize mock companies with some example data
-export let mockCompanies: Company[] = [
+export const mockCompanies: Company[] = [
   {
-    id: "1", // Changed from number to string
-    name: "Example Corp",
+    id: "1",
+    name: "Tech Corp",
     industry: "Technology",
-    salesVolume: "$10M",
-    growth: "+20%",
-    createdBy: "system",
+    salesVolume: "$1M",
+    growth: "10%",
+    createdBy: "user1",
     sharedWith: [],
-    reviews: [
-      {
-        id: 1,
-        rating: 4,
-        comment: "Great company to work with",
-        date: "2024-03-15"
-      }
-    ],
-    offers: [],
-    invitations: [],
-    link: "https://example.com"
-  }
+    reviews: [],
+    website: "https://techcorp.com",
+    phoneNumber: "123-456-7890",
+    email: "contact@techcorp.com",
+  },
+  {
+    id: "2",
+    name: "Green Energy Co",
+    industry: "Energy",
+    salesVolume: "$2M",
+    growth: "15%",
+    createdBy: "user1",
+    sharedWith: [],
+    reviews: [],
+    website: "https://greenenergy.com",
+    phoneNumber: "123-456-7891",
+    email: "contact@greenenergy.com",
+  },
 ];
-
-// Initialize user repositories mapping
-export let userRepositories: Record<string, string[]> = { // Changed from number[] to string[]
-  "user1": ["1"], // Changed from number to string
-};
-
-// Helper function to reset mock data to initial state
-export const resetMockData = () => {
-  mockCompanies = [...mockCompanies];
-  userRepositories = { ...userRepositories };
-};
