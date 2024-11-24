@@ -21,9 +21,23 @@ export const CompanyCommentsSection = ({
   return (
     <div className="pt-4 border-t">
       <h3 className="text-lg font-semibold mb-2">About</h3>
-      <p className="text-gray-600 mb-4">{editedCompany.review}</p>
+      <div className="space-y-4">
+        {editedCompany.review && (
+          <Card className="p-4">
+            <h4 className="text-sm font-medium mb-2">Review</h4>
+            <p className="text-gray-600">{editedCompany.review}</p>
+          </Card>
+        )}
+        
+        {editedCompany.notes && (
+          <Card className="p-4">
+            <h4 className="text-sm font-medium mb-2">Notes</h4>
+            <p className="text-gray-600">{editedCompany.notes}</p>
+          </Card>
+        )}
+      </div>
       
-      <div className="space-y-2">
+      <div className="space-y-2 mt-6">
         <h4 className="text-sm font-medium">Comments</h4>
         <Textarea
           placeholder="Add a new comment..."
@@ -39,7 +53,7 @@ export const CompanyCommentsSection = ({
         </Button>
       </div>
 
-      <ScrollArea className="h-[200px] w-full">
+      <ScrollArea className="h-[200px] w-full mt-4">
         <div className="space-y-4">
           {editedCompany.comments?.map((comment: Comment) => (
             <Card key={comment.id} className="p-4">
