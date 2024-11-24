@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("Logout error:", error);
       throw error;
     }
+    setUser(null); // Explicitly clear the user state
   };
 
   const register = async (email: string, password: string) => {

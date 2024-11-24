@@ -12,6 +12,7 @@ const Navigation = () => {
   const handleLogout = async () => {
     try {
       await logout();
+      // Only navigate and show success toast after successful logout
       navigate("/auth/login");
       toast({
         title: "Success",
