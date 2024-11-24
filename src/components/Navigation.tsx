@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { TeamInvitationNotifications } from "./notifications/TeamInvitationNotifications";
 
 const Navigation = () => {
   const { user, logout } = useAuth();
@@ -65,6 +66,7 @@ const Navigation = () => {
           <div className="flex items-center">
             {user ? (
               <div className="flex items-center space-x-4">
+                <TeamInvitationNotifications />
                 <Link to="/profile">
                   <Button variant="ghost">Profile</Button>
                 </Link>
