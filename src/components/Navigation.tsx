@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -7,6 +7,7 @@ import { TeamInvitationNotifications } from "./notifications/TeamInvitationNotif
 const Navigation = () => {
   const { user, logout } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -15,6 +16,8 @@ const Navigation = () => {
         title: "Success",
         description: "You have been logged out successfully",
       });
+      // After successful logout, redirect to login page
+      navigate("/auth/login");
     } catch (error: any) {
       console.error("Logout error:", error);
       toast({

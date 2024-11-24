@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
@@ -57,9 +58,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Clear any local storage items
       localStorage.clear();
-      
-      // Force reload the page to clear any remaining state
-      window.location.href = '/auth/login';
     } catch (error) {
       throw error;
     }
