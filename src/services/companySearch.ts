@@ -6,7 +6,7 @@ const GOOGLE_CSE_ID = import.meta.env.VITE_GOOGLE_CSE_ID;
 const getFallbackCompanies = (query: string): Company[] => {
   return [
     {
-      id: Date.now(),
+      id: `${Date.now()}`, // Convert to string
       name: `Search results for: ${query}`,
       industry: 'Technology',
       salesVolume: 'N/A',
@@ -16,7 +16,7 @@ const getFallbackCompanies = (query: string): Company[] => {
       link: ''
     },
     {
-      id: 2,
+      id: "2", // Changed to string
       name: 'Google Search API is not enabled',
       industry: 'Various',
       salesVolume: 'N/A',
@@ -26,7 +26,7 @@ const getFallbackCompanies = (query: string): Company[] => {
       link: 'https://console.developers.google.com/apis/api/customsearch.googleapis.com/overview'
     },
     {
-      id: 3,
+      id: "3", // Changed to string
       name: 'Please enable the Custom Search API in Google Cloud Console',
       industry: 'Various',
       salesVolume: 'N/A',
@@ -65,7 +65,7 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
     
     // Add searched companies to mockCompanies
     const searchResults = items.map((item: any) => ({
-      id: Date.now() + Math.random(), // Ensure unique IDs
+      id: `${Date.now() + Math.random()}`, // Ensure unique IDs, converted to string
       name: item.title || 'Unknown',
       industry: item.pagemap?.metatags?.[0]?.['og:type'] || 'Various',
       salesVolume: 'N/A',

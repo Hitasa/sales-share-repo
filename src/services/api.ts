@@ -23,7 +23,7 @@ export const fetchTeamMembers = async (userId: string): Promise<TeamMember[]> =>
   ]);
 };
 
-export const updateCompany = async (companyId: number, updates: Partial<Company>): Promise<Company> => {
+export const updateCompany = async (companyId: string, updates: Partial<Company>): Promise<Company> => {
   const companyIndex = mockCompanies.findIndex(c => c.id === companyId);
   if (companyIndex === -1) {
     throw new Error("Company not found");
@@ -48,7 +48,7 @@ export const fetchUserCompanies = async (userId: string): Promise<Company[]> => 
   return Promise.resolve(userCompanies);
 };
 
-export const inviteUserToCompany = async (companyId: number, email: string, role: 'admin' | 'member'): Promise<CompanyInvitation> => {
+export const inviteUserToCompany = async (companyId: string, email: string, role: 'admin' | 'member'): Promise<CompanyInvitation> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
@@ -62,7 +62,7 @@ export const inviteUserToCompany = async (companyId: number, email: string, role
   });
 };
 
-export const shareCompany = async (companyId: number, email: string): Promise<Company> => {
+export const shareCompany = async (companyId: string, email: string): Promise<Company> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
@@ -80,7 +80,7 @@ export const shareCompany = async (companyId: number, email: string): Promise<Co
   });
 };
 
-export const createOffer = async (companyId: number, offer: Omit<Offer, "id">): Promise<Offer> => {
+export const createOffer = async (companyId: string, offer: Omit<Offer, "id">): Promise<Offer> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
@@ -97,7 +97,7 @@ export const addCompany = async (company: Omit<Company, "id">): Promise<Company>
     setTimeout(() => {
       const newCompany = {
         ...company,
-        id: Date.now(),
+        id: `${Date.now()}`, // Convert to string
         reviews: [],
         website: company.website || "",
         phoneNumber: company.phoneNumber || "",
@@ -110,7 +110,7 @@ export const addCompany = async (company: Omit<Company, "id">): Promise<Company>
   });
 };
 
-export const addReview = async (companyId: number, review: { rating: number; comment: string }): Promise<Company> => {
+export const addReview = async (companyId: string, review: { rating: number; comment: string }): Promise<Company> => {
   const companyIndex = mockCompanies.findIndex(c => c.id === companyId);
   if (companyIndex === -1) {
     throw new Error("Company not found");

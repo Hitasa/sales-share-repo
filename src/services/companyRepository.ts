@@ -8,7 +8,7 @@ export const fetchUserCompanyRepository = async (userId: string): Promise<Compan
   return Promise.resolve(userCompanies);
 };
 
-export const addToUserRepository = async (companyId: number, userId: string): Promise<Company> => {
+export const addToUserRepository = async (companyId: string, userId: string): Promise<Company> => {
   if (!userId) {
     throw new Error("User ID is required");
   }
@@ -31,7 +31,7 @@ export const addToUserRepository = async (companyId: number, userId: string): Pr
   return Promise.resolve(company);
 };
 
-export const removeFromUserRepository = async (companyId: number, userId: string): Promise<void> => {
+export const removeFromUserRepository = async (companyId: string, userId: string): Promise<void> => {
   if (!userId) {
     throw new Error("User ID is required");
   }

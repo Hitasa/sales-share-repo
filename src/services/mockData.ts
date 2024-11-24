@@ -3,7 +3,7 @@ import { Company } from './types';
 // Initialize mock companies with some example data
 export let mockCompanies: Company[] = [
   {
-    id: 1,
+    id: "1", // Changed from number to string
     name: "Example Corp",
     industry: "Technology",
     salesVolume: "$10M",
@@ -25,8 +25,8 @@ export let mockCompanies: Company[] = [
 ];
 
 // Initialize user repositories mapping
-export let userRepositories: Record<string, number[]> = {
-  "user1": [1], // Example user with the example company in their repository
+export let userRepositories: Record<string, string[]> = { // Changed from number[] to string[]
+  "user1": ["1"], // Changed from number to string
 };
 
 // Helper function to reset mock data to initial state

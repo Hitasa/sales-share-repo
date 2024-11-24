@@ -65,7 +65,7 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
 
   const handleAddReview = (review: { rating: number; comment: string }) => {
     const newReview = {
-      id: Date.now(),
+      id: `${Date.now()}`, // Convert to string
       ...review,
       date: new Date().toISOString().split('T')[0],
     };
