@@ -35,12 +35,21 @@ const Projects = () => {
     },
   });
 
-  // Updated query to fetch both owned and team projects
+  // Updated query to fetch both owned and team projects with correct syntax
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
       if (!user?.id) return [];
 
+      // First, get the team IDs for the user
+      const { data: teamMembers } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", user.id);
+
+      const teamIds = teamMembers?.map(tm => tm.team_id) || [];
+
+      // Then fetch projects with the team IDs
       const { data, error } = await supabase
         .from("projects")
         .select(`
@@ -49,9 +58,7 @@ const Projects = () => {
             name
           )
         `)
-        .or(`created_by.eq.${user.id},team_id.in.(
-          select team_id from team_members where user_id = '${user.id}'
-        )`)
+        .or(`created_by.eq.${user.id}${teamIds.length > 0 ? `,team_id.in.(${teamIds.join(',')})` : ''}`)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
