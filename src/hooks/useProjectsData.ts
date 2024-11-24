@@ -41,12 +41,7 @@ export const useProjectsData = (projectId?: string) => {
 
       const { data, error } = await supabase
         .from("projects")
-        .select(`
-          *,
-          team:team_id (
-            name
-          )
-        `)
+        .select("*")
         .or(`created_by.eq.${user.id}${teamIds.length > 0 ? `,team_id.in.(${teamIds.join(',')})` : ''}`)
         .order("created_at", { ascending: false });
 
