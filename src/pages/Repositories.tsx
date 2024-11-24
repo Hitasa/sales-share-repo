@@ -19,13 +19,10 @@ const Repositories = () => {
     queryKey: ["companies", debouncedSearch],
     queryFn: () => debouncedSearch ? searchCompanies(debouncedSearch) : fetchCompanies(),
     staleTime: 1000 * 60 * 5, // 5 minutes
-    onError: (err) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch companies. Please try again.",
-      });
-    }
+    meta: {
+      errorMessage: "Failed to fetch companies. Please try again."
+    },
+    retry: 1
   });
 
   const addCompanyMutation = useMutation({
@@ -60,6 +57,14 @@ const Repositories = () => {
   const handleSearch = (value: string) => {
     setSearchQuery(value);
   };
+
+  if (error) {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Failed to fetch companies. Please try again.",
+    });
+  }
 
   return (
     <div className="container mx-auto py-20 px-4 animate-fadeIn">
