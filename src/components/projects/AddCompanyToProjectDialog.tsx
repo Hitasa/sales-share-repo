@@ -66,6 +66,11 @@ export const AddCompanyToProjectDialog = ({
     enabled: !!teamId && !!projectId,
   });
 
+  const handleAddCompany = (company: Company) => {
+    onAddCompany(company);
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
@@ -81,7 +86,7 @@ export const AddCompanyToProjectDialog = ({
         ) : (
           <CompanyList
             companies={availableCompanies}
-            onCompanySelect={onAddCompany}
+            onCompanySelect={handleAddCompany}
           />
         )}
       </DialogContent>

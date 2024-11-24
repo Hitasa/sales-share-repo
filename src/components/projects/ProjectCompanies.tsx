@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { CompanyList } from "@/components/company/CompanyList";
 import { Company } from "@/services/types";
@@ -7,7 +6,6 @@ import { Trash2 } from "lucide-react";
 
 interface ProjectCompaniesProps {
   companies?: Company[];
-  availableCompanies?: Company[];
   isLoading: boolean;
   isAddCompanyDialogOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -17,38 +15,17 @@ interface ProjectCompaniesProps {
 
 export const ProjectCompanies = ({
   companies,
-  availableCompanies,
   isLoading,
   isAddCompanyDialogOpen,
   onOpenChange,
   onAddCompany,
   onRemoveCompany,
 }: ProjectCompaniesProps) => {
-  const handleAddCompany = (company: Company) => {
-    onAddCompany(company);
-    onOpenChange(false); // Close the dialog after adding
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Project Companies</h2>
-        <Dialog open={isAddCompanyDialogOpen} onOpenChange={onOpenChange}>
-          <DialogTrigger asChild>
-            <Button>Add Company</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>Add Company to Project</DialogTitle>
-            </DialogHeader>
-            {availableCompanies && (
-              <CompanyList
-                companies={availableCompanies}
-                onCompanySelect={handleAddCompany}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
+        <Button onClick={() => onOpenChange(true)}>Add Company</Button>
       </div>
       
       {isLoading ? (
