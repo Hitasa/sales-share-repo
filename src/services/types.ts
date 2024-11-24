@@ -5,6 +5,12 @@ export interface Review {
   date: string;
 }
 
+export interface Comment {
+  id: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface Company {
   id: string;
   name: string;
@@ -19,6 +25,7 @@ export interface Company {
   createdBy: string;
   sharedWith: string[];
   reviews: Review[];
+  comments?: Comment[];
   averageRating?: number;
 }
 

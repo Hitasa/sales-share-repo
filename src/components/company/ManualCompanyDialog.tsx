@@ -32,6 +32,8 @@ export function ManualCompanyDialog() {
         ...formData,
         createdBy: user.id,
         sharedWith: [],
+        reviews: [],
+        comments: [],
       });
       
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });

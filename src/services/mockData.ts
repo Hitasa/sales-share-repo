@@ -10,6 +10,7 @@ export const mockCompanies: Company[] = [
     createdBy: "user1",
     sharedWith: [],
     reviews: [],
+    comments: [],
     website: "https://techcorp.com",
     phoneNumber: "123-456-7890",
     email: "contact@techcorp.com",
@@ -23,8 +24,13 @@ export const mockCompanies: Company[] = [
     createdBy: "user1",
     sharedWith: [],
     reviews: [],
+    comments: [],
     website: "https://greenenergy.com",
     phoneNumber: "123-456-7891",
     email: "contact@greenenergy.com",
   },
 ];
+
+export const userRepositories: { [key: string]: string[] } = {
+  'user1': ['1', '2']
+};

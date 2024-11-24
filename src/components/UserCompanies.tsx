@@ -23,7 +23,13 @@ export const UserCompanies = () => {
 
   const createCompanyMutation = useMutation({
     mutationFn: (companyData: { name: string; industry: string; salesVolume: string; growth: string }) =>
-      addCompany({ ...companyData, createdBy: user?.id || "", sharedWith: [] }),
+      addCompany({ 
+        ...companyData, 
+        createdBy: user?.id || "", 
+        sharedWith: [], 
+        reviews: [],
+        comments: [],
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userCompanies"] });
       toast({
@@ -55,7 +61,7 @@ export const UserCompanies = () => {
   }
 
   if (selectedCompany) {
-    return <CompanyProfile company={selectedCompany} />;
+    return <CompanyProfile company={selectedCompany} onBack={() => setSelectedCompany(null)} />;
   }
 
   return (
