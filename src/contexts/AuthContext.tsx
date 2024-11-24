@@ -1,11 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
-import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
@@ -76,13 +76,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (error) throw error;
   };
 
-  // Show loading state while checking authentication
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <AuthContext.Provider value={{ user, session, login, logout, register, resetPassword }}>
+    <AuthContext.Provider value={{ user, session, loading, login, logout, register, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );
