@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AddCompanyForm } from "@/components/AddCompanyForm";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchCompanies, addCompany, searchCompanies, addReview } from "@/services/api";
+import { fetchCompanies, addCompany, searchCompanies, addReview, Company } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDebounce } from "@/hooks/useDebounce";
 import ReviewList from "@/components/ReviewList";

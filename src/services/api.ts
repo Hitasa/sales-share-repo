@@ -144,3 +144,40 @@ export const addReview = async (companyId: number, review: { rating: number; com
     }, 500);
   });
 };
+
+// Add the missing functions
+export const addToUserRepository = async (companyId: number, userId: string): Promise<Company> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        id: companyId,
+        name: "Added Company",
+        industry: "Technology",
+        salesVolume: "$1.2M",
+        growth: "+15%",
+        createdBy: userId,
+        sharedWith: [],
+        reviews: [],
+      });
+    }, 500);
+  });
+};
+
+export const fetchUserCompanyRepository = async (userId: string): Promise<Company[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        {
+          id: 1,
+          name: "User's Company",
+          industry: "Technology",
+          salesVolume: "$1.2M",
+          growth: "+15%",
+          createdBy: userId,
+          sharedWith: [],
+          reviews: [],
+        },
+      ]);
+    }, 500);
+  });
+};
