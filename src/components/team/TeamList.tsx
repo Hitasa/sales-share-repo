@@ -6,6 +6,7 @@ import { TeamSection } from "./TeamSection";
 import { Team } from "@/services/types";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface TeamMemberResponse {
   team: {
@@ -18,10 +19,13 @@ interface TeamMemberResponse {
 export const TeamList = () => {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const { data: teams = [] } = useQuery({
-    queryKey: ["teams"],
+    queryKey: ["teams", user?.id],
     queryFn: async () => {
+      if (!user?.id) return [];
+
       const { data: userTeams, error } = await supabase
         .from("team_members")
         .select(`
@@ -31,9 +35,17 @@ export const TeamList = () => {
             created_at
           )
         `)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load teams: " + error.message,
+        });
+        throw error;
+      }
       
       // Transform the nested team data structure and handle potential null values
       return (userTeams as unknown as TeamMemberResponse[])
@@ -44,6 +56,7 @@ export const TeamList = () => {
           created_at: item.team.created_at
         } as Team));
     },
+    enabled: !!user?.id,
   });
 
   return (
