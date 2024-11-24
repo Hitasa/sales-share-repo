@@ -23,9 +23,17 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
     mutationFn: () => addToUserRepository(company.id, user?.id || ""),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
       toast({
         title: "Success",
         description: "Company added to your repository",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to add company to repository",
       });
     },
   });
@@ -37,9 +45,10 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
           variant="outline"
           size="sm"
           onClick={() => addToRepositoryMutation.mutate()}
+          disabled={addToRepositoryMutation.isPending}
         >
           <PlusSquare className="h-4 w-4 mr-1" />
-          Add
+          {addToRepositoryMutation.isPending ? "Adding..." : "Add"}
         </Button>
       )}
       <Dialog>
