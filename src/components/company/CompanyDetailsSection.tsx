@@ -2,7 +2,7 @@ import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Company } from "@/services/types";
-import { Star } from "lucide-react";
+import { Star, Link, Phone, Mail } from "lucide-react";
 
 interface CompanyDetailsSectionProps {
   company: Company;
@@ -77,35 +77,9 @@ export const CompanyDetailsSection = ({
             )}
           </div>
           <div className="flex justify-between items-center">
-            <span className="font-bold">Sales Volume:</span>
-            {isEditing ? (
-              <Input
-                value={editedCompany.salesVolume || ""}
-                onChange={(e) =>
-                  setEditedCompany({ ...editedCompany, salesVolume: e.target.value })
-                }
-                className="max-w-[250px]"
-              />
-            ) : (
-              <span>{editedCompany.salesVolume}</span>
-            )}
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="font-bold">Growth:</span>
-            {isEditing ? (
-              <Input
-                value={editedCompany.growth || ""}
-                onChange={(e) =>
-                  setEditedCompany({ ...editedCompany, growth: e.target.value })
-                }
-                className="max-w-[250px]"
-              />
-            ) : (
-              <span>{editedCompany.growth}</span>
-            )}
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="font-bold">Website:</span>
+            <span className="font-bold flex items-center gap-2">
+              <Link className="h-4 w-4" /> Website:
+            </span>
             {isEditing ? (
               <Input
                 value={editedCompany.website || ""}
@@ -119,7 +93,9 @@ export const CompanyDetailsSection = ({
             )}
           </div>
           <div className="flex justify-between items-center">
-            <span className="font-bold">Phone Number:</span>
+            <span className="font-bold flex items-center gap-2">
+              <Phone className="h-4 w-4" /> Phone Number:
+            </span>
             {isEditing ? (
               <Input
                 value={editedCompany.phoneNumber || ""}
@@ -133,7 +109,9 @@ export const CompanyDetailsSection = ({
             )}
           </div>
           <div className="flex justify-between items-center">
-            <span className="font-bold">Email:</span>
+            <span className="font-bold flex items-center gap-2">
+              <Mail className="h-4 w-4" /> Email:
+            </span>
             {isEditing ? (
               <Input
                 value={editedCompany.email || ""}
