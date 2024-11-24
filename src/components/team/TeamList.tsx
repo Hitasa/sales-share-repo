@@ -31,12 +31,11 @@ export const TeamList = () => {
             created_at
           )
         `)
-        .order("created_at", { foreignTable: "teams", ascending: false });
+        .order('created_at', { ascending: false, foreignTable: 'teams' });
 
       if (error) throw error;
       
-      // Transform the data to match the Team type
-      return (userTeams as any[]).map((item) => ({
+      return (userTeams as TeamResponse[]).map((item) => ({
         id: item.team.id,
         name: item.team.name,
         created_at: item.team.created_at

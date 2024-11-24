@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -9,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -68,10 +68,7 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
         description: "Team deleted successfully",
       });
 
-      // Invalidate teams query to refresh the list
       queryClient.invalidateQueries({ queryKey: ["teams"] });
-      
-      // Reset selected team
       window.location.reload();
     } catch (error: any) {
       console.error("Error deleting team:", error);
@@ -104,17 +101,16 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
 
     try {
       // First check if user is already a member of a team with this name
-      const { data: existingTeam } = await supabase
+      const { data: existingTeams } = await supabase
         .from("teams")
         .select("id")
-        .eq("name", newTeamName)
-        .single();
+        .eq("name", newTeamName);
 
-      if (existingTeam) {
+      if (existingTeams && existingTeams.length > 0) {
         const { data: existingMembership } = await supabase
           .from("team_members")
           .select("id")
-          .eq("team_id", existingTeam.id)
+          .eq("team_id", existingTeams[0].id)
           .eq("user_id", user.id)
           .single();
 
