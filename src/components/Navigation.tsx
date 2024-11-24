@@ -77,7 +77,7 @@ const Navigation = () => {
                   License
                   {license && (
                     <Badge variant="secondary" className="capitalize">
-                      {license.licenseType}
+                      {license.licenseType === 'enterprise' ? 'Full Access' : license.licenseType}
                     </Badge>
                   )}
                 </Button>
