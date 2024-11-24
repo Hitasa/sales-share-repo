@@ -23,9 +23,10 @@ export const fetchCompanies = async (): Promise<Company[]> => {
 };
 
 export const fetchUserCompanies = async (userId: string): Promise<Company[]> => {
-  // For demonstration, we'll return the company that was added to the repository
-  const company = mockCompanies.find(c => c.createdBy === userId);
-  return Promise.resolve(company ? [company] : []);
+  if (!userId) return [];
+  // Get companies from mockCompanies where the user is the creator
+  const userCompanies = mockCompanies.filter(company => company.createdBy === userId);
+  return Promise.resolve(userCompanies);
 };
 
 export const inviteUserToCompany = async (companyId: number, email: string, role: 'admin' | 'member'): Promise<CompanyInvitation> => {
@@ -78,7 +79,11 @@ export const addCompany = async (company: Omit<Company, "id">): Promise<Company>
       const newCompany = {
         ...company,
         id: Date.now(),
-        reviews: []
+        reviews: [],
+        website: company.website || "",
+        phoneNumber: company.phoneNumber || "",
+        email: company.email || "",
+        comments: []
       };
       mockCompanies.push(newCompany);
       resolve(newCompany);

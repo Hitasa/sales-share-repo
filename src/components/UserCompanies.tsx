@@ -5,11 +5,15 @@ import { Card } from "./ui/card";
 import { CompanyProfile } from "./company/CompanyProfile";
 import { AddCompanyForm } from "./AddCompanyForm";
 import { useToast } from "@/hooks/use-toast";
+import { CompanyList } from "./company/CompanyList";
+import { useState } from "react";
+import { Company } from "@/services/types";
 
 export const UserCompanies = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   const { data: companies, isLoading } = useQuery({
     queryKey: ["userCompanies", user?.id],
@@ -50,5 +54,17 @@ export const UserCompanies = () => {
     );
   }
 
-  return <CompanyProfile company={companies[0]} />;
+  if (selectedCompany) {
+    return <CompanyProfile company={selectedCompany} />;
+  }
+
+  return (
+    <div className="container mx-auto py-8">
+      <CompanyList 
+        companies={companies} 
+        isPrivate={true}
+        onCompanySelect={setSelectedCompany}
+      />
+    </div>
+  );
 };

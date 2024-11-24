@@ -3,28 +3,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CompanyActions } from "./CompanyActions";
 import { CompanyDetailsDialog } from "./CompanyDetailsDialog";
 import { Company } from "@/services/types";
-import { UserCompanies } from "../UserCompanies";
 
 interface CompanyListProps {
   companies: Company[];
   isPrivate?: boolean;
+  onCompanySelect?: (company: Company) => void;
 }
 
-export const CompanyList = ({ companies, isPrivate = false }: CompanyListProps) => {
+export const CompanyList = ({ companies, isPrivate = false, onCompanySelect }: CompanyListProps) => {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [showProfile, setShowProfile] = useState(false);
 
   const handleCompanyClick = (company: Company) => {
-    if (isPrivate) {
-      setShowProfile(true);
+    if (isPrivate && onCompanySelect) {
+      onCompanySelect(company);
     } else {
       setSelectedCompany(company);
     }
   };
-
-  if (showProfile) {
-    return <UserCompanies />;
-  }
 
   return (
     <>
