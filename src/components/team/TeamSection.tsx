@@ -40,7 +40,14 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
   const isAdmin = userRole === "admin";
 
   const handleCreateTeam = async () => {
-    if (!newTeamName.trim() || !user) return;
+    if (!newTeamName.trim() || !user) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please enter a team name and ensure you're logged in",
+      });
+      return;
+    }
 
     try {
       const { data: team, error: teamError } = await supabase

@@ -41,7 +41,7 @@ export const TeamMembersList = ({ teamId, isAdmin }: TeamMembersListProps) => {
         .select(`
           id,
           role,
-          user:profiles (
+          user:profiles!team_members_user_id_fkey (
             id,
             email,
             first_name,
@@ -51,7 +51,13 @@ export const TeamMembersList = ({ teamId, isAdmin }: TeamMembersListProps) => {
         .eq("team_id", teamId);
 
       if (error) throw error;
-      return data as TeamMember[];
+
+      // Transform the data to match our TeamMember type
+      return (data || []).map((member: any) => ({
+        id: member.id,
+        role: member.role,
+        user: member.user
+      })) as TeamMember[];
     },
   });
 
