@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Plus } from "lucide-react";
+import { Search, PlusSquare, MessageSquare, Star } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -41,8 +41,8 @@ const Repositories = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       toast({
-        title: "Company added",
-        description: "The company has been successfully added to the repository.",
+        title: "Success",
+        description: "Company added to your repository",
       });
     },
   });
@@ -64,6 +64,24 @@ const Repositories = () => {
     addCompanyMutation.mutate(newCompany);
   };
 
+  const handleAddToRepository = (company: Company) => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "Please login to add companies to your repository",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    handleAddCompany({
+      name: company.name,
+      industry: company.industry || "N/A",
+      salesVolume: company.salesVolume || "N/A",
+      growth: company.growth || "N/A",
+    });
+  };
+
   const handleSearch = (value: string) => {
     setSearchQuery(value);
   };
@@ -79,7 +97,7 @@ const Repositories = () => {
         <Dialog>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="h-4 w-4 mr-2" />
+              <PlusSquare className="h-4 w-4 mr-2" />
               Add Company
             </Button>
           </DialogTrigger>
@@ -107,9 +125,7 @@ const Repositories = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Company Name</TableHead>
-              <TableHead>Industry</TableHead>
-              <TableHead>Sales Volume</TableHead>
-              <TableHead>Growth</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -129,9 +145,38 @@ const Repositories = () => {
                     company.name
                   )}
                 </TableCell>
-                <TableCell>{company.industry}</TableCell>
-                <TableCell>{company.salesVolume}</TableCell>
-                <TableCell className="text-green-600">{company.growth}</TableCell>
+                <TableCell>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddToRepository(company)}
+                    >
+                      <PlusSquare className="h-4 w-4 mr-1" />
+                      Add
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toast({
+                        description: "Reviews feature coming soon",
+                      })}
+                    >
+                      <MessageSquare className="h-4 w-4 mr-1" />
+                      Reviews
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toast({
+                        description: "Ratings feature coming soon",
+                      })}
+                    >
+                      <Star className="h-4 w-4 mr-1" />
+                      Ratings
+                    </Button>
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
