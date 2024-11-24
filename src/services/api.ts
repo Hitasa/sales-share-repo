@@ -56,9 +56,12 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
       .select('*')
       .ilike('name', `%${query}%`);
 
-    if (localError) throw localError;
+    if (localError) {
+      console.error('Local search error:', localError);
+      return [];
+    }
 
-    // Then try Google search
+    // Then try Google search regardless of local results
     const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
     const SEARCH_ENGINE_ID = import.meta.env.VITE_GOOGLE_CSE_ID;
     
@@ -77,6 +80,7 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
     }
 
     const data = await response.json();
+    console.log('Google Search API response:', data); // Debug log
 
     // Transform Google search results into Company format
     const googleResults = data.items?.map((item: any) => ({
