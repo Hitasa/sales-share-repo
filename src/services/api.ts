@@ -33,7 +33,8 @@ export const fetchCompanies = async (): Promise<Company[]> => {
 export const fetchUserCompanyRepository = async (userId: string): Promise<Company[]> => {
   if (!userId) return [];
   const userCompanyIds = userRepositories[userId] || [];
-  return Promise.resolve(mockCompanies.filter(company => userCompanyIds.includes(company.id)));
+  const userCompanies = mockCompanies.filter(company => userCompanyIds.includes(company.id));
+  return Promise.resolve(userCompanies);
 };
 
 export const addToUserRepository = async (companyId: number, userId: string): Promise<Company> => {
@@ -57,8 +58,11 @@ export const addToUserRepository = async (companyId: number, userId: string): Pr
     throw new Error("Company already in repository");
   }
   
-  // Add to user's repository
+  // Add to user's repository and ensure it exists in mockCompanies
   userRepositories[userId].push(companyId);
+  if (!mockCompanies.find(c => c.id === companyId)) {
+    mockCompanies.push(company);
+  }
   
   return Promise.resolve(company);
 };

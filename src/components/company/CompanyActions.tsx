@@ -22,7 +22,9 @@ export const CompanyActions = ({ company, isPrivate = false }: CompanyActionsPro
   const addToRepositoryMutation = useMutation({
     mutationFn: () => addToUserRepository(company.id, user?.id || ""),
     onSuccess: () => {
+      // Invalidate both queries to ensure proper updates
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
+      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository", user?.id] });
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       toast({
         title: "Success",
