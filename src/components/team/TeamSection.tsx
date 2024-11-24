@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { CreateTeamForm } from "./CreateTeamForm";
 import { TeamHeader } from "./TeamHeader";
+import { useNavigate } from "react-router-dom";
 
 interface TeamSectionProps {
   selectedTeam: Team | null;
@@ -20,6 +21,7 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [isCreatingTeam, setIsCreatingTeam] = useState(false);
 
   const { data: userRole } = useQuery({
@@ -44,20 +46,33 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
     if (!selectedTeam) return;
 
     try {
-      const { error } = await supabase
+      // First delete team members
+      const { error: membersError } = await supabase
+        .from("team_members")
+        .delete()
+        .eq("team_id", selectedTeam.id);
+
+      if (membersError) throw membersError;
+
+      // Then delete the team
+      const { error: teamError } = await supabase
         .from("teams")
         .delete()
         .eq("id", selectedTeam.id);
 
-      if (error) throw error;
+      if (teamError) throw teamError;
 
       toast({
         title: "Success",
         description: "Team deleted successfully",
       });
 
+      // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ["teams"] });
-      window.location.reload();
+      queryClient.invalidateQueries({ queryKey: ["team-role"] });
+      
+      // Navigate back to profile page
+      navigate("/profile");
     } catch (error: any) {
       console.error("Error deleting team:", error);
       toast({
