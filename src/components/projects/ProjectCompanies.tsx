@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Card } from "@/components/ui/card";
 import { CompanyList } from "@/components/company/CompanyList";
 import { Company } from "@/services/types";
+import { Trash2 } from "lucide-react";
 
 interface ProjectCompaniesProps {
   companies?: Company[];

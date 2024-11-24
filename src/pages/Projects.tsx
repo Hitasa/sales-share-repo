@@ -6,8 +6,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProjectList } from "@/components/projects/ProjectList";
 import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
 import { ProjectCompanies } from "@/components/projects/ProjectCompanies";
-import { Trash2 } from "lucide-react";
 import * as z from "zod";
+
+// Define the project schema
+const projectSchema = z.object({
+  name: z.string().min(1, "Project name is required"),
+  teamId: z.string().optional()
+});
 
 const Projects = () => {
   const { user } = useAuth();
