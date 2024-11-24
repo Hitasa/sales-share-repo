@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
 
 interface ReviewFormProps {
-  companyId: number;
+  companyId: string;
   onSubmit: (review: { rating: number; comment: string }) => void;
 }
 

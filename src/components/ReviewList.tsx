@@ -1,11 +1,5 @@
 import { Star } from "lucide-react";
-
-interface Review {
-  id: number;
-  rating: number;
-  comment: string;
-  date: string;
-}
+import { Review } from "@/services/types";
 
 interface ReviewListProps {
   reviews: Review[];
