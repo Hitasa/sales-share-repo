@@ -47,6 +47,19 @@ export const ProjectActions = ({ company, projectId }: ProjectActionsProps) => {
       if (!user?.id || !company.id) {
         throw new Error("Missing required information");
       }
+
+      // First verify the user owns the project
+      const { data: project, error: projectError } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", projectId)
+        .eq("created_by", user.id)
+        .single();
+
+      if (projectError || !project) {
+        throw new Error("You don't have permission to add companies to this project");
+      }
+
       const { error } = await supabase
         .from("project_companies")
         .insert([{ project_id: projectId, company_id: company.id }]);
@@ -75,6 +88,19 @@ export const ProjectActions = ({ company, projectId }: ProjectActionsProps) => {
       if (!projectId || !company.id) {
         throw new Error("Missing required information");
       }
+
+      // First verify the user owns the project
+      const { data: project, error: projectError } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", projectId)
+        .eq("created_by", user.id)
+        .single();
+
+      if (projectError || !project) {
+        throw new Error("You don't have permission to remove companies from this project");
+      }
+
       const { error } = await supabase
         .from("project_companies")
         .delete()
