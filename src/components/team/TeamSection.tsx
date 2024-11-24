@@ -34,10 +34,10 @@ export const TeamSection = ({ selectedTeam }: TeamSectionProps) => {
         .select("role")
         .eq("team_id", selectedTeam.id)
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      return data.role;
+      return data?.role || null;
     },
     enabled: !!selectedTeam && !!user,
   });
