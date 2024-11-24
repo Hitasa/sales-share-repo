@@ -8,7 +8,7 @@ import { Company } from "@/services/types";
 import { CompanyProfile } from "@/components/company/CompanyProfile";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { PlusSquare } from "lucide-react";
+import { PlusSquare, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -26,6 +26,20 @@ const MyRepositories = () => {
     enabled: !!user,
   });
 
+  const { data: userTeams = [] } = useQuery({
+    queryKey: ["userTeams", user?.id],
+    queryFn: async () => {
+      const { data: teamMembers, error } = await supabase
+        .from("team_members")
+        .select("team:teams(id, name)")
+        .eq("user_id", user?.id);
+
+      if (error) throw error;
+      return teamMembers.map(tm => tm.team);
+    },
+    enabled: !!user,
+  });
+
   const { data: projects = [] } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
@@ -39,6 +53,32 @@ const MyRepositories = () => {
       return data;
     },
     enabled: !!user,
+  });
+
+  const linkToTeamMutation = useMutation({
+    mutationFn: async ({ companyId, teamId }: { companyId: string; teamId: string }) => {
+      const { error } = await supabase
+        .from("companies")
+        .update({ team_id: teamId })
+        .eq("id", companyId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
+      setIsProjectDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Company linked to team successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to link company to team",
+      });
+    },
   });
 
   const addToProjectMutation = useMutation({
@@ -89,6 +129,39 @@ const MyRepositories = () => {
     );
   }
 
+  const renderTeamDialog = (company: Company) => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="ml-2">
+          <Share2 className="h-4 w-4 mr-1" />
+          Share with Team
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Share with Team</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 mt-4">
+          {userTeams.map((team) => (
+            <Button
+              key={team.id}
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => {
+                linkToTeamMutation.mutate({
+                  companyId: company.id,
+                  teamId: team.id,
+                });
+              }}
+            >
+              {team.name}
+            </Button>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
   const renderProjectDialog = (company: Company) => (
     <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
       <DialogTrigger asChild>
@@ -120,6 +193,13 @@ const MyRepositories = () => {
     </Dialog>
   );
 
+  const renderActions = (company: Company) => (
+    <div className="flex space-x-2">
+      {renderProjectDialog(company)}
+      {renderTeamDialog(company)}
+    </div>
+  );
+
   return (
     <div className="container mx-auto py-20 px-4 animate-fadeIn">
       <div className="flex justify-between items-center mb-8">
@@ -130,7 +210,7 @@ const MyRepositories = () => {
         companies={companies} 
         isPrivate={false} 
         onCompanySelect={setSelectedCompany}
-        additionalActions={renderProjectDialog}
+        additionalActions={renderActions}
       />
     </div>
   );
