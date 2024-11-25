@@ -3,6 +3,7 @@ import { CompanyList } from "@/components/company/CompanyList";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Company } from "@/services/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AddCompanyToProjectDialogProps {
   projectId: string;
@@ -19,12 +20,14 @@ export const AddCompanyToProjectDialog = ({
   onOpenChange,
   onAddCompany,
 }: AddCompanyToProjectDialogProps) => {
-  const { data: availableCompanies = [], isLoading } = useQuery({
-    queryKey: ["available-team-companies", teamId, projectId],
-    queryFn: async () => {
-      if (!teamId) return [];
+  const { user } = useAuth();
 
-      // Get companies that are shared with the team and not already in the project
+  const { data: availableCompanies = [], isLoading } = useQuery({
+    queryKey: ["available-team-companies", teamId, projectId, user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+
+      // Get companies that are already in the project
       const { data: existingCompanies } = await supabase
         .from("project_companies")
         .select("company_id")
@@ -32,21 +35,55 @@ export const AddCompanyToProjectDialog = ({
 
       const existingIds = existingCompanies?.map(c => c.company_id) || [];
 
-      // Only add the not.in clause if there are existing companies
-      const query = supabase
+      // Get companies from user's repository
+      const { data: repositoryCompanies } = await supabase
+        .from("company_repositories")
+        .select(`
+          companies (
+            id,
+            name,
+            industry,
+            sales_volume,
+            growth,
+            website,
+            phone_number,
+            email,
+            review,
+            notes,
+            created_by,
+            team_id,
+            reviews
+          )
+        `)
+        .eq("user_id", user.id)
+        .not('companies.id', 'in', existingIds);
+
+      // Get companies shared with the team
+      const { data: teamCompanies } = await supabase
         .from("companies")
         .select("*")
-        .eq("team_id", teamId);
+        .eq("team_id", teamId)
+        .not('id', 'in', existingIds);
 
-      if (existingIds.length > 0) {
-        query.not('id', 'in', `(${existingIds.join(',')})`);
-      }
+      // Combine and transform the results
+      const repoCompanies = (repositoryCompanies || []).map(rc => ({
+        id: rc.companies.id,
+        name: rc.companies.name,
+        industry: rc.companies.industry || undefined,
+        salesVolume: rc.companies.sales_volume || undefined,
+        growth: rc.companies.growth || undefined,
+        website: rc.companies.website || undefined,
+        phoneNumber: rc.companies.phone_number || undefined,
+        email: rc.companies.email || undefined,
+        review: rc.companies.review || undefined,
+        notes: rc.companies.notes || undefined,
+        createdBy: rc.companies.created_by || "",
+        team_id: rc.companies.team_id,
+        sharedWith: [],
+        reviews: rc.companies.reviews || [],
+      }));
 
-      const { data: companies, error } = await query;
-
-      if (error) throw error;
-
-      return (companies || []).map(company => ({
+      const transformedTeamCompanies = (teamCompanies || []).map(company => ({
         id: company.id,
         name: company.name,
         industry: company.industry || undefined,
@@ -62,8 +99,16 @@ export const AddCompanyToProjectDialog = ({
         sharedWith: [],
         reviews: company.reviews || [],
       }));
+
+      // Remove duplicates by company ID
+      const uniqueCompanies = [...repoCompanies, ...transformedTeamCompanies]
+        .filter((company, index, self) => 
+          index === self.findIndex(c => c.id === company.id)
+        );
+
+      return uniqueCompanies;
     },
-    enabled: !!teamId && !!projectId,
+    enabled: !!user?.id && !!projectId,
   });
 
   const handleAddCompany = (company: Company) => {
@@ -81,7 +126,7 @@ export const AddCompanyToProjectDialog = ({
           <div>Loading companies...</div>
         ) : availableCompanies.length === 0 ? (
           <div className="text-center py-4">
-            No available companies in the team repository
+            No available companies found
           </div>
         ) : (
           <CompanyList
