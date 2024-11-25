@@ -87,7 +87,7 @@ export const ProjectList = ({
                 </Badge>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
               {teams && teams.length > 0 && !project.team_id && (
                 <TeamShareDialog
                   teams={teams}
