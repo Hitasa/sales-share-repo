@@ -4,7 +4,10 @@ import { CompanyActions } from "./CompanyActions";
 import { CompanyDetailsDialog } from "./CompanyDetailsDialog";
 import { CompanyProfile } from "./CompanyProfile";
 import { Company } from "@/services/types";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Star } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CompanyListProps {
   companies: Company[];
@@ -22,6 +25,7 @@ export const CompanyList = ({
   additionalActions 
 }: CompanyListProps) => {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const { user } = useAuth();
 
   const handleCompanyClick = (company: Company) => {
     if (isPrivate && onCompanySelect) {
@@ -34,6 +38,30 @@ export const CompanyList = ({
   const handleWebsiteClick = (website: string, event: React.MouseEvent) => {
     event.stopPropagation();
     window.open(website, '_blank');
+  };
+
+  const getVisibleReviewsCount = (company: Company) => {
+    // Check if user is part of the team
+    const { data: isTeamMember = false } = useQuery({
+      queryKey: ["teamMembership", company.team_id, user?.id],
+      queryFn: async () => {
+        if (!user?.id || !company.team_id) return false;
+
+        const { data: teamMember } = await supabase
+          .from("team_members")
+          .select("id")
+          .eq("team_id", company.team_id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        return !!teamMember;
+      },
+      enabled: !!user?.id && !!company.team_id,
+    });
+
+    const publicReviews = (company.reviews || []).filter(review => !review.isTeamReview);
+    const teamReviews = company.team_reviews || [];
+    return publicReviews.length + (isTeamMember ? teamReviews.length : 0);
   };
 
   if (selectedCompany && isPrivate) {
@@ -52,6 +80,7 @@ export const CompanyList = ({
           <TableHeader>
             <TableRow>
               <TableHead>Company Name</TableHead>
+              <TableHead>Reviews</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -69,6 +98,12 @@ export const CompanyList = ({
                       onClick={(e) => handleWebsiteClick(company.website!, e)}
                     />
                   )}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center">
+                    <Star className="h-4 w-4 text-yellow-400 fill-yellow-400 mr-1" />
+                    <span>{getVisibleReviewsCount(company)}</span>
+                  </div>
                 </TableCell>
                 <TableCell className="flex items-center gap-2">
                   <CompanyActions company={company} isPrivate={isPrivate} isTeamView={isTeamView} />
