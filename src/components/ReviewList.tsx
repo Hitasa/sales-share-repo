@@ -41,7 +41,7 @@ const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false, teamId
   //    - teamId exists (company belongs to a team)
   //    - user is authenticated
   const visibleReviews = [
-    ...reviews, // Include all public reviews
+    ...reviews.filter(review => !review.isTeamReview), // Only include non-team reviews
     ...(showTeamReviews && isTeamMember && teamId && user ? teamReviews : [])
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
