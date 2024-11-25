@@ -69,7 +69,7 @@ export const CompanyList = ({
     window.open(website, '_blank');
   };
 
-  const getTeatmikUrl = (registryCode: string | null) => {
+  const getTeatmikUrl = (registryCode: string | null | undefined) => {
     if (!registryCode) return null;
     return `https://teatmik.ee/en/person/${registryCode}`;
   };
