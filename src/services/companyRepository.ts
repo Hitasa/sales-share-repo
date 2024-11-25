@@ -30,18 +30,19 @@ export const addToUserRepository = async (companyId: string, userId: string): Pr
   }
 
   try {
-    // First verify that the company exists
-    const { data: companies, error: companyError } = await supabase
+    // First verify that the company exists - using * instead of just id to ensure we get all fields
+    const { data: company, error: companyError } = await supabase
       .from('companies')
-      .select('id')
-      .eq('id', companyId);
+      .select('*')
+      .eq('id', companyId)
+      .maybeSingle();
 
     if (companyError) {
       console.error('Error checking company:', companyError);
       throw new Error('Failed to verify company');
     }
 
-    if (!companies || companies.length === 0) {
+    if (!company) {
       throw new Error('Company not found');
     }
 
