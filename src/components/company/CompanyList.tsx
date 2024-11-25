@@ -4,7 +4,7 @@ import { CompanyActions } from "./CompanyActions";
 import { CompanyDetailsDialog } from "./CompanyDetailsDialog";
 import { CompanyProfile } from "./CompanyProfile";
 import { Company } from "@/services/types";
-import { ExternalLink, Star } from "lucide-react";
+import { ExternalLink, Star, Link } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -105,14 +105,25 @@ export const CompanyList = ({
                 >
                   {company.name}
                   {company.website && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-4 w-4 p-0"
-                      onClick={(e) => handleWebsiteClick(company.website!, e)}
-                    >
-                      <ExternalLink className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-4 w-4 p-0"
+                        onClick={(e) => handleWebsiteClick(company.website!, e)}
+                      >
+                        <ExternalLink className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 py-0 text-xs"
+                        onClick={(e) => handleWebsiteClick(company.website!, e)}
+                      >
+                        <Link className="h-3 w-3 mr-1" />
+                        Open Website
+                      </Button>
+                    </div>
                   )}
                 </TableCell>
                 <TableCell>
