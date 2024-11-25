@@ -50,18 +50,18 @@ export const searchCompanies = async (query: string): Promise<Company[]> => {
       return localResults || [];
     }
 
-    // Transform Google search results into Company format
+    // Transform Google search results into Company format, now with empty industry and website
     const googleResults = googleData.items.map((item: any) => ({
       id: item.cacheId || crypto.randomUUID(),
       name: item.title,
-      industry: item.snippet?.split(' - ')[0] || '',
-      website: item.link,
+      industry: null,
+      website: null,
       created_by: null,
       team_id: null,
       created_at: new Date().toISOString(),
       email: null,
       growth: null,
-      notes: item.snippet || null,
+      notes: null,
       phone_number: null,
       review: null,
       sales_volume: null
