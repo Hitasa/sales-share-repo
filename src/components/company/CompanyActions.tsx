@@ -46,15 +46,20 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
   });
 
   const checkExistingRepository = async () => {
-    const { data, error } = await supabase
-      .from("company_repositories")
-      .select("id")
-      .eq("company_id", company.id)
-      .eq("user_id", user?.id)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("company_repositories")
+        .select("id")
+        .eq("company_id", company.id)
+        .eq("user_id", user?.id)
+        .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') throw error;
-    return !!data;
+      if (error) throw error;
+      return !!data;
+    } catch (error) {
+      console.error("Error checking repository:", error);
+      return false;
+    }
   };
 
   const addToRepositoryMutation = useMutation({
