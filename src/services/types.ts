@@ -46,5 +46,5 @@ export interface Offer {
   createdAt: string;
 }
 
-// Re-export Team type from types/team
-export { Team } from '@/types/team';
+// Re-export Team type from types/team using export type
+export type { Team } from '@/types/team';
