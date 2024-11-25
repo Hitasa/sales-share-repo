@@ -29,10 +29,11 @@ export const useProjectsData = (projectId?: string) => {
   });
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
-    queryKey: ["projects"],
+    queryKey: ["projects", user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
 
+      // First get the user's team memberships
       const { data: teamMembers } = await supabase
         .from("team_members")
         .select("team_id")
@@ -40,6 +41,7 @@ export const useProjectsData = (projectId?: string) => {
 
       const teamIds = teamMembers?.map(tm => tm.team_id) || [];
 
+      // Then fetch projects that are either created by the user or shared with their teams
       const { data, error } = await supabase
         .from("projects")
         .select(`
