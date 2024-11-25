@@ -7,9 +7,14 @@ interface ReviewListProps {
 }
 
 const ReviewList = ({ reviews }: ReviewListProps) => {
+  // Sort reviews by date, most recent first
+  const sortedReviews = [...reviews].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
   return (
     <div className="space-y-4">
-      {reviews.map((review) => (
+      {sortedReviews.map((review) => (
         <div key={review.id} className="border rounded-lg p-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-1">
