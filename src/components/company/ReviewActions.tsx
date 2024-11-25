@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MessageSquare, Star, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Company } from "@/services/types";
 import { useAuth } from "@/contexts/AuthContext";
 import ReviewList from "@/components/ReviewList";
@@ -20,6 +20,24 @@ export const ReviewActions = ({ company, isTeamView = false }: ReviewActionsProp
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [isTeamReview, setIsTeamReview] = useState(false);
+
+  // Check if user is part of the company's team
+  const { data: isTeamMember = false } = useQuery({
+    queryKey: ["teamMembership", company.team_id, user?.id],
+    queryFn: async () => {
+      if (!user?.id || !company.team_id) return false;
+
+      const { data: teamMember } = await supabase
+        .from("team_members")
+        .select("id")
+        .eq("team_id", company.team_id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      return !!teamMember;
+    },
+    enabled: !!user?.id && !!company.team_id,
+  });
 
   const addReviewMutation = useMutation({
     mutationFn: async (review: { rating: number; comment: string }) => {
@@ -40,7 +58,7 @@ export const ReviewActions = ({ company, isTeamView = false }: ReviewActionsProp
 
       let updatedField = {};
       
-      if (isTeamReview || company.team_id) {
+      if (isTeamReview && company.team_id) {
         const teamReviews = [...(companyData?.team_reviews || []), newReview];
         updatedField = { team_reviews: teamReviews };
       } else {
@@ -74,10 +92,9 @@ export const ReviewActions = ({ company, isTeamView = false }: ReviewActionsProp
   });
 
   const calculateAverageRating = () => {
-    const allReviews = [
-      ...(company.reviews || []),
-      ...(company.team_reviews || [])
-    ];
+    const publicReviews = company.reviews || [];
+    const teamReviews = isTeamMember ? (company.team_reviews || []) : [];
+    const allReviews = [...publicReviews, ...teamReviews];
     
     if (!allReviews || allReviews.length === 0) return 0;
     const sum = allReviews.reduce((acc, review) => acc + review.rating, 0);
@@ -85,7 +102,8 @@ export const ReviewActions = ({ company, isTeamView = false }: ReviewActionsProp
   };
 
   const averageRating = calculateAverageRating();
-  const allReviews = [...(company.reviews || []), ...(company.team_reviews || [])];
+  const publicReviews = company.reviews || [];
+  const teamReviews = company.team_reviews || [];
 
   return (
     <div className="flex items-center space-x-2">
@@ -101,18 +119,18 @@ export const ReviewActions = ({ company, isTeamView = false }: ReviewActionsProp
             <DialogTitle>Reviews for {company.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
-            {allReviews.length > 0 ? (
-              <ReviewList reviews={allReviews} />
-            ) : (
-              <p className="text-muted-foreground">No reviews yet.</p>
-            )}
+            <ReviewList 
+              reviews={publicReviews} 
+              teamReviews={teamReviews}
+              showTeamReviews={isTeamMember}
+            />
             {user && (
               <div className="border-t pt-6">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold">
                     Write a Review
                   </h3>
-                  {isTeamView && (
+                  {isTeamView && isTeamMember && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -145,7 +163,7 @@ export const ReviewActions = ({ company, isTeamView = false }: ReviewActionsProp
           />
         ))}
         <span className="text-sm text-gray-600 ml-1">
-          ({allReviews.length || 0})
+          ({publicReviews.length + (isTeamMember ? teamReviews.length : 0)})
         </span>
       </div>
     </div>

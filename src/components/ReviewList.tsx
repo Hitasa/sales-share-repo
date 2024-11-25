@@ -4,17 +4,20 @@ import { Badge } from "@/components/ui/badge";
 
 interface ReviewListProps {
   reviews: Review[];
+  teamReviews?: Review[];
+  showTeamReviews?: boolean;
 }
 
-const ReviewList = ({ reviews }: ReviewListProps) => {
-  // Sort reviews by date, most recent first
-  const sortedReviews = [...reviews].sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false }: ReviewListProps) => {
+  // Combine and sort reviews based on visibility permissions
+  const visibleReviews = [
+    ...reviews,
+    ...(showTeamReviews ? teamReviews : [])
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <div className="space-y-4">
-      {sortedReviews.map((review) => (
+      {visibleReviews.map((review) => (
         <div key={review.id} className="border rounded-lg p-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-1">
