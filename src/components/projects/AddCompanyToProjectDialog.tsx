@@ -13,26 +13,6 @@ interface AddCompanyToProjectDialogProps {
   onAddCompany: (company: Company) => void;
 }
 
-interface CompanyData {
-  id: string;
-  name: string;
-  industry: string | null;
-  sales_volume: string | null;
-  growth: string | null;
-  website: string | null;
-  phone_number: string | null;
-  email: string | null;
-  review: string | null;
-  notes: string | null;
-  created_by: string | null;
-  team_id: string | null;
-  reviews: any[];
-}
-
-interface RepositoryCompany {
-  companies: CompanyData;
-}
-
 export const AddCompanyToProjectDialog = ({
   projectId,
   teamId,
@@ -43,7 +23,7 @@ export const AddCompanyToProjectDialog = ({
   const { user } = useAuth();
 
   const { data: availableCompanies = [], isLoading } = useQuery({
-    queryKey: ["available-team-companies", teamId, projectId, user?.id],
+    queryKey: ["available-companies", teamId, projectId, user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
 
@@ -55,89 +35,62 @@ export const AddCompanyToProjectDialog = ({
 
       const existingIds = existingCompanies?.map(c => c.company_id) || [];
 
-      let query = supabase
+      // Get user's companies and team companies
+      const { data: userCompanies } = await supabase
+        .from("companies")
+        .select("*")
+        .eq("created_by", user.id);
+
+      // Get companies from user's repository
+      const { data: repositoryCompanies } = await supabase
         .from("company_repositories")
-        .select(`
-          companies (*)
-        `)
+        .select("companies (*)")
         .eq("user_id", user.id);
 
-      // Only add the not-in filter if there are existing IDs
-      if (existingIds.length > 0) {
-        query = query.not('companies.id', 'in', `(${existingIds.join(',')})`);
-      }
-
-      const { data: repositoryCompanies } = await query;
-
-      // Get companies shared with the team
-      let teamQuery = supabase
-        .from("companies")
-        .select("*");
-      
+      // Get team companies if teamId is provided
+      let teamCompanies: any[] = [];
       if (teamId) {
-        teamQuery = teamQuery.eq("team_id", teamId);
-      } else {
-        teamQuery = teamQuery.is("team_id", null);
+        const { data: teamData } = await supabase
+          .from("companies")
+          .select("*")
+          .eq("team_id", teamId);
+        teamCompanies = teamData || [];
       }
 
-      // Only add the not-in filter if there are existing IDs
-      if (existingIds.length > 0) {
-        teamQuery = teamQuery.not('id', 'in', `(${existingIds.join(',')})`);
-      }
+      // Combine all companies and remove duplicates
+      const allCompanies = [
+        ...(userCompanies || []),
+        ...(repositoryCompanies?.map(rc => rc.companies) || []),
+        ...teamCompanies
+      ];
 
-      const { data: teamCompanies } = await teamQuery;
-
-      // Transform repository companies
-      const repoCompanies = ((repositoryCompanies || []) as unknown as RepositoryCompany[]).map(rc => ({
-        id: rc.companies.id,
-        name: rc.companies.name,
-        industry: rc.companies.industry || undefined,
-        salesVolume: rc.companies.sales_volume || undefined,
-        growth: rc.companies.growth || undefined,
-        website: rc.companies.website || undefined,
-        phoneNumber: rc.companies.phone_number || undefined,
-        email: rc.companies.email || undefined,
-        review: rc.companies.review || undefined,
-        notes: rc.companies.notes || undefined,
-        createdBy: rc.companies.created_by || "",
-        team_id: rc.companies.team_id,
-        sharedWith: [],
-        reviews: rc.companies.reviews || [],
-      }));
-
-      // Transform team companies
-      const transformedTeamCompanies = (teamCompanies || []).map(company => ({
-        id: company.id,
-        name: company.name,
-        industry: company.industry || undefined,
-        salesVolume: company.sales_volume || undefined,
-        growth: company.growth || undefined,
-        website: company.website || undefined,
-        phoneNumber: company.phone_number || undefined,
-        email: company.email || undefined,
-        review: company.review || undefined,
-        notes: company.notes || undefined,
-        createdBy: company.created_by || "",
-        team_id: company.team_id,
-        sharedWith: [],
-        reviews: company.reviews || [],
-      }));
-
-      // Remove duplicates by company ID
-      const uniqueCompanies = [...repoCompanies, ...transformedTeamCompanies]
+      // Filter out companies that are already in the project
+      const uniqueCompanies = allCompanies
         .filter((company, index, self) => 
-          index === self.findIndex(c => c.id === company.id)
-        );
+          index === self.findIndex(c => c.id === company.id) &&
+          !existingIds.includes(company.id)
+        )
+        .map(company => ({
+          id: company.id,
+          name: company.name,
+          industry: company.industry || undefined,
+          salesVolume: company.sales_volume || undefined,
+          growth: company.growth || undefined,
+          website: company.website || undefined,
+          phoneNumber: company.phone_number || undefined,
+          email: company.email || undefined,
+          review: company.review || undefined,
+          notes: company.notes || undefined,
+          createdBy: company.created_by || "",
+          team_id: company.team_id,
+          sharedWith: [],
+          reviews: company.reviews || [],
+        }));
 
       return uniqueCompanies;
     },
-    enabled: !!user?.id && !!projectId,
+    enabled: !!user?.id && !!projectId && isOpen,
   });
-
-  const handleAddCompany = (company: Company) => {
-    onAddCompany(company);
-    onOpenChange(false);
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -154,7 +107,7 @@ export const AddCompanyToProjectDialog = ({
         ) : (
           <CompanyList
             companies={availableCompanies}
-            onCompanySelect={handleAddCompany}
+            onCompanySelect={onAddCompany}
           />
         )}
       </DialogContent>
