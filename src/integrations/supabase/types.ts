@@ -25,6 +25,7 @@ export type Database = {
           reviews: Json | null
           sales_volume: string | null
           team_id: string | null
+          team_reviews: Json | null
           website: string | null
         }
         Insert: {
@@ -42,6 +43,7 @@ export type Database = {
           reviews?: Json | null
           sales_volume?: string | null
           team_id?: string | null
+          team_reviews?: Json | null
           website?: string | null
         }
         Update: {
@@ -59,6 +61,7 @@ export type Database = {
           reviews?: Json | null
           sales_volume?: string | null
           team_id?: string | null
+          team_reviews?: Json | null
           website?: string | null
         }
         Relationships: [

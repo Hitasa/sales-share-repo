@@ -32,30 +32,48 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
       try {
         const { data, error } = await supabase
           .from('companies')
-          .select('reviews, team_id, comments')
+          .select('reviews, team_id, comments, team_reviews')
           .eq('id', company.id)
           .maybeSingle();
         
         if (error) throw error;
         
-        if (!data || data.team_id) {
-          return { reviews: [], team_id: data?.team_id, comments: [] };
+        if (!data) {
+          return { 
+            reviews: [], 
+            team_id: null, 
+            comments: [],
+            team_reviews: []
+          };
         }
         
+        // Combine regular reviews and team reviews
+        const allReviews = [
+          ...(data.reviews || []),
+          ...(data.team_reviews || [])
+        ];
+        
         return { 
-          reviews: data.reviews || [], 
+          reviews: allReviews,
           team_id: data.team_id,
-          comments: data.comments || []
+          comments: data.comments || [],
+          team_reviews: data.team_reviews || []
         };
       } catch (error) {
         console.error('Error fetching company reviews:', error);
-        return { reviews: [], team_id: null, comments: [] };
+        return { 
+          reviews: [], 
+          team_id: null, 
+          comments: [],
+          team_reviews: []
+        };
       }
     },
     initialData: { 
-      reviews: company.reviews || [], 
+      reviews: [...(company.reviews || []), ...(company.team_reviews || [])],
       team_id: company.team_id,
-      comments: company.comments || []
+      comments: company.comments || [],
+      team_reviews: company.team_reviews || []
     }
   });
 
