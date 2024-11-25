@@ -34,11 +34,11 @@ const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false, teamId
   });
 
   // Filter reviews to show:
-  // 1. Always show public reviews (non-team reviews)
+  // 1. Always show public reviews
   // 2. Show team reviews only if:
-  //    - showTeamReviews is true
+  //    - showTeamReviews is true (indicating we're in My Repositories view)
   //    - user is a team member
-  //    - review belongs to the specific team
+  //    - teamId exists (company belongs to a team)
   const visibleReviews = [
     ...reviews, // Include all public reviews
     ...(showTeamReviews && isTeamMember && teamId ? teamReviews : [])
