@@ -1,14 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trash2, Share2 } from "lucide-react";
+import { Trash2, Share2, Users } from "lucide-react";
 import { TeamShareDialog } from "@/components/team/TeamShareDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 interface Project {
   id: string;
   name: string;
+  team_id?: string | null;
+  team?: {
+    name: string;
+  } | null;
 }
 
 interface ProjectListProps {
@@ -38,7 +43,7 @@ export const ProjectList = ({
     },
   });
 
-  const handleTeamShare = async (projectId: string, teamId: string, teamName: string, onSuccess: () => void) => {
+  const handleTeamShare = async (projectId: string, teamId: string) => {
     try {
       const { error } = await supabase
         .from("projects")
@@ -49,10 +54,8 @@ export const ProjectList = ({
       
       toast({
         title: "Success",
-        description: `Project shared with team ${teamName}`,
+        description: "Project shared with team successfully",
       });
-      
-      onSuccess();
     } catch (error) {
       console.error("Error sharing project:", error);
       toast({
@@ -75,14 +78,20 @@ export const ProjectList = ({
           onClick={() => onProjectSelect(project.id)}
         >
           <div className="flex justify-between items-center">
-            <span>{project.name}</span>
+            <div className="flex items-center gap-2">
+              <span>{project.name}</span>
+              {project.team_id && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  Shared with team
+                </Badge>
+              )}
+            </div>
             <div className="flex gap-2">
-              {teams && teams.length > 0 && (
+              {teams && teams.length > 0 && !project.team_id && (
                 <TeamShareDialog
                   teams={teams}
-                  onTeamSelect={(teamId, teamName, onSuccess) => 
-                    handleTeamShare(project.id, teamId, teamName, onSuccess)
-                  }
+                  onTeamSelect={(teamId) => handleTeamShare(project.id, teamId)}
                 />
               )}
               <Button

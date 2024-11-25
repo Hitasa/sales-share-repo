@@ -30,7 +30,30 @@ export const useProjectsData = (projectId?: string) => {
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ["projects"],
-    queryFn: () => fetchProjects(user?.id || ""),
+    queryFn: async () => {
+      if (!user?.id) return [];
+
+      const { data: teamMembers } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", user.id);
+
+      const teamIds = teamMembers?.map(tm => tm.team_id) || [];
+
+      const { data, error } = await supabase
+        .from("projects")
+        .select(`
+          *,
+          team:teams (
+            name
+          )
+        `)
+        .or(`created_by.eq.${user.id}${teamIds.length > 0 ? `,team_id.in.(${teamIds.join(',')})` : ''}`)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
