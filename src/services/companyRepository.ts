@@ -27,19 +27,18 @@ export const fetchUserCompanyRepository = async (userId: string): Promise<Compan
 export const addToUserRepository = async (companyId: string, userId: string): Promise<void> => {
   try {
     // Check if the company is already in the repository
-    const { data: existingEntry, error: checkError } = await supabase
+    const { data: existingEntries, error: checkError } = await supabase
       .from('company_repositories')
       .select('id')
       .eq('company_id', companyId)
-      .eq('user_id', userId)
-      .single();
+      .eq('user_id', userId);
 
-    if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+    if (checkError) {
       console.error('Error checking repository:', checkError);
       throw checkError;
     }
 
-    if (existingEntry) {
+    if (existingEntries && existingEntries.length > 0) {
       throw new Error('Company is already in your repository');
     }
 
