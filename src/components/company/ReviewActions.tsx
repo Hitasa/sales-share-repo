@@ -93,7 +93,7 @@ export const ReviewActions = ({ company, isTeamView = false }: ReviewActionsProp
   });
 
   const calculateAverageRating = () => {
-    const publicReviews = company.reviews || [];
+    const publicReviews = (company.reviews || []).filter(review => !review.isTeamReview);
     const teamReviews = isTeamMember ? (company.team_reviews || []) : [];
     const allReviews = [...publicReviews, ...teamReviews];
     
@@ -103,8 +103,9 @@ export const ReviewActions = ({ company, isTeamView = false }: ReviewActionsProp
   };
 
   const averageRating = calculateAverageRating();
-  const publicReviews = company.reviews || [];
+  const publicReviews = (company.reviews || []).filter(review => !review.isTeamReview);
   const teamReviews = company.team_reviews || [];
+  const visibleReviewsCount = publicReviews.length + (isTeamMember ? teamReviews.length : 0);
 
   return (
     <div className="flex items-center space-x-2">
@@ -165,7 +166,7 @@ export const ReviewActions = ({ company, isTeamView = false }: ReviewActionsProp
           />
         ))}
         <span className="text-sm text-gray-600 ml-1">
-          ({publicReviews.length + (isTeamMember ? teamReviews.length : 0)})
+          ({visibleReviewsCount})
         </span>
       </div>
     </div>
