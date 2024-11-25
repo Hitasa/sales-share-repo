@@ -9,10 +9,10 @@ interface ReviewListProps {
 }
 
 const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false }: ReviewListProps) => {
-  // Only include team reviews if showTeamReviews is true
+  // Only include team reviews if showTeamReviews is true and mark them as team reviews
   const visibleReviews = [
     ...reviews,
-    ...(showTeamReviews ? teamReviews : [])
+    ...(showTeamReviews ? teamReviews.map(review => ({ ...review, isTeamReview: true })) : [])
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   if (visibleReviews.length === 0) {
