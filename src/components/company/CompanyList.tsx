@@ -9,13 +9,15 @@ import { ExternalLink } from "lucide-react";
 interface CompanyListProps {
   companies: Company[];
   isPrivate?: boolean;
+  isTeamView?: boolean;
   onCompanySelect?: (company: Company) => void;
   additionalActions?: (company: Company) => React.ReactNode;
 }
 
 export const CompanyList = ({ 
   companies, 
-  isPrivate = false, 
+  isPrivate = false,
+  isTeamView = false,
   onCompanySelect,
   additionalActions 
 }: CompanyListProps) => {
@@ -69,7 +71,7 @@ export const CompanyList = ({
                   )}
                 </TableCell>
                 <TableCell className="flex items-center gap-2">
-                  <CompanyActions company={company} isPrivate={isPrivate} />
+                  <CompanyActions company={company} isPrivate={isPrivate} isTeamView={isTeamView} />
                   {additionalActions && additionalActions(company)}
                 </TableCell>
               </TableRow>
