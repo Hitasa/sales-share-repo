@@ -72,7 +72,7 @@ export const AddCompanyToProjectDialog = ({
         .not('id', 'in', existingIds);
 
       // Transform repository companies
-      const repoCompanies = (repositoryCompanies as RepositoryCompany[] || []).map(rc => ({
+      const repoCompanies = ((repositoryCompanies || []) as unknown as RepositoryCompany[]).map(rc => ({
         id: rc.companies.id,
         name: rc.companies.name,
         industry: rc.companies.industry || undefined,
