@@ -107,7 +107,9 @@ export const ReviewActions = ({ company, isTeamView = false }: ReviewActionsProp
             )}
             {user && (
               <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold mb-4">Write a {isTeamView ? 'Team ' : ''}Review</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Write a {isTeamView ? 'Team ' : ''}Review
+                </h3>
                 <ReviewForm 
                   companyId={company.id} 
                   onSubmit={(review) => addReviewMutation.mutate(review)} 
