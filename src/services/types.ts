@@ -15,6 +15,7 @@ export interface Company {
   reviews?: Review[];
   comments?: Comment[];
   team_reviews?: Review[];
+  averageRating?: number;
 }
 
 export interface Review {
@@ -44,3 +45,6 @@ export interface Offer {
   status: 'pending' | 'accepted' | 'rejected';
   createdAt: string;
 }
+
+// Re-export Team type from types/team
+export { Team } from '@/types/team';
