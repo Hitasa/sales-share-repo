@@ -40,7 +40,8 @@ const TeamRepositories = () => {
           created_by,
           team_id,
           created_at,
-          reviews
+          reviews,
+          team_reviews
         `)
         .in('team_id', teamIds);
 
@@ -58,8 +59,10 @@ const TeamRepositories = () => {
         review: company.review || undefined,
         notes: company.notes || undefined,
         createdBy: company.created_by || "",
-        sharedWith: [], // This field isn't stored in the database
+        team_id: company.team_id,
+        sharedWith: [],
         reviews: company.reviews || [],
+        team_reviews: company.team_reviews || [],
       })) as Company[];
     },
     enabled: !!user,
@@ -74,7 +77,7 @@ const TeamRepositories = () => {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Team Repository</h1>
       </div>
-      <CompanyList companies={teamCompanies} />
+      <CompanyList companies={teamCompanies} isTeamView={true} />
     </div>
   );
 };

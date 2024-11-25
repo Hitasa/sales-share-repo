@@ -11,9 +11,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface ReviewActionsProps {
   company: Company;
+  isTeamView?: boolean;
 }
 
-export const ReviewActions = ({ company }: ReviewActionsProps) => {
+export const ReviewActions = ({ company, isTeamView = false }: ReviewActionsProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -36,8 +37,8 @@ export const ReviewActions = ({ company }: ReviewActionsProps) => {
 
       let updatedField = {};
       
-      // If the company belongs to a team, add to team_reviews
-      if (company.team_id) {
+      // If viewing from team repository or company belongs to a team, add to team_reviews
+      if (isTeamView || company.team_id) {
         const teamReviews = [...(companyData?.team_reviews || []), newReview];
         updatedField = { team_reviews: teamReviews };
       } else {
@@ -106,7 +107,7 @@ export const ReviewActions = ({ company }: ReviewActionsProps) => {
             )}
             {user && (
               <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold mb-4">Write a Review</h3>
+                <h3 className="text-lg font-semibold mb-4">Write a {isTeamView ? 'Team ' : ''}Review</h3>
                 <ReviewForm 
                   companyId={company.id} 
                   onSubmit={(review) => addReviewMutation.mutate(review)} 
