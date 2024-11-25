@@ -144,6 +144,7 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
               reviews={editedCompany.reviews || []} 
               teamReviews={editedCompany.team_reviews || []}
               showTeamReviews={isTeamMember}
+              teamId={initialCompany.team_id}
             />
           </div>
         </CardContent>
