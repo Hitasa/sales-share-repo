@@ -25,6 +25,10 @@ export const fetchUserCompanyRepository = async (userId: string): Promise<Compan
 };
 
 export const addToUserRepository = async (companyId: string, userId: string): Promise<void> => {
+  if (!companyId || !userId) {
+    throw new Error('Company ID and User ID are required');
+  }
+
   try {
     // First verify that the company exists
     const { data: companies, error: companyError } = await supabase
@@ -32,7 +36,11 @@ export const addToUserRepository = async (companyId: string, userId: string): Pr
       .select('id')
       .eq('id', companyId);
 
-    if (companyError) throw companyError;
+    if (companyError) {
+      console.error('Error checking company:', companyError);
+      throw new Error('Failed to verify company');
+    }
+
     if (!companies || companies.length === 0) {
       throw new Error('Company not found');
     }
@@ -46,7 +54,7 @@ export const addToUserRepository = async (companyId: string, userId: string): Pr
 
     if (checkError) {
       console.error('Error checking repository:', checkError);
-      throw checkError;
+      throw new Error('Failed to check repository');
     }
 
     if (existingEntries && existingEntries.length > 0) {
@@ -63,7 +71,7 @@ export const addToUserRepository = async (companyId: string, userId: string): Pr
 
     if (insertError) {
       console.error('Error inserting into repository:', insertError);
-      throw insertError;
+      throw new Error('Failed to add company to repository');
     }
   } catch (error) {
     console.error('Error in addToUserRepository:', error);
@@ -74,11 +82,18 @@ export const addToUserRepository = async (companyId: string, userId: string): Pr
 };
 
 export const removeFromUserRepository = async (companyId: string, userId: string): Promise<void> => {
+  if (!companyId || !userId) {
+    throw new Error('Company ID and User ID are required');
+  }
+
   const { error } = await supabase
     .from('company_repositories')
     .delete()
     .eq('company_id', companyId)
     .eq('user_id', userId);
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error removing from repository:', error);
+    throw new Error('Failed to remove company from repository');
+  }
 };
