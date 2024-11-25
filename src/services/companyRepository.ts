@@ -25,48 +25,12 @@ export const fetchUserCompanyRepository = async (userId: string): Promise<Compan
 };
 
 export const addToUserRepository = async (companyId: string, userId: string): Promise<void> => {
-  try {
-    // First check if the company exists and is accessible to the user
-    const { data: company, error: companyError } = await supabase
-      .from('companies')
-      .select('*')
-      .or(`team_id.is.null,created_by.eq.${userId}`)
-      .eq('id', companyId)
-      .maybeSingle();
+  const { error: insertError } = await supabase
+    .from('company_repositories')
+    .insert([{ company_id: companyId, user_id: userId }]);
 
-    if (companyError) throw companyError;
-    
-    if (!company) {
-      throw new Error('Company not found or not accessible');
-    }
-
-    // Check if the company is already in the repository
-    const { data: existingEntry, error: existingError } = await supabase
-      .from('company_repositories')
-      .select('id')
-      .eq('company_id', companyId)
-      .eq('user_id', userId)
-      .maybeSingle();
-
-    if (existingError) throw existingError;
-
-    if (existingEntry) {
-      throw new Error('Company is already in your repository');
-    }
-
-    // Add to repository
-    const { error: insertError } = await supabase
-      .from('company_repositories')
-      .insert([{ company_id: companyId, user_id: userId }]);
-
-    if (insertError) {
-      throw insertError;
-    }
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error('Failed to add company to repository');
+  if (insertError) {
+    throw insertError;
   }
 };
 
