@@ -10,12 +10,13 @@ interface ReviewListProps {
 }
 
 const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false, teamId }: ReviewListProps) => {
-  // Only include team reviews if showTeamReviews is true AND the review belongs to the current team
+  // Only include team reviews if showTeamReviews is true AND we have a valid teamId match
   const visibleReviews = [
     ...reviews,
-    ...(showTeamReviews ? 
-      teamReviews.filter(review => review.teamId === teamId)
-      .map(review => ({ ...review, isTeamReview: true })) 
+    ...(showTeamReviews && teamId ? 
+      teamReviews
+        .filter(review => review.teamId === teamId)
+        .map(review => ({ ...review, isTeamReview: true })) 
       : []
     )
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
