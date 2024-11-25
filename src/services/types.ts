@@ -24,6 +24,7 @@ export interface Review {
   comment: string;
   date: string;
   isTeamReview?: boolean;
+  teamId?: string | null;
 }
 
 export interface Comment {
