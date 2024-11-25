@@ -9,11 +9,15 @@ interface ReviewListProps {
 }
 
 const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false }: ReviewListProps) => {
-  // Combine and sort reviews based on visibility permissions
+  // Only include team reviews if showTeamReviews is true
   const visibleReviews = [
     ...reviews,
     ...(showTeamReviews ? teamReviews : [])
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  if (visibleReviews.length === 0) {
+    return <p className="text-sm text-gray-500">No reviews yet.</p>;
+  }
 
   return (
     <div className="space-y-4">
@@ -32,7 +36,7 @@ const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false }: Revi
                 />
               ))}
             </div>
-            {review.isTeamReview && (
+            {review.isTeamReview && showTeamReviews && (
               <Badge variant="secondary" className="flex items-center gap-1">
                 <Users className="h-3 w-3" />
                 Team Review
