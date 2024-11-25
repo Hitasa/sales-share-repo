@@ -7,9 +7,11 @@ import { Company, Comment, Review } from "@/services/types";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { updateCompany } from "@/services/api";
 import { ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CompanyProfileProps {
   company: Company;
@@ -22,11 +24,31 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
   const [newComment, setNewComment] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
-  const calculateAverageRating = (reviews: { rating: number }[] = []) => {
-    if (!reviews.length) return 0;
-    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
-    return Number((sum / reviews.length).toFixed(1));
+  // Check if user is part of the company's team
+  const { data: isTeamMember = false } = useQuery({
+    queryKey: ["teamMembership", initialCompany.team_id, user?.id],
+    queryFn: async () => {
+      if (!user?.id || !initialCompany.team_id) return false;
+
+      const { data: teamMember } = await supabase
+        .from("team_members")
+        .select("id")
+        .eq("team_id", initialCompany.team_id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      return !!teamMember;
+    },
+    enabled: !!user?.id && !!initialCompany.team_id,
+  });
+
+  const calculateAverageRating = (reviews: { rating: number }[] = [], teamReviews: { rating: number }[] = []) => {
+    const allReviews = [...reviews, ...(isTeamMember ? teamReviews : [])];
+    if (!allReviews.length) return 0;
+    const sum = allReviews.reduce((acc, review) => acc + review.rating, 0);
+    return Number((sum / allReviews.length).toFixed(1));
   };
 
   const updateCompanyMutation = useMutation({
@@ -34,7 +56,6 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
     onSuccess: (updatedCompany) => {
       setEditedCompany(updatedCompany);
       setIsEditing(false);
-      // Invalidate both queries to ensure data is refreshed
       queryClient.invalidateQueries({ queryKey: ["userCompanies"] });
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
       toast({
@@ -64,10 +85,7 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
       createdAt: new Date().toISOString(),
     };
 
-    const updatedComments = [
-      ...(editedCompany.comments || []),
-      newCommentObj,
-    ];
+    const updatedComments = [...(editedCompany.comments || []), newCommentObj];
 
     updateCompanyMutation.mutate({
       ...editedCompany,
@@ -88,11 +106,11 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
     updateCompanyMutation.mutate({
       ...editedCompany,
       reviews: updatedReviews,
-      averageRating: calculateAverageRating(updatedReviews),
+      averageRating: calculateAverageRating(updatedReviews, editedCompany.team_reviews || []),
     });
   };
 
-  const averageRating = calculateAverageRating(editedCompany.reviews);
+  const averageRating = calculateAverageRating(editedCompany.reviews, editedCompany.team_reviews);
 
   return (
     <div className="container mx-auto py-8">
@@ -122,9 +140,11 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
           <CardTitle className="mb-4">Reviews</CardTitle>
           <div className="space-y-6">
             <ReviewForm companyId={initialCompany.id} onSubmit={handleAddReview} />
-            {editedCompany.reviews && editedCompany.reviews.length > 0 && (
-              <ReviewList reviews={editedCompany.reviews} />
-            )}
+            <ReviewList 
+              reviews={editedCompany.reviews || []} 
+              teamReviews={editedCompany.team_reviews || []}
+              showTeamReviews={isTeamMember}
+            />
           </div>
         </CardContent>
 
