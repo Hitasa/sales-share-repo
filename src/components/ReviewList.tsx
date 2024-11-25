@@ -40,11 +40,8 @@ const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false, teamId
   //    - user is a team member
   //    - review belongs to the specific team
   const visibleReviews = [
-    ...reviews.filter(review => !review.isTeamReview), // Include all public reviews
-    ...(showTeamReviews && isTeamMember && teamId ? 
-      teamReviews.filter(review => review.teamId === teamId) 
-      : []
-    )
+    ...reviews, // Include all public reviews
+    ...(showTeamReviews && isTeamMember && teamId ? teamReviews : [])
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   if (visibleReviews.length === 0) {
