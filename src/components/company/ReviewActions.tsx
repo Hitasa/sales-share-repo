@@ -4,10 +4,10 @@ import { MessageSquare, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Company } from "@/services/types";
-import { addReview } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import ReviewList from "@/components/ReviewList";
 import ReviewForm from "@/components/ReviewForm";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ReviewActionsProps {
   company: Company;
@@ -19,8 +19,41 @@ export const ReviewActions = ({ company }: ReviewActionsProps) => {
   const { user } = useAuth();
 
   const addReviewMutation = useMutation({
-    mutationFn: (review: { rating: number; comment: string }) => 
-      addReview(company.id, review),
+    mutationFn: async (review: { rating: number; comment: string }) => {
+      if (!company.id) throw new Error('Company ID is required');
+
+      const newReview = {
+        id: crypto.randomUUID(),
+        ...review,
+        date: new Date().toISOString().split('T')[0],
+      };
+
+      const { data: companyData } = await supabase
+        .from('companies')
+        .select('reviews, team_reviews, team_id')
+        .eq('id', company.id)
+        .single();
+
+      let updatedField = {};
+      
+      // If the company belongs to a team, add to team_reviews
+      if (company.team_id) {
+        const teamReviews = [...(companyData?.team_reviews || []), newReview];
+        updatedField = { team_reviews: teamReviews };
+      } else {
+        // Otherwise, add to regular reviews
+        const reviews = [...(companyData?.reviews || []), newReview];
+        updatedField = { reviews };
+      }
+
+      const { error } = await supabase
+        .from('companies')
+        .update(updatedField)
+        .eq('id', company.id);
+
+      if (error) throw error;
+      return { ...company, ...updatedField };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
@@ -39,12 +72,18 @@ export const ReviewActions = ({ company }: ReviewActionsProps) => {
   });
 
   const calculateAverageRating = () => {
-    if (!company.reviews || company.reviews.length === 0) return 0;
-    const sum = company.reviews.reduce((acc, review) => acc + review.rating, 0);
-    return sum / company.reviews.length;
+    const allReviews = [
+      ...(company.reviews || []),
+      ...(company.team_reviews || [])
+    ];
+    
+    if (!allReviews || allReviews.length === 0) return 0;
+    const sum = allReviews.reduce((acc, review) => acc + review.rating, 0);
+    return sum / allReviews.length;
   };
 
   const averageRating = calculateAverageRating();
+  const allReviews = [...(company.reviews || []), ...(company.team_reviews || [])];
 
   return (
     <>
@@ -60,8 +99,8 @@ export const ReviewActions = ({ company }: ReviewActionsProps) => {
             <DialogTitle>Reviews for {company.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
-            {company.reviews && company.reviews.length > 0 ? (
-              <ReviewList reviews={company.reviews} />
+            {allReviews.length > 0 ? (
+              <ReviewList reviews={allReviews} />
             ) : (
               <p className="text-muted-foreground">No reviews yet.</p>
             )}
@@ -89,7 +128,7 @@ export const ReviewActions = ({ company }: ReviewActionsProps) => {
           />
         ))}
         <span className="text-sm text-gray-600 ml-1">
-          ({company.reviews?.length || 0})
+          ({allReviews.length || 0})
         </span>
       </div>
     </>
