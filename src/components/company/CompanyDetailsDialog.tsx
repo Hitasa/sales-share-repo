@@ -35,20 +35,25 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
   const { data: companyWithReviews } = useQuery({
     queryKey: ["companyReviews", company.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('companies')
-        .select('reviews, team_id')
-        .eq('id', company.id)
-        .single();
-      
-      if (error) throw error;
-
-      // If the company belongs to a team (private), don't show its reviews in public view
-      if (data.team_id) {
-        return { reviews: [], team_id: data.team_id } as CompanyReviewsResponse;
+      try {
+        const { data, error } = await supabase
+          .from('companies')
+          .select('reviews, team_id')
+          .eq('id', company.id)
+          .maybeSingle();
+        
+        if (error) throw error;
+        
+        // If no data found or if the company belongs to a team (private), don't show its reviews in public view
+        if (!data || data.team_id) {
+          return { reviews: [], team_id: data?.team_id } as CompanyReviewsResponse;
+        }
+        
+        return { reviews: data.reviews || [], team_id: data.team_id } as CompanyReviewsResponse;
+      } catch (error) {
+        console.error('Error fetching company reviews:', error);
+        return { reviews: [], team_id: null } as CompanyReviewsResponse;
       }
-      
-      return { reviews: data.reviews || [], team_id: data.team_id } as CompanyReviewsResponse;
     },
     initialData: { reviews: company.reviews || [], team_id: company.team_id } as CompanyReviewsResponse
   });
