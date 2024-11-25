@@ -25,10 +25,19 @@ export const fetchTeamMembers = async (userId: string): Promise<TeamMember[]> =>
 export const updateCompany = async (companyId: string, updates: Partial<Company>): Promise<Company> => {
   // Transform the updates to match the database column names
   const dbUpdates = {
-    ...updates,
+    name: updates.name,
+    industry: updates.industry,
     sales_volume: updates.salesVolume,
+    growth: updates.growth,
+    website: updates.website,
     phone_number: updates.phoneNumber,
+    email: updates.email,
+    review: updates.review,
+    notes: updates.notes,
     created_by: updates.createdBy,
+    team_id: updates.team_id,
+    reviews: updates.reviews,
+    comments: updates.comments
   };
 
   const { data, error } = await supabase
@@ -80,9 +89,10 @@ const transformCompanyFromDB = (dbCompany: any): Company => ({
   review: dbCompany.review || undefined,
   notes: dbCompany.notes || undefined,
   createdBy: dbCompany.created_by || "",
+  team_id: dbCompany.team_id,
   sharedWith: [],
   reviews: dbCompany.reviews || [],
-  comments: [],
+  comments: dbCompany.comments || []
 });
 
 export const inviteUserToCompany = async (companyId: string, email: string, role: 'admin' | 'member'): Promise<CompanyInvitation> => {
@@ -136,7 +146,7 @@ export const addCompany = async (company: {
     console.error("Error adding company:", error);
     throw error;
   }
-  return data;
+  return transformCompanyFromDB(data);
 };
 
 export const addReview = async (companyId: string, review: { rating: number; comment: string }): Promise<Company> => {
@@ -164,5 +174,5 @@ export const addReview = async (companyId: string, review: { rating: number; com
     .single();
 
   if (updateError) throw updateError;
-  return updatedCompany;
+  return transformCompanyFromDB(updatedCompany);
 };
