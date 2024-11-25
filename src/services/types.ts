@@ -23,6 +23,7 @@ export interface Review {
   rating: number;
   comment: string;
   date: string;
+  isTeamReview?: boolean;
 }
 
 export interface Comment {
