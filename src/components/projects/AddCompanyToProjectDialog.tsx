@@ -55,21 +55,32 @@ export const AddCompanyToProjectDialog = ({
 
       const existingIds = existingCompanies?.map(c => c.company_id) || [];
 
-      // Get companies from user's repository
-      const { data: repositoryCompanies } = await supabase
+      let query = supabase
         .from("company_repositories")
         .select(`
           companies (*)
         `)
-        .eq("user_id", user.id)
-        .not('companies.id', 'in', existingIds);
+        .eq("user_id", user.id);
+
+      // Only add the not-in filter if there are existing IDs
+      if (existingIds.length > 0) {
+        query = query.not('companies.id', 'in', `(${existingIds.join(',')})`);
+      }
+
+      const { data: repositoryCompanies } = await query;
 
       // Get companies shared with the team
-      const { data: teamCompanies } = await supabase
+      let teamQuery = supabase
         .from("companies")
         .select("*")
-        .eq("team_id", teamId)
-        .not('id', 'in', existingIds);
+        .eq("team_id", teamId);
+
+      // Only add the not-in filter if there are existing IDs
+      if (existingIds.length > 0) {
+        teamQuery = teamQuery.not('id', 'in', `(${existingIds.join(',')})`);
+      }
+
+      const { data: teamCompanies } = await teamQuery;
 
       // Transform repository companies
       const repoCompanies = ((repositoryCompanies || []) as unknown as RepositoryCompany[]).map(rc => ({
