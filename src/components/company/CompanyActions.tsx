@@ -45,32 +45,41 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
     enabled: !!user,
   });
 
-  const checkExistingRepository = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("company_repositories")
-        .select("id")
-        .eq("company_id", company.id)
-        .eq("user_id", user?.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      return !!data;
-    } catch (error) {
-      console.error("Error checking repository:", error);
-      return false;
-    }
-  };
-
   const addToRepositoryMutation = useMutation({
     mutationFn: async () => {
       if (!user?.id || !company) {
         throw new Error("Missing required information");
       }
-      const exists = await checkExistingRepository();
-      if (exists) {
-        throw new Error("Company already exists in your repository");
+
+      // First ensure the company exists in the database
+      const { data: existingCompany, error: companyError } = await supabase
+        .from("companies")
+        .select("*")
+        .eq("id", company.id)
+        .maybeSingle();
+
+      if (companyError) throw companyError;
+
+      if (!existingCompany) {
+        // If company doesn't exist, create it first
+        const { error: insertError } = await supabase
+          .from("companies")
+          .insert([{
+            id: company.id,
+            name: company.name,
+            industry: company.industry,
+            sales_volume: company.salesVolume,
+            growth: company.growth,
+            website: company.website,
+            phone_number: company.phoneNumber,
+            email: company.email,
+            created_by: user.id
+          }]);
+
+        if (insertError) throw insertError;
       }
+
+      // Now add to repository
       await addToUserRepository(company.id, user.id);
     },
     onSuccess: () => {
