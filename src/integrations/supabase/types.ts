@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       companies: {
         Row: {
+          comments: Json | null
           created_at: string
           created_by: string | null
           email: string | null
@@ -27,6 +28,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          comments?: Json | null
           created_at?: string
           created_by?: string | null
           email?: string | null
@@ -43,6 +45,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          comments?: Json | null
           created_at?: string
           created_by?: string | null
           email?: string | null

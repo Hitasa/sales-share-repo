@@ -19,11 +19,6 @@ interface CompanyDetailsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-interface CompanyReviewsResponse {
-  reviews: any[];
-  team_id: string | null;
-}
-
 export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDetailsDialogProps) => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
@@ -31,31 +26,37 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
   const [newComment, setNewComment] = useState("");
   const queryClient = useQueryClient();
 
-  // Fetch company reviews
   const { data: companyWithReviews } = useQuery({
     queryKey: ["companyReviews", company.id],
     queryFn: async () => {
       try {
         const { data, error } = await supabase
           .from('companies')
-          .select('reviews, team_id')
+          .select('reviews, team_id, comments')
           .eq('id', company.id)
           .maybeSingle();
         
         if (error) throw error;
         
-        // If no data found or if the company belongs to a team (private), don't show its reviews in public view
         if (!data || data.team_id) {
-          return { reviews: [], team_id: data?.team_id } as CompanyReviewsResponse;
+          return { reviews: [], team_id: data?.team_id, comments: [] };
         }
         
-        return { reviews: data.reviews || [], team_id: data.team_id } as CompanyReviewsResponse;
+        return { 
+          reviews: data.reviews || [], 
+          team_id: data.team_id,
+          comments: data.comments || []
+        };
       } catch (error) {
         console.error('Error fetching company reviews:', error);
-        return { reviews: [], team_id: null } as CompanyReviewsResponse;
+        return { reviews: [], team_id: null, comments: [] };
       }
     },
-    initialData: { reviews: company.reviews || [], team_id: company.team_id } as CompanyReviewsResponse
+    initialData: { 
+      reviews: company.reviews || [], 
+      team_id: company.team_id,
+      comments: company.comments || []
+    }
   });
 
   const handleSave = async () => {
