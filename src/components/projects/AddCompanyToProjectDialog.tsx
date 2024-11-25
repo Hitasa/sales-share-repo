@@ -13,22 +13,24 @@ interface AddCompanyToProjectDialogProps {
   onAddCompany: (company: Company) => void;
 }
 
-interface CompanyRepository {
-  companies: {
-    id: string;
-    name: string;
-    industry: string | null;
-    sales_volume: string | null;
-    growth: string | null;
-    website: string | null;
-    phone_number: string | null;
-    email: string | null;
-    review: string | null;
-    notes: string | null;
-    created_by: string | null;
-    team_id: string | null;
-    reviews: any[];
-  } | null;
+interface CompanyData {
+  id: string;
+  name: string;
+  industry: string | null;
+  sales_volume: string | null;
+  growth: string | null;
+  website: string | null;
+  phone_number: string | null;
+  email: string | null;
+  review: string | null;
+  notes: string | null;
+  created_by: string | null;
+  team_id: string | null;
+  reviews: any[];
+}
+
+interface RepositoryCompany {
+  companies: CompanyData;
 }
 
 export const AddCompanyToProjectDialog = ({
@@ -70,21 +72,21 @@ export const AddCompanyToProjectDialog = ({
         .not('id', 'in', existingIds);
 
       // Transform repository companies
-      const repoCompanies = (repositoryCompanies as CompanyRepository[] || []).map(rc => ({
-        id: rc.companies?.id || "",
-        name: rc.companies?.name || "",
-        industry: rc.companies?.industry || undefined,
-        salesVolume: rc.companies?.sales_volume || undefined,
-        growth: rc.companies?.growth || undefined,
-        website: rc.companies?.website || undefined,
-        phoneNumber: rc.companies?.phone_number || undefined,
-        email: rc.companies?.email || undefined,
-        review: rc.companies?.review || undefined,
-        notes: rc.companies?.notes || undefined,
-        createdBy: rc.companies?.created_by || "",
-        team_id: rc.companies?.team_id,
+      const repoCompanies = (repositoryCompanies as RepositoryCompany[] || []).map(rc => ({
+        id: rc.companies.id,
+        name: rc.companies.name,
+        industry: rc.companies.industry || undefined,
+        salesVolume: rc.companies.sales_volume || undefined,
+        growth: rc.companies.growth || undefined,
+        website: rc.companies.website || undefined,
+        phoneNumber: rc.companies.phone_number || undefined,
+        email: rc.companies.email || undefined,
+        review: rc.companies.review || undefined,
+        notes: rc.companies.notes || undefined,
+        createdBy: rc.companies.created_by || "",
+        team_id: rc.companies.team_id,
         sharedWith: [],
-        reviews: rc.companies?.reviews || [],
+        reviews: rc.companies.reviews || [],
       }));
 
       // Transform team companies
