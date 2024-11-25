@@ -39,21 +39,7 @@ export const AddCompanyToProjectDialog = ({
       const { data: repositoryCompanies } = await supabase
         .from("company_repositories")
         .select(`
-          companies (
-            id,
-            name,
-            industry,
-            sales_volume,
-            growth,
-            website,
-            phone_number,
-            email,
-            review,
-            notes,
-            created_by,
-            team_id,
-            reviews
-          )
+          companies (*)
         `)
         .eq("user_id", user.id)
         .not('companies.id', 'in', existingIds);
@@ -65,7 +51,7 @@ export const AddCompanyToProjectDialog = ({
         .eq("team_id", teamId)
         .not('id', 'in', existingIds);
 
-      // Combine and transform the results
+      // Transform repository companies
       const repoCompanies = (repositoryCompanies || []).map(rc => ({
         id: rc.companies.id,
         name: rc.companies.name,
@@ -83,6 +69,7 @@ export const AddCompanyToProjectDialog = ({
         reviews: rc.companies.reviews || [],
       }));
 
+      // Transform team companies
       const transformedTeamCompanies = (teamCompanies || []).map(company => ({
         id: company.id,
         name: company.name,
