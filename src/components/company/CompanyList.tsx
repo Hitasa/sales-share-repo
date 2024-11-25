@@ -27,6 +27,34 @@ export const CompanyList = ({
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const { user } = useAuth();
 
+  // Move the team membership query to the component level
+  const { data: teamMemberships = {} } = useQuery({
+    queryKey: ["teamMemberships", companies.map(c => c.team_id), user?.id],
+    queryFn: async () => {
+      if (!user?.id) return {};
+
+      const teamIds = companies
+        .map(c => c.team_id)
+        .filter((id): id is string => id !== null);
+
+      if (teamIds.length === 0) return {};
+
+      const { data: teamMembers } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", user.id)
+        .in("team_id", teamIds);
+
+      return teamMembers?.reduce((acc: Record<string, boolean>, member) => {
+        if (member.team_id) {
+          acc[member.team_id] = true;
+        }
+        return acc;
+      }, {}) || {};
+    },
+    enabled: !!user?.id && companies.some(c => c.team_id !== null),
+  });
+
   const handleCompanyClick = (company: Company) => {
     if (isPrivate && onCompanySelect) {
       onCompanySelect(company);
@@ -41,24 +69,7 @@ export const CompanyList = ({
   };
 
   const getVisibleReviewsCount = (company: Company) => {
-    // Check if user is part of the team
-    const { data: isTeamMember = false } = useQuery({
-      queryKey: ["teamMembership", company.team_id, user?.id],
-      queryFn: async () => {
-        if (!user?.id || !company.team_id) return false;
-
-        const { data: teamMember } = await supabase
-          .from("team_members")
-          .select("id")
-          .eq("team_id", company.team_id)
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        return !!teamMember;
-      },
-      enabled: !!user?.id && !!company.team_id,
-    });
-
+    const isTeamMember = company.team_id ? teamMemberships[company.team_id] : false;
     const publicReviews = (company.reviews || []).filter(review => !review.isTeamReview);
     const teamReviews = company.team_reviews || [];
     return publicReviews.length + (isTeamMember ? teamReviews.length : 0);
