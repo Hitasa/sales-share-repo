@@ -69,6 +69,12 @@ export const CompanyList = ({
     window.open(website, '_blank');
   };
 
+  const getTeatmikUrl = (companyName: string) => {
+    // Encode the company name for the URL
+    const encodedName = encodeURIComponent(companyName);
+    return `https://teatmik.ee/search/${encodedName}`;
+  };
+
   const getVisibleReviewsCount = (company: Company) => {
     const isTeamMember = company.team_id ? teamMemberships[company.team_id] : false;
     const publicReviews = (company.reviews || []).filter(review => !review.isTeamReview);
@@ -104,27 +110,28 @@ export const CompanyList = ({
                   onClick={() => handleCompanyClick(company)}
                 >
                   {company.name}
-                  {company.website && (
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-4 w-4 p-0"
-                        onClick={(e) => handleWebsiteClick(company.website!, e)}
-                      >
-                        <ExternalLink className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-                      </Button>
+                  <div className="flex items-center gap-2">
+                    {company.website && (
                       <Button
                         variant="ghost"
                         size="sm"
                         className="h-6 px-2 py-0 text-xs"
                         onClick={(e) => handleWebsiteClick(company.website!, e)}
                       >
-                        <Link className="h-3 w-3 mr-1" />
-                        Open Website
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        Website
                       </Button>
-                    </div>
-                  )}
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 py-0 text-xs"
+                      onClick={(e) => handleWebsiteClick(getTeatmikUrl(company.name), e)}
+                    >
+                      <Link className="h-3 w-3 mr-1" />
+                      Teatmik
+                    </Button>
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center">
