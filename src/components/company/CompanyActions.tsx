@@ -51,7 +51,19 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
         throw new Error("Missing required information");
       }
 
-      // First check if company exists
+      // First check if company exists in repository
+      const { data: existingEntry } = await supabase
+        .from("company_repositories")
+        .select("id")
+        .eq("company_id", company.id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (existingEntry) {
+        throw new Error("Company is already in your repository");
+      }
+
+      // If company doesn't exist in main companies table, create it
       const { data: existingCompany, error: checkError } = await supabase
         .from("companies")
         .select("id")
@@ -60,7 +72,6 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
 
       if (checkError) throw checkError;
 
-      // If company doesn't exist, create it
       if (!existingCompany) {
         const { error: insertError } = await supabase
           .from("companies")
@@ -90,13 +101,7 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
           user_id: user.id
         }]);
 
-      if (repoError) {
-        // Check if it's a unique violation (company already in repository)
-        if (repoError.code === "23505") {
-          throw new Error("Company is already in your repository");
-        }
-        throw repoError;
-      }
+      if (repoError) throw repoError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
@@ -110,8 +115,12 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
     onError: (error) => {
       console.error("Error adding to repository:", error);
       toast({
-        variant: "destructive",
-        title: "Error",
+        variant: error instanceof Error && error.message === "Company is already in your repository" 
+          ? "default" 
+          : "destructive",
+        title: error instanceof Error && error.message === "Company is already in your repository" 
+          ? "Information"
+          : "Error",
         description: error instanceof Error ? error.message : "Failed to add company to repository",
       });
     },
