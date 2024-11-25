@@ -1,6 +1,9 @@
 import { Star, Users } from "lucide-react";
 import { Review } from "@/services/types";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ReviewListProps {
   reviews: Review[];
@@ -10,10 +13,30 @@ interface ReviewListProps {
 }
 
 const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false, teamId }: ReviewListProps) => {
-  // Only include team reviews if showTeamReviews is true AND we have a valid teamId match
+  const { user } = useAuth();
+
+  // Check if user is part of the team
+  const { data: isTeamMember = false } = useQuery({
+    queryKey: ["teamMembership", teamId, user?.id],
+    queryFn: async () => {
+      if (!user?.id || !teamId) return false;
+
+      const { data: teamMember } = await supabase
+        .from("team_members")
+        .select("id")
+        .eq("team_id", teamId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      return !!teamMember;
+    },
+    enabled: !!user?.id && !!teamId,
+  });
+
+  // Only include team reviews if showTeamReviews is true AND user is a team member
   const visibleReviews = [
     ...reviews,
-    ...(showTeamReviews && teamId ? 
+    ...(showTeamReviews && isTeamMember && teamId ? 
       teamReviews
         .filter(review => review.teamId === teamId)
         .map(review => ({ ...review, isTeamReview: true })) 
