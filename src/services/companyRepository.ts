@@ -31,9 +31,13 @@ export const addToUserRepository = async (companyId: string, userId: string): Pr
       .from('companies')
       .select('id')
       .eq('id', companyId)
-      .single();
+      .maybeSingle();
 
-    if (companyError || !company) {
+    if (companyError) {
+      throw companyError;
+    }
+
+    if (!company) {
       throw new Error('Company not found');
     }
 
