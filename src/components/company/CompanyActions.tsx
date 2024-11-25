@@ -1,8 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { PlusSquare, Trash2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { addToUserRepository, removeFromUserRepository } from "@/services/api";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { Company } from "@/services/types";
 import { ProjectActions } from "./ProjectActions";
@@ -10,6 +8,9 @@ import { ReviewActions } from "./ReviewActions";
 import { TeamShareDialog } from "../team/TeamShareDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { Team } from "@/types/team";
+import { useAddToRepository } from "./mutations/useAddToRepository";
+import { useRemoveFromRepository } from "./mutations/useRemoveFromRepository";
+import { useLinkToTeam } from "./mutations/useLinkToTeam";
 
 interface TeamResponse {
   team: Team;
@@ -18,12 +19,16 @@ interface TeamResponse {
 interface CompanyActionsProps {
   company: Company;
   isPrivate?: boolean;
+  isTeamView?: boolean;
   projectId?: string;
 }
 
-export const CompanyActions = ({ company, isPrivate = false, projectId }: CompanyActionsProps) => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+export const CompanyActions = ({ 
+  company, 
+  isPrivate = false, 
+  isTeamView = false,
+  projectId 
+}: CompanyActionsProps) => {
   const { user } = useAuth();
 
   const { data: userTeams = [] } = useQuery({
@@ -45,143 +50,9 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
     enabled: !!user,
   });
 
-  const addToRepositoryMutation = useMutation({
-    mutationFn: async () => {
-      if (!user?.id || !company) {
-        throw new Error("Missing required information");
-      }
-
-      // First check if company exists in repository
-      const { data: existingEntry } = await supabase
-        .from("company_repositories")
-        .select("id")
-        .eq("company_id", company.id)
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (existingEntry) {
-        throw new Error("Company is already in your repository");
-      }
-
-      // If company doesn't exist in main companies table, create it
-      const { data: existingCompany, error: checkError } = await supabase
-        .from("companies")
-        .select("id")
-        .eq("id", company.id)
-        .maybeSingle();
-
-      if (checkError) throw checkError;
-
-      if (!existingCompany) {
-        const { error: insertError } = await supabase
-          .from("companies")
-          .insert([{
-            id: company.id,
-            name: company.name,
-            industry: company.industry,
-            sales_volume: company.salesVolume,
-            growth: company.growth,
-            website: company.website,
-            phone_number: company.phoneNumber,
-            email: company.email,
-            created_by: user.id
-          }]);
-
-        if (insertError) {
-          console.error("Error creating company:", insertError);
-          throw new Error("Failed to create company");
-        }
-      }
-
-      // Now add to repository
-      const { error: repoError } = await supabase
-        .from("company_repositories")
-        .insert([{
-          company_id: company.id,
-          user_id: user.id
-        }]);
-
-      if (repoError) throw repoError;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
-      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["companies"] });
-      toast({
-        title: "Success",
-        description: `${company.name} added to your repository`,
-      });
-    },
-    onError: (error) => {
-      console.error("Error adding to repository:", error);
-      toast({
-        variant: error instanceof Error && error.message === "Company is already in your repository" 
-          ? "default" 
-          : "destructive",
-        title: error instanceof Error && error.message === "Company is already in your repository" 
-          ? "Information"
-          : "Error",
-        description: error instanceof Error ? error.message : "Failed to add company to repository",
-      });
-    },
-  });
-
-  const linkToTeamMutation = useMutation({
-    mutationFn: async ({ companyId, teamId }: { companyId: string; teamId: string }) => {
-      const { error } = await supabase
-        .from("companies")
-        .update({ team_id: teamId })
-        .eq("id", companyId);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
-      toast({
-        title: "Success",
-        description: "Company linked to team successfully",
-      });
-    },
-    onError: (error) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to link company to team",
-      });
-    },
-  });
-
-  const removeFromRepositoryMutation = useMutation({
-    mutationFn: async () => {
-      if (!user?.id || !company.id) {
-        throw new Error("Missing required information");
-      }
-      const { error } = await supabase
-        .from("company_repositories")
-        .delete()
-        .eq("company_id", company.id)
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
-      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["companies"] });
-      toast({
-        title: "Success",
-        description: `${company.name} removed from your repository`,
-      });
-    },
-    onError: (error) => {
-      console.error("Error removing from repository:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to remove company from repository",
-      });
-    },
-  });
+  const addToRepositoryMutation = useAddToRepository(company, user?.id);
+  const removeFromRepositoryMutation = useRemoveFromRepository(company, user?.id);
+  const linkToTeamMutation = useLinkToTeam();
 
   const handleTeamSelect = (teamId: string) => {
     linkToTeamMutation.mutate({
@@ -205,7 +76,7 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
             <PlusSquare className="h-4 w-4 mr-1" />
             {addToRepositoryMutation.isPending ? "Adding..." : "Add"}
           </Button>
-          <ReviewActions company={company} />
+          <ReviewActions company={company} isTeamView={isTeamView} />
         </>
       ) : (
         <>
