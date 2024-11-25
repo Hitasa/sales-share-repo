@@ -27,9 +27,11 @@ export const fetchUserCompanyRepository = async (userId: string): Promise<Compan
 export const addToUserRepository = async (companyId: string, userId: string): Promise<void> => {
   try {
     // First check if the company exists and is accessible to the user
+    // We need to explicitly check each condition from the RLS policy
     const { data: company, error: companyError } = await supabase
       .from('companies')
-      .select('*')
+      .select('*, team_members!inner(user_id)')
+      .or(`team_id.is.null,created_by.eq.${userId},team_members.user_id.eq.${userId}`)
       .eq('id', companyId)
       .maybeSingle();
 
