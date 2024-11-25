@@ -13,6 +13,24 @@ interface AddCompanyToProjectDialogProps {
   onAddCompany: (company: Company) => void;
 }
 
+interface CompanyRepository {
+  companies: {
+    id: string;
+    name: string;
+    industry: string | null;
+    sales_volume: string | null;
+    growth: string | null;
+    website: string | null;
+    phone_number: string | null;
+    email: string | null;
+    review: string | null;
+    notes: string | null;
+    created_by: string | null;
+    team_id: string | null;
+    reviews: any[];
+  } | null;
+}
+
 export const AddCompanyToProjectDialog = ({
   projectId,
   teamId,
@@ -52,9 +70,9 @@ export const AddCompanyToProjectDialog = ({
         .not('id', 'in', existingIds);
 
       // Transform repository companies
-      const repoCompanies = (repositoryCompanies || []).map(rc => ({
-        id: rc.companies?.id,
-        name: rc.companies?.name,
+      const repoCompanies = (repositoryCompanies as CompanyRepository[] || []).map(rc => ({
+        id: rc.companies?.id || "",
+        name: rc.companies?.name || "",
         industry: rc.companies?.industry || undefined,
         salesVolume: rc.companies?.sales_volume || undefined,
         growth: rc.companies?.growth || undefined,
