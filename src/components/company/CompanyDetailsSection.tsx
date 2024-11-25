@@ -11,7 +11,7 @@ interface CompanyDetailsSectionProps {
   setEditedCompany: (company: Company) => void;
   setIsEditing: (isEditing: boolean) => void;
   averageRating: number;
-  onSave?: () => void;
+  onSave: () => void;
 }
 
 export const CompanyDetailsSection = ({
@@ -84,7 +84,7 @@ export const CompanyDetailsSection = ({
                 className="max-w-[250px]"
               />
             ) : (
-              <span>{editedCompany.industry}</span>
+              <span>{editedCompany.industry || "Not specified"}</span>
             )}
           </div>
           <div className="flex justify-between items-center">
@@ -100,7 +100,7 @@ export const CompanyDetailsSection = ({
                 className="max-w-[250px]"
               />
             ) : (
-              <span>{editedCompany.website}</span>
+              <span>{editedCompany.website || "Not specified"}</span>
             )}
           </div>
           <div className="flex justify-between items-center">
@@ -116,7 +116,7 @@ export const CompanyDetailsSection = ({
                 className="max-w-[250px]"
               />
             ) : (
-              <span>{editedCompany.phoneNumber}</span>
+              <span>{editedCompany.phoneNumber || "Not specified"}</span>
             )}
           </div>
           <div className="flex justify-between items-center">
@@ -132,7 +132,7 @@ export const CompanyDetailsSection = ({
                 className="max-w-[250px]"
               />
             ) : (
-              <span>{editedCompany.email}</span>
+              <span>{editedCompany.email || "Not specified"}</span>
             )}
           </div>
         </div>

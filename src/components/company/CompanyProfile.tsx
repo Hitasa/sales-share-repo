@@ -7,7 +7,7 @@ import { Company, Comment, Review } from "@/services/types";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateCompany } from "@/services/api";
 import { ArrowLeft } from "lucide-react";
 
@@ -21,6 +21,7 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
   const [editedCompany, setEditedCompany] = useState(initialCompany);
   const [newComment, setNewComment] = useState("");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const calculateAverageRating = (reviews: { rating: number }[] = []) => {
     if (!reviews.length) return 0;
@@ -33,6 +34,9 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
     onSuccess: (updatedCompany) => {
       setEditedCompany(updatedCompany);
       setIsEditing(false);
+      // Invalidate both queries to ensure data is refreshed
+      queryClient.invalidateQueries({ queryKey: ["userCompanies"] });
+      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
       toast({
         title: "Success",
         description: "Company profile updated successfully",
@@ -111,18 +115,8 @@ export const CompanyProfile = ({ company: initialCompany, onBack }: CompanyProfi
           setEditedCompany={setEditedCompany}
           setIsEditing={setIsEditing}
           averageRating={averageRating}
+          onSave={handleSave}
         />
-
-        {isEditing && (
-          <CardContent className="flex justify-end space-x-2 border-t pt-4">
-            <Button variant="outline" onClick={() => setIsEditing(false)}>
-              Cancel
-            </Button>
-            <Button onClick={() => updateCompanyMutation.mutate(editedCompany)}>
-              Save Changes
-            </Button>
-          </CardContent>
-        )}
 
         <CardContent className="border-t pt-6">
           <CardTitle className="mb-4">Reviews</CardTitle>
