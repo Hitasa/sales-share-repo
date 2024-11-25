@@ -41,10 +41,7 @@ export const useProjectsData = (projectId?: string) => {
 
       if (teamError) throw teamError;
 
-      // Get all projects where either:
-      // 1. The user created them
-      // 2. The project is shared with any team the user is a member of
-      const { data, error } = await supabase
+      let query = supabase
         .from("projects")
         .select(`
           *,
@@ -52,8 +49,17 @@ export const useProjectsData = (projectId?: string) => {
             name
           )
         `)
-        .or(`created_by.eq.${user.id},team_id.in.(${teamMembers?.map(tm => tm.team_id).join(',')})`)
-        .order("created_at", { ascending: false });
+        .or(`created_by.eq.${user.id}`);
+
+      // Only add team condition if user has team memberships
+      if (teamMembers && teamMembers.length > 0) {
+        const teamIds = teamMembers.map(tm => tm.team_id).filter(Boolean);
+        if (teamIds.length > 0) {
+          query = query.or(`team_id.in.(${teamIds.join(',')})`);
+        }
+      }
+
+      const { data, error } = await query.order("created_at", { ascending: false });
 
       if (error) throw error;
       return data;
