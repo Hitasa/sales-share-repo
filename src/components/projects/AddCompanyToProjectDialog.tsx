@@ -72,8 +72,13 @@ export const AddCompanyToProjectDialog = ({
       // Get companies shared with the team
       let teamQuery = supabase
         .from("companies")
-        .select("*")
-        .eq("team_id", teamId);
+        .select("*");
+      
+      if (teamId) {
+        teamQuery = teamQuery.eq("team_id", teamId);
+      } else {
+        teamQuery = teamQuery.is("team_id", null);
+      }
 
       // Only add the not-in filter if there are existing IDs
       if (existingIds.length > 0) {
