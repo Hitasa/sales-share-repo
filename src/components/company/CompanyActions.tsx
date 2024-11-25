@@ -51,17 +51,17 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
         throw new Error("Missing required information");
       }
 
-      // First ensure the company exists in the database
-      const { data: existingCompany, error: companyError } = await supabase
+      // First check if company exists
+      const { data: existingCompany, error: checkError } = await supabase
         .from("companies")
-        .select("*")
+        .select("id")
         .eq("id", company.id)
         .maybeSingle();
 
-      if (companyError) throw companyError;
+      if (checkError) throw checkError;
 
+      // If company doesn't exist, create it
       if (!existingCompany) {
-        // If company doesn't exist, create it first
         const { error: insertError } = await supabase
           .from("companies")
           .insert([{
@@ -76,11 +76,27 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
             created_by: user.id
           }]);
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error("Error creating company:", insertError);
+          throw new Error("Failed to create company");
+        }
       }
 
       // Now add to repository
-      await addToUserRepository(company.id, user.id);
+      const { error: repoError } = await supabase
+        .from("company_repositories")
+        .insert([{
+          company_id: company.id,
+          user_id: user.id
+        }]);
+
+      if (repoError) {
+        // Check if it's a unique violation (company already in repository)
+        if (repoError.code === "23505") {
+          throw new Error("Company is already in your repository");
+        }
+        throw repoError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
@@ -131,7 +147,13 @@ export const CompanyActions = ({ company, isPrivate = false, projectId }: Compan
       if (!user?.id || !company.id) {
         throw new Error("Missing required information");
       }
-      await removeFromUserRepository(company.id, user.id);
+      const { error } = await supabase
+        .from("company_repositories")
+        .delete()
+        .eq("company_id", company.id)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
