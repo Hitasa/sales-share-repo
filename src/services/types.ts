@@ -16,6 +16,7 @@ export interface Company {
   comments?: Comment[];
   team_reviews?: Review[];
   averageRating?: number;
+  registry_code?: string | null;
 }
 
 export interface Review {

@@ -21,6 +21,7 @@ export type Database = {
           name: string
           notes: string | null
           phone_number: string | null
+          registry_code: string | null
           review: string | null
           reviews: Json | null
           sales_volume: string | null
@@ -39,6 +40,7 @@ export type Database = {
           name: string
           notes?: string | null
           phone_number?: string | null
+          registry_code?: string | null
           review?: string | null
           reviews?: Json | null
           sales_volume?: string | null
@@ -57,6 +59,7 @@ export type Database = {
           name?: string
           notes?: string | null
           phone_number?: string | null
+          registry_code?: string | null
           review?: string | null
           reviews?: Json | null
           sales_volume?: string | null
