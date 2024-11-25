@@ -27,13 +27,13 @@ export const fetchUserCompanyRepository = async (userId: string): Promise<Compan
 export const addToUserRepository = async (companyId: string, userId: string): Promise<void> => {
   try {
     // First verify that the company exists
-    const { data: company, error: companyError } = await supabase
+    const { data: companies, error: companyError } = await supabase
       .from('companies')
       .select('id')
-      .eq('id', companyId)
-      .single();
+      .eq('id', companyId);
 
-    if (companyError || !company) {
+    if (companyError) throw companyError;
+    if (!companies || companies.length === 0) {
       throw new Error('Company not found');
     }
 
