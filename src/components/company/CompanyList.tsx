@@ -69,10 +69,9 @@ export const CompanyList = ({
     window.open(website, '_blank');
   };
 
-  const getTeatmikUrl = (companyName: string) => {
-    // Encode the company name for the URL
-    const encodedName = encodeURIComponent(companyName);
-    return `https://teatmik.ee/search/${encodedName}`;
+  const getTeatmikUrl = (registryCode: string | null) => {
+    if (!registryCode) return null;
+    return `https://teatmik.ee/en/person/${registryCode}`;
   };
 
   const getVisibleReviewsCount = (company: Company) => {
@@ -122,15 +121,17 @@ export const CompanyList = ({
                         Website
                       </Button>
                     )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-2 py-0 text-xs"
-                      onClick={(e) => handleWebsiteClick(getTeatmikUrl(company.name), e)}
-                    >
-                      <Link className="h-3 w-3 mr-1" />
-                      Teatmik
-                    </Button>
+                    {company.registry_code && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 py-0 text-xs"
+                        onClick={(e) => handleWebsiteClick(getTeatmikUrl(company.registry_code)!, e)}
+                      >
+                        <Link className="h-3 w-3 mr-1" />
+                        Teatmik
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell>
