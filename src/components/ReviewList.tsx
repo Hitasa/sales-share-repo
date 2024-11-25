@@ -33,13 +33,11 @@ const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false, teamId
     enabled: !!user?.id && !!teamId,
   });
 
-  // Only include team reviews if showTeamReviews is true AND user is a team member
+  // Only include team reviews if showTeamReviews is true AND user is a team member AND reviews belong to the specific team
   const visibleReviews = [
     ...reviews,
     ...(showTeamReviews && isTeamMember && teamId ? 
-      teamReviews
-        .filter(review => review.teamId === teamId)
-        .map(review => ({ ...review, isTeamReview: true })) 
+      teamReviews.filter(review => review.teamId === teamId) 
       : []
     )
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
