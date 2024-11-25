@@ -53,20 +53,20 @@ export const AddCompanyToProjectDialog = ({
 
       // Transform repository companies
       const repoCompanies = (repositoryCompanies || []).map(rc => ({
-        id: rc.companies.id,
-        name: rc.companies.name,
-        industry: rc.companies.industry || undefined,
-        salesVolume: rc.companies.sales_volume || undefined,
-        growth: rc.companies.growth || undefined,
-        website: rc.companies.website || undefined,
-        phoneNumber: rc.companies.phone_number || undefined,
-        email: rc.companies.email || undefined,
-        review: rc.companies.review || undefined,
-        notes: rc.companies.notes || undefined,
-        createdBy: rc.companies.created_by || "",
-        team_id: rc.companies.team_id,
+        id: rc.companies?.id,
+        name: rc.companies?.name,
+        industry: rc.companies?.industry || undefined,
+        salesVolume: rc.companies?.sales_volume || undefined,
+        growth: rc.companies?.growth || undefined,
+        website: rc.companies?.website || undefined,
+        phoneNumber: rc.companies?.phone_number || undefined,
+        email: rc.companies?.email || undefined,
+        review: rc.companies?.review || undefined,
+        notes: rc.companies?.notes || undefined,
+        createdBy: rc.companies?.created_by || "",
+        team_id: rc.companies?.team_id,
         sharedWith: [],
-        reviews: rc.companies.reviews || [],
+        reviews: rc.companies?.reviews || [],
       }));
 
       // Transform team companies
