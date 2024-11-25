@@ -58,10 +58,22 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
     initialData: { reviews: company.reviews || [], team_id: company.team_id } as CompanyReviewsResponse
   });
 
-  const calculateAverageRating = (reviews: { rating: number }[] = []) => {
-    if (!reviews.length) return 0;
-    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
-    return Number((sum / reviews.length).toFixed(1));
+  const handleSave = async () => {
+    try {
+      await updateCompany(company.id, editedCompany);
+      setIsEditing(false);
+      queryClient.invalidateQueries({ queryKey: ["userCompanyRepository"] });
+      toast({
+        title: "Success",
+        description: "Company details updated successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update company",
+      });
+    }
   };
 
   const handleAddComment = async () => {
@@ -103,6 +115,12 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
     }
   };
 
+  const calculateAverageRating = (reviews: { rating: number }[] = []) => {
+    if (!reviews.length) return 0;
+    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+    return Number((sum / reviews.length).toFixed(1));
+  };
+
   const averageRating = calculateAverageRating(companyWithReviews?.reviews);
 
   return (
@@ -126,6 +144,7 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
                 setEditedCompany={setEditedCompany}
                 setIsEditing={setIsEditing}
                 averageRating={averageRating}
+                onSave={handleSave}
               />
               <CardContent>
                 <CompanyCommentsSection
