@@ -34,12 +34,15 @@ export const useProjectsData = (projectId?: string) => {
       if (!user?.id) return [];
 
       // First get the user's team memberships
-      const { data: teamMembers } = await supabase
+      const { data: teamMembers, error: teamError } = await supabase
         .from("team_members")
         .select("team_id")
         .eq("user_id", user.id);
 
+      if (teamError) throw teamError;
+
       const teamIds = teamMembers?.map(tm => tm.team_id) || [];
+      const teamCondition = teamIds.length > 0 ? `team_id.in.(${teamIds.join(',')})` : 'team_id.is.null';
 
       // Then fetch projects that are either created by the user or shared with their teams
       const { data, error } = await supabase
@@ -50,7 +53,7 @@ export const useProjectsData = (projectId?: string) => {
             name
           )
         `)
-        .or(`created_by.eq.${user.id}${teamIds.length > 0 ? `,team_id.in.(${teamIds.join(',')})` : ''}`)
+        .or(`created_by.eq.${user.id},${teamCondition}`)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
