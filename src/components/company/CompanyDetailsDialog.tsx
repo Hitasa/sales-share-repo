@@ -188,7 +188,12 @@ export const CompanyDetailsDialog = ({ company, open, onOpenChange }: CompanyDet
               <CardContent>
                 <ScrollArea className="h-[200px]">
                   {companyWithReviews?.reviews && companyWithReviews.reviews.length > 0 ? (
-                    <ReviewList reviews={companyWithReviews.reviews} />
+                    <ReviewList 
+                      reviews={companyWithReviews.reviews} 
+                      teamReviews={companyWithReviews.team_reviews || []}
+                      showTeamReviews={!!companyWithReviews.team_id}
+                      teamId={companyWithReviews.team_id}
+                    />
                   ) : (
                     <p className="text-sm text-muted-foreground">No reviews yet.</p>
                   )}

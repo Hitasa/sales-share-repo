@@ -6,13 +6,19 @@ interface ReviewListProps {
   reviews: Review[];
   teamReviews?: Review[];
   showTeamReviews?: boolean;
+  teamId?: string | null;
 }
 
-const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false }: ReviewListProps) => {
-  // Only include team reviews if showTeamReviews is true and mark them as team reviews
+const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false, teamId }: ReviewListProps) => {
+  // Only include team reviews if showTeamReviews is true, they belong to the team, and mark them as team reviews
   const visibleReviews = [
     ...reviews,
-    ...(showTeamReviews ? teamReviews.map(review => ({ ...review, isTeamReview: true })) : [])
+    ...(showTeamReviews && teamId ? 
+      teamReviews
+        .filter(review => review.teamId === teamId)
+        .map(review => ({ ...review, isTeamReview: true })) 
+      : []
+    )
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   if (visibleReviews.length === 0) {

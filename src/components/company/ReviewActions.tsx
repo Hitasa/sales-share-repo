@@ -48,6 +48,7 @@ export const ReviewActions = ({ company, isTeamView = false }: ReviewActionsProp
         ...review,
         date: new Date().toISOString().split('T')[0],
         isTeamReview: isTeamReview,
+        teamId: isTeamReview ? company.team_id : null,
       };
 
       const { data: companyData } = await supabase
@@ -123,6 +124,7 @@ export const ReviewActions = ({ company, isTeamView = false }: ReviewActionsProp
               reviews={publicReviews} 
               teamReviews={teamReviews}
               showTeamReviews={isTeamMember}
+              teamId={company.team_id}
             />
             {user && (
               <div className="border-t pt-6">
