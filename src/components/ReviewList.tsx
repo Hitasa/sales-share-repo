@@ -33,13 +33,15 @@ const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false, teamId
     enabled: !!user?.id && !!teamId,
   });
 
-  // Only include team reviews if:
-  // 1. showTeamReviews is true
-  // 2. user is a team member
-  // 3. reviews belong to the specific team
-  // 4. teamId matches exactly with the current team
+  // Filter reviews to show:
+  // 1. All public reviews (non-team reviews)
+  // 2. Team reviews only if:
+  //    - showTeamReviews is true
+  //    - user is a team member
+  //    - review belongs to the specific team
+  //    - review is marked as a team review
   const visibleReviews = [
-    ...reviews,
+    ...reviews.filter(review => !review.isTeamReview), // Only include non-team reviews
     ...(showTeamReviews && isTeamMember && teamId ? 
       teamReviews.filter(review => 
         review.teamId === teamId && 
