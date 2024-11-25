@@ -41,27 +41,37 @@ export const useProjectsData = (projectId?: string) => {
 
       if (teamError) throw teamError;
 
-      let query = supabase
+      // Construct the base query
+      const query = supabase
         .from("projects")
         .select(`
           *,
           team:teams (
             name
           )
-        `)
-        .or(`created_by.eq.${user.id}`);
+        `);
 
-      // Only add team condition if user has team memberships
+      // Create the conditions array for the OR clause
+      const conditions = [`created_by.eq.${user.id}`];
+      
+      // Add team condition if user has team memberships
       if (teamMembers && teamMembers.length > 0) {
         const teamIds = teamMembers.map(tm => tm.team_id).filter(Boolean);
         if (teamIds.length > 0) {
-          query = query.or(`team_id.in.(${teamIds.join(',')})`);
+          conditions.push(`team_id.in.(${teamIds.join(',')})`);
         }
       }
 
-      const { data, error } = await query.order("created_at", { ascending: false });
+      // Execute the query with all conditions
+      const { data, error } = await query
+        .or(conditions.join(','))
+        .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching projects:", error);
+        throw error;
+      }
+
       return data;
     },
     enabled: !!user?.id,
