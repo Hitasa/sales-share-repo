@@ -8,6 +8,7 @@ import { ExternalLink, Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 interface CompanyListProps {
   companies: Company[];
@@ -104,10 +105,14 @@ export const CompanyList = ({
                 >
                   {company.name}
                   {company.website && (
-                    <ExternalLink 
-                      className="h-4 w-4 text-gray-400 hover:text-gray-600"
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-4 w-4 p-0"
                       onClick={(e) => handleWebsiteClick(company.website!, e)}
-                    />
+                    >
+                      <ExternalLink className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                    </Button>
                   )}
                 </TableCell>
                 <TableCell>
