@@ -35,13 +35,14 @@ const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false, teamId
 
   // Filter reviews to show:
   // 1. Always show public reviews
-  // 2. Show team reviews only if:
+  // 2. Show team reviews only if ALL conditions are met:
   //    - showTeamReviews is true (indicating we're in My Repositories view)
   //    - user is a team member
   //    - teamId exists (company belongs to a team)
+  //    - user is authenticated
   const visibleReviews = [
     ...reviews, // Include all public reviews
-    ...(showTeamReviews && isTeamMember && teamId ? teamReviews : [])
+    ...(showTeamReviews && isTeamMember && teamId && user ? teamReviews : [])
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   if (visibleReviews.length === 0) {
@@ -65,7 +66,7 @@ const ReviewList = ({ reviews, teamReviews = [], showTeamReviews = false, teamId
                 />
               ))}
             </div>
-            {review.isTeamReview && showTeamReviews && (
+            {review.isTeamReview && showTeamReviews && isTeamMember && (
               <Badge variant="secondary" className="flex items-center gap-1">
                 <Users className="h-3 w-3" />
                 Team Review
