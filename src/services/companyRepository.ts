@@ -26,6 +26,17 @@ export const fetchUserCompanyRepository = async (userId: string): Promise<Compan
 
 export const addToUserRepository = async (companyId: string, userId: string): Promise<void> => {
   try {
+    // First verify that the company exists
+    const { data: company, error: companyError } = await supabase
+      .from('companies')
+      .select('id')
+      .eq('id', companyId)
+      .single();
+
+    if (companyError || !company) {
+      throw new Error('Company not found');
+    }
+
     // Check if the company is already in the repository
     const { data: existingEntries, error: checkError } = await supabase
       .from('company_repositories')
@@ -42,7 +53,7 @@ export const addToUserRepository = async (companyId: string, userId: string): Pr
       throw new Error('Company is already in your repository');
     }
 
-    // Add to repository directly since we now have public access to companies
+    // Add to repository
     const { error: insertError } = await supabase
       .from('company_repositories')
       .insert([{ 
